@@ -7,3 +7,8 @@ build/
 # packed carts and their save blocks: build artifacts, not sources
 *.wasc
 *.sav
+
+# bombfrog is third-party content with no licence file in the tree. It stays
+# on disk as a render test on real assets, but is NOT committed until its
+# origin and licence are confirmed.
+bombfrog/

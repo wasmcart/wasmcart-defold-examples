@@ -1,7 +1,0 @@
-font: "/assets/font/LycheeSoda.ttf"
-material: "/builtins/fonts/font.material"
-size: 32
-outline_alpha: 1.0
-outline_width: 3.0
-all_chars: true
-characters: " !\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
