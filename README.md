@@ -198,6 +198,28 @@ Two limits worth knowing before writing a test around either harness:
   `op:'pointer'`; the pad form is
   `input({op:'set', ports:[{left:true}]})`.
 
+## Testing: run BOTH hosts
+
+```bash
+./test-both-hosts.sh              # every example, both hosts
+./test-both-hosts.sh bombfrog     # just one
+```
+
+A cart has two players here and they fail differently, so checking one proves
+less than it looks. This suite has been bitten in both directions:
+
+- `wc_get_info()` resetting the cart's resolution was **invisible under
+  romdev**, which does not re-read it after init. The same cart opened cropped
+  in the native player, 1280x720 squeezed into a 960x540 window.
+- The two GL uniform-block imports were **missing from the native player
+  alone**. A cart that needs them draws nothing at all, with every draw call
+  succeeding and no GL error raised.
+
+Neither would have been caught by whichever host happened to be handy. The
+script reports each side's resolution, the native player's count of stubbed GL
+imports (should be 0) and its script-error count, so a disagreement between the
+two is visible on one line.
+
 ## Gamepad
 
 The pad maps onto Defold's standard action names through the automatic gamepad
