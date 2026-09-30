@@ -69,6 +69,15 @@ Paddle, ball, 50 bricks, lives and scoring, driving keyboard and gamepad
 through the *same* held-state booleans so neither is a second-class alias of
 the other, plus three sound effects and a saved high score.
 
+It also carries the one Lua trap worth copying out of here: compare
+`action_id` against **pre-hashed constants**, never against
+`tostring(action_id)`. A release build has no reverse hash table, so
+`tostring()` on an action hash returns `hash: [<unknown:123...>]` and a string
+comparison matches nothing. `on_input` runs every frame, the input is
+genuinely arriving, and the game ignores every button. That looked exactly
+like a dead gamepad driver for as long as it took to print the paddle
+position.
+
 ### `bombfrog` (on disk, not in this repo)
 
 A full third-party Defold game: title screen, menus, tilemap levels, animated
@@ -176,9 +185,18 @@ Two limits worth knowing before writing a test around either harness:
   test persistence, drive `CartHost` directly: run, `getSaveData()`, then load
   a fresh host with `{ saveData }`.
 - **romdev drives the pad, not the keyboard, on a wasmcart cart.**
-  `input({op:'press', button:'a'})` reaches `on_input`; `pressKey`/`typeText`
-  route to a C64-specific path and error out. An example that must be driven
-  from romdev should bind gamepad actions.
+  `pressKey`/`typeText` route to a C64-specific path and error out, so an
+  example that must be driven from romdev has to bind gamepad actions.
+- **romdev's button names are libretro's, and they are CROSSED relative to
+  wasmcart's.** `romdev "a"` sends wasmcart **B**, and `romdev "b"` sends
+  wasmcart **A** (`RETROPAD_TO_WASMCART` in `WasmcartHost.js`). A Defold
+  action bound to `GAMEPAD_RPAD_DOWN` is wasmcart A, so it is reached with
+  `input({op:'press', button:'b'})`. Pressing the name that looks right is
+  the single easiest way to conclude a working game ignores input.
+- **Hold with `op:'set'` needs the ports form.** A bare
+  `input({op:'set', left:true})` is refused because `left` belongs to
+  `op:'pointer'`; the pad form is
+  `input({op:'set', ports:[{left:true}]})`.
 
 ## Gamepad
 
