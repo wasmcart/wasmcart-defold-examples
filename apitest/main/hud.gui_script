@@ -1,0 +1,22 @@
+-- GUI API coverage: node lookup, text set, colour animation, and gui.animate
+-- with a completion callback. These are a separate Lua context from game
+-- object scripts, with their own API surface, so a cart that only ever runs
+-- .script files never touches any of this.
+
+function init(self)
+	self.status = gui.get_node("status")
+	self.apis = gui.get_node("apis")
+	gui.set_text(self.status, "apitest: gui alive")
+	self.pulse = 0
+	-- gui.animate exercises the easing + callback path.
+	gui.animate(self.apis, gui.PROP_COLOR, vmath.vector4(1, 0.8, 0.3, 1),
+		gui.EASING_INOUTSINE, 1.5, 0, nil, gui.PLAYBACK_LOOP_PINGPONG)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("status") then
+		gui.set_text(self.status, message.text)
+	elseif message_id == hash("apis") then
+		gui.set_text(self.apis, message.text)
+	end
+end

@@ -1,0 +1,5 @@
+-- Runs only if the proxy actually loaded and enabled this collection.
+function init(self)
+	print("proxytest: level collection init -- proxy load SUCCEEDED")
+	msg.post("main:/go#script", "level_ready", {})
+end

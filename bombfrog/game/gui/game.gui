@@ -1,0 +1,336 @@
+script: "/game/gui/game.gui_script"
+fonts {
+  name: "main"
+  font: "/assets/font/main.font"
+}
+fonts {
+  name: "small"
+  font: "/assets/font/small.font"
+}
+textures {
+  name: "main"
+  texture: "/game/core/main.tilesource"
+}
+textures {
+  name: "main1"
+  texture: "/main/main.atlas"
+}
+nodes {
+  position {
+    x: 639.0
+    y: 688.0
+  }
+  size {
+    x: 600.0
+    y: 64.0
+  }
+  color {
+    x: 0.16078432
+    y: 0.21176471
+    z: 0.43529412
+  }
+  type: TYPE_BOX
+  id: "top"
+  adjust_mode: ADJUST_MODE_STRETCH
+  inherit_alpha: true
+}
+nodes {
+  position {
+    y: -34.0
+  }
+  size {
+    x: 600.0
+    y: 4.0
+  }
+  color {
+    x: 0.2509804
+    y: 0.35686275
+    z: 0.8156863
+  }
+  type: TYPE_BOX
+  id: "line"
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "top"
+  inherit_alpha: true
+}
+nodes {
+  position {
+    x: 253.0
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  type: TYPE_TEXT
+  text: "0"
+  font: "main"
+  id: "bombs"
+  pivot: PIVOT_W
+  outline {
+    x: 0.101960786
+    y: 0.10980392
+    z: 0.17254902
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "top"
+  inherit_alpha: true
+  shadow_alpha: 0.0
+}
+nodes {
+  position {
+    x: -8.0
+  }
+  scale {
+    x: 3.0
+    y: 3.0
+  }
+  type: TYPE_BOX
+  texture: "main/bomb"
+  id: "box"
+  pivot: PIVOT_E
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "bombs"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    x: -224.0
+  }
+  scale {
+    x: 3.0
+    y: 3.0
+  }
+  type: TYPE_BOX
+  texture: "main/player"
+  id: "frog"
+  pivot: PIVOT_E
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "top"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    x: 8.0
+  }
+  type: TYPE_BOX
+  texture: "main/heart"
+  id: "heart1"
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "frog"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    x: 10.0
+  }
+  type: TYPE_BOX
+  texture: "main/heart"
+  id: "heart2"
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "heart1"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    x: 10.0
+  }
+  type: TYPE_BOX
+  texture: "main/heart"
+  id: "heart3"
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "heart2"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    x: 10.0
+  }
+  type: TYPE_BOX
+  texture: "main/heart"
+  id: "heart4"
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "heart3"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    x: 10.0
+  }
+  type: TYPE_BOX
+  texture: "main/heart"
+  id: "heart5"
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "heart4"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    x: 639.0
+    y: 32.0
+  }
+  size {
+    x: 600.0
+    y: 64.0
+  }
+  color {
+    x: 0.16078432
+    y: 0.21176471
+    z: 0.43529412
+  }
+  type: TYPE_BOX
+  id: "bottom"
+  adjust_mode: ADJUST_MODE_STRETCH
+  inherit_alpha: true
+}
+nodes {
+  position {
+    y: 34.0
+  }
+  size {
+    x: 600.0
+    y: 4.0
+  }
+  color {
+    x: 0.2509804
+    y: 0.35686275
+    z: 0.8156863
+  }
+  type: TYPE_BOX
+  id: "line1"
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "bottom"
+  inherit_alpha: true
+}
+nodes {
+  position {
+    x: -216.0
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  type: TYPE_TEXT
+  text: "0/0"
+  font: "main"
+  id: "treasure"
+  pivot: PIVOT_W
+  outline {
+    x: 0.101960786
+    y: 0.10980392
+    z: 0.17254902
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "bottom"
+  inherit_alpha: true
+  shadow_alpha: 0.0
+}
+nodes {
+  position {
+    x: -8.0
+  }
+  scale {
+    x: 3.0
+    y: 3.0
+  }
+  type: TYPE_BOX
+  texture: "main/artefact"
+  id: "box1"
+  pivot: PIVOT_E
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "treasure"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    x: 253.0
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  type: TYPE_TEXT
+  text: "0"
+  font: "main"
+  id: "mushrooms"
+  pivot: PIVOT_W
+  outline {
+    x: 0.101960786
+    y: 0.10980392
+    z: 0.17254902
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "bottom"
+  inherit_alpha: true
+  shadow_alpha: 0.0
+}
+nodes {
+  position {
+    x: -8.0
+  }
+  rotation {
+    y: 0.58
+  }
+  scale {
+    x: 3.0
+    y: 3.0
+  }
+  type: TYPE_BOX
+  texture: "main/mushroom"
+  id: "box2"
+  pivot: PIVOT_E
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "mushrooms"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  color {
+    y: 0.8156863
+    z: 0.4745098
+  }
+  type: TYPE_TEXT
+  text: "FOUND A SECRET!"
+  font: "small"
+  id: "secret"
+  outline {
+    x: 0.101960786
+    y: 0.10980392
+    z: 0.17254902
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  parent: "bottom"
+  inherit_alpha: true
+}
+material: "/builtins/materials/gui.material"
+adjust_reference: ADJUST_REFERENCE_PARENT

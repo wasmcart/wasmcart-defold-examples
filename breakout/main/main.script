@@ -1,0 +1,269 @@
+-- breakout -- the wasmcart-defold example that is actually a game.
+--
+-- hello_defold proves the engine BOOTS. This proves it PLAYS, and it exercises
+-- the four things a cart runtime has to get right that a clear-colour fixture
+-- cannot test at all:
+--
+--   input   keyboard AND gamepad, as held state, driving the same movement
+--   sound   three distinct effects, triggered by gameplay
+--   save    a high score via sys.save/sys.load, surviving a restart
+--   render  real sprites through the standard pipeline, not debug lines
+--
+-- On the render choice: an earlier version drew everything with
+-- msg.post("@render:", "draw_line"). It worked as game logic (691 messages a
+-- frame, verified) but drew nothing, because debug lines are a debugging aid
+-- rather than a drawing API. Sprites through a factory are the idiomatic path
+-- and are what a reader should copy.
+--
+-- The only art asset is an 8x8 white square, tinted per sprite. That keeps the
+-- example one script plus small .go/.atlas wiring rather than an art pipeline.
+
+local W, H = 960, 540
+
+local PADDLE_W, PADDLE_H = 120, 16
+local PADDLE_Y = 44
+local PADDLE_SPEED = 620
+
+local BALL_SIZE = 16
+local BALL_SPEED = 360
+
+local BRICK_COLS, BRICK_ROWS = 10, 5
+local BRICK_W, BRICK_H = 84, 26
+local BRICK_GAP = 8
+local BRICK_TOP = H - 110
+
+-- The atlas image is 8x8, so a sprite's scale IS its size in pixels / 8.
+local ART = 8
+
+local SAVE_FILE = sys.get_save_file("breakout", "scores")
+
+local ROW_COLOUR = {
+	vmath.vector4(0.93, 0.36, 0.38, 1),
+	vmath.vector4(0.95, 0.68, 0.30, 1),
+	vmath.vector4(0.45, 0.85, 0.52, 1),
+	vmath.vector4(0.38, 0.62, 0.95, 1),
+	vmath.vector4(0.72, 0.55, 0.95, 1),
+}
+local WHITE = vmath.vector4(1, 1, 1, 1)
+local DIM   = vmath.vector4(0.30, 0.32, 0.42, 1)
+
+-- Spawn one white sprite and size/tint it. Everything on screen is one of
+-- these, which is why the example needs no art beyond the 8x8 square.
+-- Spawn one sprite at a given size.
+--
+-- NO PER-SPRITE TINT. The stock sprite material declares a "tint" fragment
+-- constant, but this engine build rejects setting it from Lua by any route
+-- tried: sprite.set_constant is not registered (only reset_constant), and
+-- go.set(url, "tint", ...) reports "does not have any property called" on a
+-- factory-created object. Rather than ship a colour system that does not
+-- work, everything is white and shape carries the meaning. Colour is a
+-- genuine open item for this port, recorded in DEFOLD_STATE.md.
+local function spawn(x, y, w, h)
+	return factory.create("#blockfactory", vmath.vector3(x, y, 0), nil, {},
+		vmath.vector3(w / ART, h / ART, 1))
+end
+
+local function load_high()
+	-- sys.load returns an EMPTY TABLE when the file does not exist, never nil,
+	-- so guard on the field rather than on the table.
+	local t = sys.load(SAVE_FILE)
+	return t.high or 0
+end
+
+local function save_high(v)
+	sys.save(SAVE_FILE, { high = v })
+end
+
+local function reset_ball(self)
+	self.bx, self.by = self.paddle_x, PADDLE_Y + PADDLE_H * 0.5 + BALL_SIZE
+	self.vx, self.vy = BALL_SPEED * 0.45, BALL_SPEED * 0.9
+	self.stuck = true
+	go.set_position(vmath.vector3(self.bx, self.by, 0), self.ball_id)
+end
+
+local function build_bricks(self)
+	for _, b in ipairs(self.bricks or {}) do
+		if b.id then go.delete(b.id) end
+	end
+	self.bricks = {}
+	local total = BRICK_COLS * BRICK_W + (BRICK_COLS - 1) * BRICK_GAP
+	local x0 = (W - total) * 0.5 + BRICK_W * 0.5
+	for r = 1, BRICK_ROWS do
+		for c = 1, BRICK_COLS do
+			local x = x0 + (c - 1) * (BRICK_W + BRICK_GAP)
+			local y = BRICK_TOP - (r - 1) * (BRICK_H + BRICK_GAP)
+			local colour = ROW_COLOUR[r] or WHITE
+			self.bricks[#self.bricks + 1] = {
+				x = x, y = y, alive = true, colour = colour,
+				points = (BRICK_ROWS - r + 1) * 10,
+				id = spawn(x, y, BRICK_W, BRICK_H),
+			}
+		end
+	end
+	self.remaining = BRICK_COLS * BRICK_ROWS
+end
+
+-- The HUD is pips, not text: a font would need its own atlas and this example
+-- deliberately ships one 8x8 image. Score is a bar, lives are squares.
+local function layout_hud(self)
+	local hud_y = H - 22
+	local sw = math.max(1, math.min(W * 0.5, self.score * 0.6))
+	go.set_position(vmath.vector3(sw * 0.5 + 16, hud_y, 0), self.score_bar)
+	go.set_scale(vmath.vector3(sw / ART, 10 / ART, 1), self.score_bar)
+
+	local hw = math.max(1, math.min(W * 0.5, self.high * 0.6))
+	go.set_position(vmath.vector3(hw + 16, hud_y, 0), self.high_mark)
+
+	-- Lives are shown by PRESENCE, not colour: a lost life deletes its pip.
+	for i, pip in ipairs(self.life_pips) do
+		if pip and i > self.lives then
+			go.delete(pip); self.life_pips[i] = false
+		end
+	end
+end
+
+function init(self)
+	msg.post("@render:", "clear_color", { color = vmath.vector4(0.055, 0.065, 0.10, 1) })
+	msg.post(".", "acquire_input_focus")
+
+	self.paddle_x = W * 0.5
+	self.score, self.lives = 0, 3
+	self.high = load_high()
+	self.left, self.right, self.launch = false, false, false
+
+	self.paddle_id = spawn(self.paddle_x, PADDLE_Y, PADDLE_W, PADDLE_H)
+	self.ball_id   = spawn(W * 0.5, H * 0.5, BALL_SIZE, BALL_SIZE)
+	self.score_bar = spawn(16, H - 22, 1, 10)
+	self.high_mark = spawn(16, H - 22, 3, 18)
+	self.life_pips = {}
+	for i = 1, 3 do
+		self.life_pips[i] = spawn(W - 24 - (i - 1) * 22, H - 22, 12, 12)
+	end
+
+	build_bricks(self)
+	reset_ball(self)
+	layout_hud(self)
+
+	print(string.format("breakout: init (high score %d, loaded from save)", self.high))
+	print(string.format("breakout: spawned %d sprites (paddle+ball+hud+%d bricks)",
+		4 + #self.life_pips + #self.bricks, #self.bricks))
+	local p = go.get_position(self.paddle_id)
+	print(string.format("breakout: paddle at %.0f,%.0f  ball at %.0f,%.0f",
+		p.x, p.y, self.bx, self.by))
+	print("breakout: left/right or d-pad to move, space or gamepad A to launch")
+end
+
+function final(self)
+	-- Persist on a clean quit too, not only on game over.
+	if self.score > self.high then save_high(self.score) end
+end
+
+local function lose_life(self)
+	self.lives = self.lives - 1
+	sound.play("#lose")
+	if self.lives <= 0 then
+		if self.score > self.high then
+			self.high = self.score
+			save_high(self.high)
+			print(string.format("breakout: new high score %d saved", self.high))
+		end
+		self.score, self.lives = 0, 3
+		build_bricks(self)
+	end
+	reset_ball(self)
+	layout_hud(self)
+end
+
+local function hit_bricks(self)
+	for _, b in ipairs(self.bricks) do
+		if b.alive then
+			local dx, dy = math.abs(self.bx - b.x), math.abs(self.by - b.y)
+			if dx <= (BRICK_W + BALL_SIZE) * 0.5 and dy <= (BRICK_H + BALL_SIZE) * 0.5 then
+				b.alive = false
+				go.delete(b.id); b.id = nil
+				self.remaining = self.remaining - 1
+				self.score = self.score + b.points
+				sound.play("#brick")
+				-- Flip on the shallower overlap: a side hit reverses x, a face
+				-- hit reverses y. Without this a corner clip picks the wrong axis.
+				local ox = (BRICK_W + BALL_SIZE) * 0.5 - dx
+				local oy = (BRICK_H + BALL_SIZE) * 0.5 - dy
+				if ox < oy then self.vx = -self.vx else self.vy = -self.vy end
+				layout_hud(self)
+				return
+			end
+		end
+	end
+end
+
+function update(self, dt)
+	-- Clamp dt so a stalled frame cannot tunnel the ball through a wall.
+	if dt > 0.05 then dt = 0.05 end
+
+	local dir = (self.right and 1 or 0) - (self.left and 1 or 0)
+	if dir ~= 0 then
+		self.paddle_x = math.max(PADDLE_W * 0.5,
+			math.min(W - PADDLE_W * 0.5, self.paddle_x + dir * PADDLE_SPEED * dt))
+		go.set_position(vmath.vector3(self.paddle_x, PADDLE_Y, 0), self.paddle_id)
+	end
+
+	if self.stuck then
+		self.bx = self.paddle_x
+		self.by = PADDLE_Y + PADDLE_H * 0.5 + BALL_SIZE
+		if self.launch then
+			self.stuck, self.launch = false, false
+			sound.play("#bounce")
+		end
+	else
+		self.bx = self.bx + self.vx * dt
+		self.by = self.by + self.vy * dt
+
+		local r = BALL_SIZE * 0.5
+		if self.bx < r then
+			self.bx = r; self.vx = -self.vx; sound.play("#bounce")
+		elseif self.bx > W - r then
+			self.bx = W - r; self.vx = -self.vx; sound.play("#bounce")
+		end
+		if self.by > H - r then
+			self.by = H - r; self.vy = -self.vy; sound.play("#bounce")
+		end
+
+		-- Paddle hit with english: where the ball lands steers it, so the
+		-- player steers the game rather than watching it.
+		if self.vy < 0
+			and self.by - r <= PADDLE_Y + PADDLE_H * 0.5
+			and self.by > PADDLE_Y - PADDLE_H
+			and math.abs(self.bx - self.paddle_x) <= (PADDLE_W + BALL_SIZE) * 0.5 then
+			self.by = PADDLE_Y + PADDLE_H * 0.5 + r
+			self.vx = ((self.bx - self.paddle_x) / (PADDLE_W * 0.5)) * BALL_SPEED * 0.85
+			self.vy = math.abs(self.vy)
+			sound.play("#bounce")
+		end
+
+		hit_bricks(self)
+		if self.by < -BALL_SIZE then lose_life(self) end
+	end
+
+	go.set_position(vmath.vector3(self.bx, self.by, 0), self.ball_id)
+
+	if self.remaining <= 0 then
+		build_bricks(self)
+		reset_ball(self)
+	end
+end
+
+function on_input(self, action_id, action)
+	if action_id == nil then return end
+	local name = tostring(action_id)
+
+	-- Keyboard and gamepad map onto the SAME booleans, so neither is a
+	-- second-class alias of the other. gamepad_lpad_* is the d-pad;
+	-- gamepad_lstick_* is the stick past its deadzone.
+	if name == "key_left" or name == "gamepad_lpad_left" or name == "gamepad_lstick_left" then
+		if action.pressed then self.left = true elseif action.released then self.left = false end
+	elseif name == "key_right" or name == "gamepad_lpad_right" or name == "gamepad_lstick_right" then
+		if action.pressed then self.right = true elseif action.released then self.right = false end
+	elseif name == "key_space" or name == "gamepad_rpad_down" or name == "gamepad_start" then
+		if action.pressed then self.launch = true end
+	end
+end

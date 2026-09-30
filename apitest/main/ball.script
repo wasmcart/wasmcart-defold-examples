@@ -1,0 +1,13 @@
+-- Physics messages are delivered to the script on the COLLIDING object, not to
+-- whoever spawned it. Without this relay the main script can never observe a
+-- contact, which reads exactly like "physics does not collide".
+function init(self)
+	self.reported = false
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("collision_response") and not self.reported then
+		self.reported = true
+		msg.post("main:/go#script", "ball_hit", {})
+	end
+end

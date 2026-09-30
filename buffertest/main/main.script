@@ -1,0 +1,87 @@
+-- buffertest -- buffer, resource and the dynamic-texture path.
+--
+-- These are the APIs a cart needs for anything generated at runtime: procedural
+-- textures, mesh data, audio buffers. They are also the APIs most likely to be
+-- quietly broken on a port, because nothing in a normal game touches them and
+-- they fail by producing WRONG DATA rather than by raising an error. So every
+-- check here round-trips real values and compares them.
+
+local results, order = {}, {}
+local function check(name, ok, detail)
+	if results[name] == nil then order[#order+1] = name end
+	results[name] = ok and true or false
+	print(string.format("buffertest: %-16s %s%s", name, ok and "PASS" or "FAIL",
+		detail and ("  (" .. tostring(detail) .. ")") or ""))
+end
+
+function init(self)
+	msg.post("@render:", "clear_color", { color = vmath.vector4(0.05, 0.05, 0.09, 1) })
+	self.frame = 0
+
+	-- buffer.create + streams: write values in, read them back out.
+	local b = buffer.create(64, { { name = hash("rgba"), type = buffer.VALUE_TYPE_UINT8, count = 4 } })
+	local stream = buffer.get_stream(b, hash("rgba"))
+	for i = 1, 64 * 4 do stream[i] = (i * 7) % 256 end
+	local readback_ok = stream[1] == 7 and stream[10] == 70
+	check("buffer.create", b ~= nil and readback_ok,
+		string.format("stream[1]=%d stream[10]=%d", stream[1], stream[10]))
+
+	-- buffer.copy_stream between two buffers.
+	local b2 = buffer.create(64, { { name = hash("rgba"), type = buffer.VALUE_TYPE_UINT8, count = 4 } })
+	local ok_copy = pcall(buffer.copy_stream, buffer.get_stream(b2, hash("rgba")), 0, stream, 0, 64 * 4)
+	local s2 = buffer.get_stream(b2, hash("rgba"))
+	check("buffer.copy_stream", ok_copy and s2[10] == 70, "copied " .. tostring(s2[10]))
+
+	-- A float stream: different element type, different packing.
+	local fb = buffer.create(16, { { name = hash("pos"), type = buffer.VALUE_TYPE_FLOAT32, count = 3 } })
+	local fs = buffer.get_stream(fb, hash("pos"))
+	fs[1], fs[2], fs[3] = 1.5, -2.5, 3.25
+	check("buffer.float32", math.abs(fs[1] - 1.5) < 0.001 and math.abs(fs[3] - 3.25) < 0.001,
+		string.format("%.2f %.2f %.2f", fs[1], fs[2], fs[3]))
+
+	-- resource.set_texture: upload a generated texture at runtime. This is the
+	-- real test of the buffer->GPU path, not just CPU-side arithmetic.
+	local tex = buffer.create(16 * 16, { { name = hash("rgba"), type = buffer.VALUE_TYPE_UINT8, count = 4 } })
+	local ts = buffer.get_stream(tex, hash("rgba"))
+	for y = 0, 15 do for x = 0, 15 do
+		local i = (y * 16 + x) * 4
+		ts[i+1] = x * 16; ts[i+2] = y * 16; ts[i+3] = 200; ts[i+4] = 255
+	end end
+	-- set_texture needs a TEXTURE resource to write into. Creating one at
+	-- runtime is the honest test of the buffer->GPU path and needs no
+	-- component wiring: earlier versions aimed at "#out" (a label, which has
+	-- no texture at all) and the pcall hid the message that said so.
+	local ok_new, tex_path = pcall(resource.create_texture, "/generated.texturec", {
+		type = graphics.TEXTURE_TYPE_2D, width = 16, height = 16,
+		format = graphics.TEXTURE_FORMAT_RGBA })
+	check("resource.create_texture", ok_new, ok_new and "16x16 RGBA created" or tostring(tex_path))
+
+	local ok_tex, err = true, nil
+	if ok_new then
+		ok_tex, err = pcall(resource.set_texture, tex_path, {
+			type = graphics.TEXTURE_TYPE_2D, width = 16, height = 16,
+			format = graphics.TEXTURE_FORMAT_RGBA }, tex)
+	else
+		ok_tex, err = false, "no texture to write into"
+	end
+	check("resource.set_texture", ok_tex, ok_tex and "uploaded 16x16 RGBA" or tostring(err))
+
+	-- sys.get_engine_info / hash round-trip on this port.
+	local ei = sys.get_engine_info()
+	check("sys.engine_info", ei ~= nil and ei.version ~= nil, ei and ei.version)
+
+	local pass, fail = 0, 0
+	for _, n in ipairs(order) do if results[n] then pass = pass + 1 else fail = fail + 1 end end
+	self.line = string.format("buffer/resource: %d PASS  %d FAIL", pass, fail)
+	print("buffertest: " .. self.line)
+end
+
+function update(self, dt)
+	self.frame = self.frame + 1
+	if self.frame == 30 then
+		label.set_text("#out", self.line)
+		local names = {}
+		for _, n in ipairs(order) do names[#names+1] = (results[n] and "+" or "!") .. n end
+		label.set_text("#out2", table.concat(names, " "))
+	end
+end

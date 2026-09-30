@@ -1,0 +1,307 @@
+script: "/menu/credits.gui_script"
+fonts {
+  name: "main"
+  font: "/assets/font/main.font"
+}
+fonts {
+  name: "small"
+  font: "/assets/font/small.font"
+}
+textures {
+  name: "main"
+  texture: "/main/main.atlas"
+}
+nodes {
+  position {
+    x: 640.0
+    y: 360.0
+  }
+  type: TYPE_BOX
+  id: "container"
+  adjust_mode: ADJUST_MODE_STRETCH
+  inherit_alpha: true
+}
+nodes {
+  position {
+    y: 250.0
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  color {
+    x: 0.95686275
+    y: 0.95686275
+    z: 0.95686275
+  }
+  type: TYPE_TEXT
+  text: "CREDITS"
+  font: "main"
+  id: "credits"
+  outline {
+    x: 0.101960786
+    y: 0.10980392
+    z: 0.17254902
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  shadow_alpha: 0.0
+}
+nodes {
+  position {
+    y: -250.0
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  color {
+    x: 0.95686275
+    y: 0.95686275
+    z: 0.95686275
+  }
+  type: TYPE_TEXT
+  text: "PRESS SPACE"
+  font: "main"
+  id: "pressspace"
+  outline {
+    x: 0.101960786
+    y: 0.10980392
+    z: 0.17254902
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  shadow_alpha: 0.0
+}
+nodes {
+  position {
+    y: 150.0
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  color {
+    y: 0.8156863
+    z: 0.4745098
+  }
+  type: TYPE_TEXT
+  text: "developed by"
+  font: "small"
+  id: "devby"
+  outline {
+    x: 0.101960786
+    y: 0.10980392
+    z: 0.17254902
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  shadow_alpha: 0.0
+}
+nodes {
+  position {
+    y: -35.0
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  color {
+    x: 0.95686275
+    y: 0.95686275
+    z: 0.95686275
+  }
+  type: TYPE_TEXT
+  text: "BEN JAMES"
+  font: "main"
+  id: "bj"
+  outline {
+    x: 0.101960786
+    y: 0.10980392
+    z: 0.17254902
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "devby"
+  inherit_alpha: true
+}
+nodes {
+  position {
+    y: -110.0
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  color {
+    y: 0.8156863
+    z: 0.4745098
+  }
+  type: TYPE_TEXT
+  text: "made with"
+  font: "small"
+  id: "madewith"
+  outline {
+    x: 0.101960786
+    y: 0.10980392
+    z: 0.17254902
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  shadow_alpha: 0.0
+}
+nodes {
+  position {
+    y: -35.0
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  color {
+    x: 0.95686275
+    y: 0.95686275
+    z: 0.95686275
+  }
+  type: TYPE_TEXT
+  text: "DEFOLD"
+  font: "main"
+  id: "defold"
+  outline {
+    x: 0.101960786
+    y: 0.10980392
+    z: 0.17254902
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "madewith"
+  inherit_alpha: true
+}
+nodes {
+  position {
+    y: 35.0
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  color {
+    y: 0.8156863
+    z: 0.4745098
+  }
+  type: TYPE_TEXT
+  text: "music\n"
+  ""
+  font: "small"
+  id: "music"
+  outline {
+    x: 0.101960786
+    y: 0.10980392
+    z: 0.17254902
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  shadow_alpha: 0.0
+}
+nodes {
+  position {
+    y: -35.0
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  color {
+    x: 0.95686275
+    y: 0.95686275
+    z: 0.95686275
+  }
+  type: TYPE_TEXT
+  text: "ERIC MATYAS"
+  font: "main"
+  id: "eric"
+  outline {
+    x: 0.101960786
+    y: 0.10980392
+    z: 0.17254902
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "music"
+  inherit_alpha: true
+}
+nodes {
+  position {
+    y: -70.0
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  color {
+    y: 0.8156863
+    z: 0.4745098
+  }
+  type: TYPE_TEXT
+  text: "soundimage.org"
+  font: "small"
+  id: "soundimage"
+  outline {
+    x: 0.101960786
+    y: 0.10980392
+    z: 0.17254902
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "music"
+  inherit_alpha: true
+  shadow_alpha: 0.0
+}
+material: "/builtins/materials/gui.material"
+adjust_reference: ADJUST_REFERENCE_PARENT

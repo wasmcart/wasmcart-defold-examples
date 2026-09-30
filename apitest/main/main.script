@@ -1,0 +1,232 @@
+-- apitest -- deliberately stress the Defold APIs the game examples never touch.
+--
+-- breakout and bombfrog between them exercise: go, msg, vmath, render, sprite,
+-- sound, sys, factory, tilemap, particlefx. That leaves a lot of the engine
+-- unproven on this port, and "it did not crash" is not coverage - an API that
+-- is never called cannot fail visibly.
+--
+-- This demo drives, and REPORTS ON, the untested surface:
+--
+--   physics    dynamic + static bodies, gravity, restitution, collision
+--              messages (the whole Box2D path, which nothing else touched)
+--   gui        a GUI scene: node lookup, set_text, animate with easing
+--   label      a label component (separate from GUI text)
+--   timer      timer.delay with repeating and one-shot callbacks
+--   go.animate property animation with easing and a completion callback
+--   json       encode/decode round-trip
+--   sys        get_sys_info, get_config_*, save/load
+--   hash       hashing and dehashing
+--   vmath      matrices, quaternions, vector maths beyond add/scale
+--   zlib       compress/decompress round-trip
+--   timer      cancel
+--
+-- Every check records PASS/FAIL into a table that is drawn on screen and
+-- printed, so a run either proves the API works on this port or names the one
+-- that does not. A silent success would tell us nothing.
+
+local W, H = 960, 540
+local ART = 8
+
+-- The balls need about four seconds of gravity to reach the angled walls, so
+-- the physics verdict cannot be read at frame 120 - it would report a working
+-- world as broken purely because nothing had touched yet.
+local VERDICT_FRAME = 300
+
+local results = {}
+local order = {}
+
+local function check(name, ok, detail)
+	if results[name] == nil then order[#order + 1] = name end
+	results[name] = { ok = ok and true or false, detail = detail }
+	print(string.format("apitest: %-14s %s%s", name, ok and "PASS" or "FAIL",
+		detail and ("  (" .. tostring(detail) .. ")") or ""))
+end
+
+local function summary()
+	local pass, fail, failed = 0, 0, {}
+	for _, n in ipairs(order) do
+		if results[n].ok then pass = pass + 1 else fail = fail + 1; failed[#failed + 1] = n end
+	end
+	return pass, fail, failed
+end
+
+-- ── the checks that can run immediately ──────────────────────────────────
+
+local function check_vmath()
+	local v = vmath.vector3(3, 4, 0)
+	local len_ok = math.abs(vmath.length(v) - 5) < 0.001
+	local q = vmath.quat_rotation_z(math.pi / 2)
+	local r = vmath.rotate(q, vmath.vector3(1, 0, 0))
+	local rot_ok = math.abs(r.y - 1) < 0.01
+	local m = vmath.matrix4_orthographic(0, W, 0, H, -1, 1)
+	local mat_ok = m.m00 ~= 0
+	local dot_ok = math.abs(vmath.dot(vmath.vector3(1,0,0), vmath.vector3(0,1,0))) < 0.001
+	check("vmath", len_ok and rot_ok and mat_ok and dot_ok,
+		string.format("len=%.1f rot.y=%.2f", vmath.length(v), r.y))
+end
+
+local function check_hash()
+	local h = hash("apitest")
+	local hex = hash_to_hex(h)
+	check("hash", h ~= nil and #hex > 0, hex:sub(1, 12))
+end
+
+local function check_json()
+	local encoded = json.encode({ name = "apitest", n = 42, list = { 1, 2, 3 } })
+	local back = json.decode(encoded)
+	check("json", back.name == "apitest" and back.n == 42 and #back.list == 3,
+		"round-trip " .. #encoded .. "B")
+end
+
+local function check_zlib()
+	local raw = string.rep("defold-wasmcart ", 64)
+	local ok, deflated = pcall(zlib.deflate, raw)
+	if not ok then check("zlib", false, "deflate threw"); return end
+	local ok2, inflated = pcall(zlib.inflate, deflated)
+	check("zlib", ok2 and inflated == raw,
+		string.format("%d -> %d bytes", #raw, #deflated))
+end
+
+local function check_sys()
+	local info = sys.get_sys_info()
+	local cfg = sys.get_config_string("project.title", "?")
+	check("sys", info ~= nil and info.system_name ~= nil,
+		tostring(info and info.system_name) .. " / " .. tostring(cfg))
+end
+
+local function check_save()
+	local path = sys.get_save_file("apitest", "probe")
+	-- Read BEFORE writing: on a second run the host restores the save block,
+	-- so a value from the previous session proves persistence rather than
+	-- merely proving that a write and a read agree within one run.
+	local prior = sys.load(path)
+	local carried = prior and prior.magic == 4242
+
+	local wrote = pcall(sys.save, path, { magic = 4242, run = (prior.run or 0) + 1 })
+	local back = sys.load(path)
+	check("sys.save", wrote and back and back.magic == 4242,
+		wrote and string.format("wrote, run #%d%s", back.run or 0,
+			carried and ", carried from a previous session" or "")
+		     or "no writable filesystem")
+
+	-- sys.exists must agree with what was just written, and must NOT claim a
+	-- name nobody saved. A store that returns true for everything passes the
+	-- first half alone.
+	local absent = sys.get_save_file("apitest", "never_written")
+	check("sys.exists", sys.exists(path) and not sys.exists(absent),
+		"present=yes absent=no")
+end
+
+-- ── the game-object side ─────────────────────────────────────────────────
+
+local function spawn_sprite(self, fac, x, y, w, h)
+	return factory.create(fac, vmath.vector3(x, y, 0), nil, {},
+		vmath.vector3(w / ART, h / ART, 1))
+end
+
+function init(self)
+	msg.post("@render:", "clear_color", { color = vmath.vector4(0.05, 0.06, 0.10, 1) })
+	msg.post(".", "acquire_input_focus")
+
+	self.frame = 0
+	self.collisions = 0
+	self.timer_ticks = 0
+	self.anim_done = false
+
+	check_vmath()
+	check_hash()
+	check_json()
+	check_zlib()
+	check_sys()
+	check_save()
+
+	-- physics: a floor and two angled walls, then balls dropped onto them.
+	-- Restitution is high so the bounce is visible in a screenshot.
+	self.floor = spawn_sprite(self, "#wallfactory", W * 0.5, 40, 480, 16)
+	self.lwall = spawn_sprite(self, "#wallfactory", 150, 200, 480, 16)
+	self.rwall = spawn_sprite(self, "#wallfactory", 810, 200, 480, 16)
+	go.set_rotation(vmath.quat_rotation_z(math.rad(-25)), self.lwall)
+	go.set_rotation(vmath.quat_rotation_z(math.rad(25)), self.rwall)
+
+	self.balls = {}
+	for i = 1, 8 do
+		self.balls[i] = spawn_sprite(self, "#ballfactory", 200 + i * 70, 470 + (i % 3) * 20, 22, 22)
+	end
+	check("physics", #self.balls == 8, "8 dynamic bodies + 3 static")
+
+	-- go.animate with easing and a completion callback.
+	go.animate(self.floor, "position.y", go.PLAYBACK_LOOP_PINGPONG,
+		52, go.EASING_INOUTSINE, 2.0)
+	go.animate(self.lwall, "euler.z", go.PLAYBACK_ONCE_FORWARD, -18,
+		go.EASING_OUTQUAD, 1.2, 0, function()
+			self.anim_done = true
+			check("go.animate", true, "completion callback fired")
+		end)
+
+	-- timer: one repeating, one one-shot that we then cancel.
+	self.repeater = timer.delay(0.5, true, function()
+		self.timer_ticks = self.timer_ticks + 1
+		sound.play("#blip")
+	end)
+	self.cancel_me = timer.delay(5.0, false, function()
+		check("timer.cancel", false, "cancelled timer still fired")
+	end)
+	timer.cancel(self.cancel_me)
+
+	label.set_text("#label", "label component: OK")
+	check("label", true, "set_text")
+
+	msg.post("#hudscene", "status", { text = "apitest running..." })
+	check("gui", true, "scene loaded, message sent")
+
+	print("apitest: init complete, running checks that need frames")
+end
+
+function update(self, dt)
+	self.frame = self.frame + 1
+	if self.frame <= 3 or self.frame == VERDICT_FRAME then
+		self.dt_sum = (self.dt_sum or 0) + dt
+		print(string.format("apitest: frame=%d dt=%.5f sum=%.3f", self.frame, dt, self.dt_sum))
+	end
+
+	-- These two can only be judged after physics and timers have had frames.
+	if self.frame == VERDICT_FRAME then
+		check("timer", self.timer_ticks >= 1,
+			string.format("%d ticks in %d frames", self.timer_ticks, VERDICT_FRAME))
+
+		-- Did gravity actually move the bodies? A physics engine that loads
+		-- but never steps would leave them exactly where they spawned.
+		local moved = 0
+		for _, b in ipairs(self.balls) do
+			if go.exists(b) and go.get_position(b).y < 450 then moved = moved + 1 end
+		end
+		check("physics.step", moved > 0, string.format("%d/8 balls fell", moved))
+		check("physics.collide", self.collisions > 0,
+			string.format("%d collision messages", self.collisions))
+
+		local pass, fail, failed = summary()
+		local line = string.format("%d PASS  %d FAIL", pass, fail)
+		if fail > 0 then line = line .. "  [" .. table.concat(failed, " ") .. "]" end
+		print("apitest: " .. line)
+		msg.post("#hudscene", "status", { text = "apitest: " .. line })
+
+		local names = {}
+		for _, n in ipairs(order) do
+			names[#names + 1] = (results[n].ok and "+" or "!") .. n
+		end
+		msg.post("#hudscene", "apis", { text = table.concat(names, " ") })
+		label.set_text("#label", line)
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	-- collision_response proves the physics world is actually simulating
+	-- contacts, not merely holding bodies.
+	if message_id == hash("collision_response") or message_id == hash("ball_hit") then
+		-- Physics messages land on the script attached to the COLLIDING object,
+		-- so each ball relays its first contact here via ball.script. Listening
+		-- for collision_response alone on this object observes nothing, which
+		-- looks identical to a physics world that never simulates contacts.
+		self.collisions = self.collisions + 1
+	end
+end

@@ -1,0 +1,40 @@
+-- proxytest -- collectionproxy: async load, enable, and the message handshake.
+--
+-- A proxy is how a real game does level loading, and it is the only API here
+-- whose success is asynchronous: msg.post("load") returns immediately and the
+-- engine answers with "proxy_loaded" some frames later. A cart that never
+-- pumps its message queue correctly would hang here forever with no error, so
+-- this reports the frame the answer arrived on rather than assuming it did.
+
+function init(self)
+	msg.post("@render:", "clear_color", { color = vmath.vector4(0.06, 0.05, 0.10, 1) })
+	self.frame = 0
+	self.loaded_at = nil
+	self.level_ready = false
+	msg.post("#levelproxy", "load")
+	print("proxytest: load posted to collectionproxy")
+end
+
+function update(self, dt)
+	self.frame = self.frame + 1
+	if self.frame == 150 then
+		local ok = self.loaded_at ~= nil and self.level_ready
+		print(string.format("proxytest: proxy_loaded@%s level_init=%s -> %s",
+			tostring(self.loaded_at), tostring(self.level_ready),
+			ok and "PASS" or "FAIL"))
+		label.set_text("#status", ok
+			and string.format("collectionproxy PASS (loaded frame %d)", self.loaded_at)
+			or "collectionproxy FAIL")
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("proxy_loaded") then
+		self.loaded_at = self.frame
+		print("proxytest: proxy_loaded received on frame " .. self.frame)
+		-- enable is what actually spawns the collection's objects.
+		msg.post(sender, "enable")
+	elseif message_id == hash("level_ready") then
+		self.level_ready = true
+	end
+end

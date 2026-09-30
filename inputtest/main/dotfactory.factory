@@ -1,0 +1,2 @@
+prototype: "/main/dot.go"
+load_dynamically: false

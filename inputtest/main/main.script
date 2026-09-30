@@ -1,0 +1,93 @@
+-- inputtest -- every input path a cart can receive, reported live on screen.
+--
+-- Input is the API most likely to be silently half-working: a port can deliver
+-- keyboard and not gamepad, or deliver press but never release, and a normal
+-- game just feels slightly wrong rather than failing. This shows what actually
+-- arrives, so a tester can press a key or a pad button and SEE whether the
+-- engine got it.
+--
+-- It also leaves a visible trail: each distinct action spawns a marker, so a
+-- screenshot after input was injected proves delivery without reading a log.
+
+local W, H = 960, 540
+local ART = 8
+
+function init(self)
+	msg.post("@render:", "clear_color", { color = vmath.vector4(0.04, 0.06, 0.09, 1) })
+	msg.post(".", "acquire_input_focus")
+	self.frame = 0
+	self.seen = {}        -- action_id -> count
+	self.order = {}
+	self.markers = 0
+	self.released = 0
+	self.pointer = nil
+	print("inputtest: ready -- press keys, move the mouse, use a gamepad")
+end
+
+local function note(self, name)
+	if self.seen[name] == nil then
+		self.seen[name] = 0
+		self.order[#self.order + 1] = name
+		-- Spawn a marker so delivery is visible in a still frame.
+		if self.markers < 24 then
+			self.markers = self.markers + 1
+			factory.create("#dotfactory",
+				vmath.vector3(60 + (self.markers - 1) % 12 * 70,
+				              200 - math.floor((self.markers - 1) / 12) * 50, 0),
+				nil, {}, vmath.vector3(18 / ART, 18 / ART, 1))
+		end
+	end
+	self.seen[name] = self.seen[name] + 1
+end
+
+function update(self, dt)
+	self.frame = self.frame + 1
+	if self.frame % 30 == 0 then
+		local n = #self.order
+		label.set_text("#log", string.format("inputtest: %d distinct actions, %d releases",
+			n, self.released))
+		local recent = {}
+		for i = math.max(1, n - 5), n do
+			recent[#recent + 1] = self.order[i] .. "x" .. self.seen[self.order[i]]
+		end
+		label.set_text("#log2", n > 0 and table.concat(recent, " ") or "waiting for input...")
+		-- Printed as well as drawn: a headless run has no screen to read, and
+		-- "the label says so" cannot be checked without vision.
+		print(string.format("inputtest: %d distinct actions, %d releases [%s]",
+			n, self.released, table.concat(self.order, " ")))
+	end
+end
+
+-- The expected action for each injected button. Comparing hashes by identity
+-- is the only way to tell a correct mapping from a transposed one: a driver
+-- with A and B swapped delivers exactly the same NUMBER of actions.
+local EXPECT = {
+	"gamepad_rpad_down", "gamepad_rpad_right", "gamepad_rpad_left", "gamepad_rpad_up",
+	"gamepad_start", "gamepad_back",
+	"gamepad_lpad_up", "gamepad_lpad_down", "gamepad_lpad_left", "gamepad_lpad_right",
+	"gamepad_lshoulder", "gamepad_rshoulder",
+}
+
+local function name_of(action_id)
+	for _, n in ipairs(EXPECT) do
+		if hash(n) == action_id then return n end
+	end
+	return tostring(action_id)
+end
+
+function on_input(self, action_id, action)
+	if action_id == nil then
+		-- action_id nil is MOUSE MOVEMENT (no bound action). Worth handling
+		-- explicitly: a port that never delivers it looks fine until a game
+		-- needs a cursor.
+		if action.x then
+			self.pointer = action
+			note(self, "mousemove")
+		end
+		return
+	end
+	local name = name_of(action_id)
+	if action.pressed then note(self, name .. ":down")
+	elseif action.released then self.released = self.released + 1; note(self, name .. ":up")
+	else note(self, name .. ":held") end
+end

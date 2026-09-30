@@ -1,0 +1,2 @@
+prototype: "/main/wall.go"
+load_dynamically: false

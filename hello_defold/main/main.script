@@ -1,0 +1,40 @@
+-- hello_defold: the Phase 1 gate.
+-- Clears to a known colour so a screenshot can be checked by pixel value,
+-- and reports input so gate 5 can be proven rather than assumed.
+
+function init(self)
+    self.frame = 0
+    self.reported = {}
+    msg.post("@render:", "clear_color", { color = vmath.vector4(0.2, 0.4, 0.8, 1.0) })
+    msg.post(".", "acquire_input_focus")
+    -- Play a known 440Hz tone so audio can be verified by measuring the
+    -- samples the host drains, not by assuming the device opened.
+    sound.play("#tone")
+    print("hello_defold: init")
+end
+
+function update(self, dt)
+    self.frame = self.frame + 1
+    if self.frame <= 3 then
+        print(string.format("hello_defold: update frame=%d dt=%.4f", self.frame, dt))
+    end
+end
+
+function on_input(self, action_id, action)
+    -- Print each distinct action once: enough to prove input arrives without
+    -- flooding the log every frame a key is held.
+    local name = action_id and hash_to_hex(action_id) or "nil"
+    if action_id and not self.reported[name] then
+        self.reported[name] = true
+        print(string.format("hello_defold: INPUT action=%s pressed=%s value=%.2f",
+            tostring(action_id), tostring(action.pressed), action.value or 0))
+    end
+    if action.x and not self.reported["_pointer"] then
+        self.reported["_pointer"] = true
+        print(string.format("hello_defold: INPUT pointer x=%.0f y=%.0f", action.x, action.y))
+    end
+end
+
+function on_message(self, message_id, message, sender)
+    print("hello_defold: on_message " .. tostring(message_id))
+end

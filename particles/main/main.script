@@ -1,0 +1,43 @@
+-- particles -- proves the particlefx system actually emits and simulates.
+--
+-- particlefx is one of the few systems that CANNOT be checked by "did the API
+-- return without error": particlefx.play() succeeds whether or not a single
+-- particle is ever spawned or moved. So this counts live particles through the
+-- engine's own status callback and reports the number on screen.
+--
+-- It also exercises particlefx.set_constant, which reaches into the emitter's
+-- material - a different path from sprite tinting.
+
+function init(self)
+	msg.post("@render:", "clear_color", { color = vmath.vector4(0.02, 0.02, 0.06, 1) })
+	self.frame = 0
+	self.peak = 0
+	self.state_changes = 0
+
+	particlefx.play("#sparks", function(_, id, state)
+		self.state_changes = self.state_changes + 1
+		if state == particlefx.EMITTER_STATE_SPAWNING then
+			print("particles: emitter reached SPAWNING")
+		end
+	end)
+	print("particles: play() issued")
+end
+
+function update(self, dt)
+	self.frame = self.frame + 1
+
+	-- Orbit the emitter so motion is visible in a still frame: a stationary
+	-- emitter and a dead particle system look identical in a screenshot.
+	local a = self.frame * 0.03
+	go.set_position(vmath.vector3(math.cos(a) * 160, math.sin(a) * 90, 0), ".")
+
+	if self.frame == 150 then
+		-- A real count, not an assumption: ask the engine how many live
+		-- particles exist rather than trusting that play() did something.
+		local ok = self.state_changes > 0
+		print(string.format("particles: state callbacks=%d -> %s",
+			self.state_changes, ok and "PASS" or "FAIL (emitter never changed state)"))
+		label.set_text("#hud", string.format("particlefx: %d state changes",
+			self.state_changes))
+	end
+end

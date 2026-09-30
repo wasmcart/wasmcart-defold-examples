@@ -1,0 +1,37 @@
+script: "/main/hud.gui_script"
+fonts {
+  name: "default"
+  font: "/builtins/fonts/default.font"
+}
+nodes {
+  position { x: 20.0 y: 520.0 z: 0.0 }
+  rotation { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+  scale { x: 1.0 y: 1.0 z: 1.0 }
+  size { x: 600.0 y: 40.0 z: 0.0 }
+  color { x: 1.0 y: 1.0 z: 1.0 w: 1.0 }
+  type: TYPE_TEXT
+  text: "apitest"
+  font: "default"
+  id: "status"
+  pivot: PIVOT_NW
+  outline { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+  shadow { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+  inherit_alpha: true
+}
+nodes {
+  position { x: 20.0 y: 480.0 z: 0.0 }
+  rotation { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+  scale { x: 1.0 y: 1.0 z: 1.0 }
+  size { x: 900.0 y: 40.0 z: 0.0 }
+  color { x: 0.6 y: 0.9 z: 1.0 w: 1.0 }
+  type: TYPE_TEXT
+  text: "apis"
+  font: "default"
+  id: "apis"
+  pivot: PIVOT_NW
+  outline { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+  shadow { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+  inherit_alpha: true
+}
+material: "/builtins/materials/gui.material"
+adjust_reference: ADJUST_REFERENCE_PARENT

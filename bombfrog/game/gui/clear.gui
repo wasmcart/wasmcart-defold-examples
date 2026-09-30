@@ -1,0 +1,197 @@
+script: "/game/gui/clear.gui_script"
+fonts {
+  name: "main"
+  font: "/assets/font/main.font"
+}
+textures {
+  name: "main"
+  texture: "/game/core/main.tilesource"
+}
+nodes {
+  position {
+    x: 640.0
+    y: 360.0
+  }
+  type: TYPE_BOX
+  id: "container"
+  adjust_mode: ADJUST_MODE_STRETCH
+  inherit_alpha: true
+}
+nodes {
+  size {
+    x: 420.0
+    y: 170.0
+  }
+  color {
+    x: 0.2509804
+    y: 0.35686275
+    z: 0.8156863
+  }
+  type: TYPE_BOX
+  id: "box"
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+}
+nodes {
+  size {
+    x: 400.0
+    y: 150.0
+  }
+  color {
+    x: 0.16078432
+    y: 0.21176471
+    z: 0.43529412
+  }
+  type: TYPE_BOX
+  id: "box1"
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "box"
+  inherit_alpha: true
+}
+nodes {
+  position {
+    y: 50.0
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  color {
+    x: 0.95686275
+    y: 0.95686275
+    z: 0.95686275
+  }
+  type: TYPE_TEXT
+  text: "LEVEL COMPLETE!"
+  font: "main"
+  id: "1"
+  outline {
+    x: 0.101960786
+    y: 0.10980392
+    z: 0.17254902
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "box"
+  inherit_alpha: true
+  shadow_alpha: 0.0
+}
+nodes {
+  position {
+    y: -50.0
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  color {
+    y: 0.8156863
+    z: 0.4745098
+  }
+  type: TYPE_TEXT
+  text: "PRESS SPACE"
+  font: "main"
+  id: "2"
+  outline {
+    x: 0.101960786
+    y: 0.10980392
+    z: 0.17254902
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "box"
+  inherit_alpha: true
+  shadow_alpha: 0.0
+}
+nodes {
+  position {
+    x: 42.0
+  }
+  scale {
+    x: 3.0
+    y: 3.0
+  }
+  type: TYPE_BOX
+  texture: "main/heart"
+  id: "heart"
+  parent: "box"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    x: 18.0
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  color {
+    x: 0.69411767
+    y: 0.25490198
+    z: 0.3372549
+  }
+  type: TYPE_TEXT
+  text: "BONUS"
+  font: "main"
+  id: "bonus"
+  pivot: PIVOT_E
+  outline {
+    x: 0.101960786
+    y: 0.10980392
+    z: 0.17254902
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "box"
+  inherit_alpha: true
+  shadow_alpha: 0.0
+}
+nodes {
+  position {
+    x: 66.0
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  color {
+    x: 0.69411767
+    y: 0.25490198
+    z: 0.3372549
+  }
+  type: TYPE_TEXT
+  text: "x 1"
+  font: "main"
+  id: "x 1"
+  pivot: PIVOT_W
+  outline {
+    x: 0.101960786
+    y: 0.10980392
+    z: 0.17254902
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "box"
+  inherit_alpha: true
+  shadow_alpha: 0.0
+}
+material: "/builtins/materials/gui.material"
+adjust_reference: ADJUST_REFERENCE_PARENT

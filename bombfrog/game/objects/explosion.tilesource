@@ -1,0 +1,9 @@
+image: "/assets/png/explosion.png"
+tile_width: 48
+tile_height: 48
+animations {
+  id: "anim"
+  start_tile: 1
+  end_tile: 12
+  fps: 10
+}
