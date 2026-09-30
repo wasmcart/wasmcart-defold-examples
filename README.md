@@ -69,11 +69,14 @@ Paddle, ball, 50 bricks, lives and scoring, driving keyboard and gamepad
 through the *same* held-state booleans so neither is a second-class alias of
 the other, plus three sound effects and a saved high score.
 
-### `bombfrog`
+### `bombfrog` (on disk, not in this repo)
 
-A full game: title screen, menus, tilemap levels, animated sprites, enemies
-and bombs. The example that proves the renderer on real content rather than on
-a fixture.
+A full third-party Defold game: title screen, menus, tilemap levels, animated
+sprites, enemies and bombs. It is the strongest render test here because it
+exercises the pipeline on real content rather than on a fixture, and it is how
+the renderer fix was confirmed. It is deliberately NOT committed: it arrived
+with no licence file or provenance, so it stays a local test fixture until
+those are established.
 
 ### `apitest`
 
