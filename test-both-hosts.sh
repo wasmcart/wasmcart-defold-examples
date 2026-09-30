@@ -19,6 +19,12 @@ EX=/home/monteslu/code/cliemu/defold-wasmcart-examples
 NAT=/home/monteslu/code/cliemu/wasmcart-native/build/wasmcart-run
 OUT="${TMPDIR:-/tmp}/bothtest"; mkdir -p "$OUT"
 
+# ONE session for the whole suite, reused for every cart. A session per cart
+# makes the server hold a live emulator each, and at maxHosts it evicts the
+# oldest idle one - which on 2026-09-30 was somebody's running livestream. The
+# suite loads carts in sequence and never needs two at once.
+SESS="${ROMDEV_SESSION:-both-hosts}"
+
 printf '%-14s | %-22s | %-22s\n' "cart" "romdev" "native"
 printf '%s\n' "---------------+------------------------+-----------------------"
 CARTS=("$@")
@@ -31,14 +37,21 @@ for p in "${CARTS[@]}"; do
 
   # --- romdev ---
   curl -s -X POST http://127.0.0.1:7331/tool/loadMedia \
-    -H 'Content-Type: application/json' -H "x-romdev-session: both-$p" \
+    -H 'Content-Type: application/json' -H "x-romdev-session: $SESS" \
     --data-binary "{\"platform\":\"wasmcart\",\"path\":\"$cart\"}" > "$OUT/$p.load" 2>&1
   rres=$(grep -oE '"fbWidth":[0-9]+,"fbHeight":[0-9]+' "$OUT/$p.load" | tr -d '"' | sed 's/fbWidth://;s/,fbHeight:/x/')
   curl -s -X POST http://127.0.0.1:7331/tool/frame \
-    -H 'Content-Type: application/json' -H "x-romdev-session: both-$p" \
+    -H 'Content-Type: application/json' -H "x-romdev-session: $SESS" \
     --data-binary '{"op":"step","frames":320}' > "$OUT/$p.step" 2>&1
+  # Read the step RESPONSE. An evicted host or a dead server answers with an
+  # error and a resolution parsed from the earlier load still looks like a
+  # pass, so "it did not say error" is the only honest success signal here.
   rok=$(grep -oE '"framesRun":[0-9]+' "$OUT/$p.step" | head -1)
-  [ -z "$rres" ] && rres="LOAD FAILED"
+  if grep -q '"error"' "$OUT/$p.step" 2>/dev/null; then
+    rres="STEP ERROR"; rok=""
+  elif [ -z "$rres" ]; then
+    rres="LOAD FAILED"
+  fi
 
   # --- native ---
   ( cd "$EX/$p" && timeout 25 "$NAT" "$p.wasc" > "$OUT/$p.nat" 2>&1 )
