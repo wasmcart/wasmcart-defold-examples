@@ -58,21 +58,51 @@ function update(self, dt)
 	end
 end
 
--- The expected action for each injected button. Comparing hashes by identity
--- is the only way to tell a correct mapping from a transposed one: a driver
--- with A and B swapped delivers exactly the same NUMBER of actions.
-local EXPECT = {
-	"gamepad_rpad_down", "gamepad_rpad_right", "gamepad_rpad_left", "gamepad_rpad_up",
-	"gamepad_start", "gamepad_back",
-	"gamepad_lpad_up", "gamepad_lpad_down", "gamepad_lpad_left", "gamepad_lpad_right",
-	"gamepad_lshoulder", "gamepad_rshoulder",
+-- EVERY action /builtins/input/all.input_binding defines, generated from that
+-- file rather than hand-listed. A hand-written subset is why the display showed
+-- "hash: [<unknown:3707431882006794545>]" for anything it had missed: an
+-- unresolved hash stringifies to that, and two of them fill the line and push
+-- it off both edges.
+--
+-- Identity matters as much as readability here. Comparing by hash is the only
+-- way to tell a correct mapping from a transposed one, because a driver with A
+-- and B swapped delivers exactly the same NUMBER of actions.
+local ACTIONS = {
+	"gamepad_back", "gamepad_connected", "gamepad_disconnected", "gamepad_guide", "gamepad_lpad_down", "gamepad_lpad_left",
+	"gamepad_lpad_right", "gamepad_lpad_up", "gamepad_lshoulder", "gamepad_lstick_click", "gamepad_lstick_down", "gamepad_lstick_left",
+	"gamepad_lstick_right", "gamepad_lstick_up", "gamepad_ltrigger", "gamepad_rpad_down", "gamepad_rpad_left", "gamepad_rpad_right",
+	"gamepad_rpad_up", "gamepad_rshoulder", "gamepad_rstick_click", "gamepad_rstick_down", "gamepad_rstick_left", "gamepad_rstick_right",
+	"gamepad_rstick_up", "gamepad_rtrigger", "gamepad_start", "key_0", "key_1", "key_2",
+	"key_3", "key_4", "key_5", "key_6", "key_7", "key_8",
+	"key_9", "key_a", "key_ampersand", "key_asterisk", "key_at", "key_b",
+	"key_back", "key_backslash", "key_backspace", "key_c", "key_capslock", "key_caret",
+	"key_colon", "key_comma", "key_d", "key_del", "key_dollarsign", "key_doublequote",
+	"key_down", "key_e", "key_end", "key_enter", "key_equals", "key_esc",
+	"key_exclamationmark", "key_f", "key_f1", "key_f10", "key_f11", "key_f12",
+	"key_f2", "key_f3", "key_f4", "key_f5", "key_f6", "key_f7",
+	"key_f8", "key_f9", "key_g", "key_grave", "key_greaterthan", "key_h",
+	"key_hash", "key_home", "key_i", "key_insert", "key_j", "key_k",
+	"key_l", "key_lalt", "key_lbrace", "key_lbracket", "key_lctrl", "key_left",
+	"key_lessthan", "key_lparen", "key_lshift", "key_lsuper", "key_m", "key_menu",
+	"key_minus", "key_n", "key_numpad_0", "key_numpad_1", "key_numpad_2", "key_numpad_3",
+	"key_numpad_4", "key_numpad_5", "key_numpad_6", "key_numpad_7", "key_numpad_8", "key_numpad_9",
+	"key_numpad_add", "key_numpad_decimal", "key_numpad_divide", "key_numpad_enter", "key_numpad_equal", "key_numpad_multiply",
+	"key_numpad_numlock", "key_numpad_subtract", "key_o", "key_p", "key_pagedown", "key_pageup",
+	"key_pause", "key_period", "key_pipe", "key_plus", "key_q", "key_questionmark",
+	"key_r", "key_ralt", "key_rbrace", "key_rbracket", "key_rctrl", "key_right",
+	"key_rparen", "key_rshift", "key_rsuper", "key_s", "key_scrolllock", "key_semicolon",
+	"key_singlequote", "key_slash", "key_space", "key_t", "key_tab", "key_u",
+	"key_underscore", "key_up", "key_v", "key_w", "key_x", "key_y",
+	"key_z", "marked_text", "mouse_button_1", "mouse_button_2", "mouse_button_3", "mouse_button_4",
+	"mouse_button_5", "mouse_button_6", "mouse_button_7", "mouse_button_8", "mouse_button_left", "mouse_button_middle",
+	"mouse_button_right", "mouse_wheel_down", "mouse_wheel_up", "text", "touch", "touch_multi",
 }
 
+local BY_HASH = {}
+for _, n in ipairs(ACTIONS) do BY_HASH[hash(n)] = n end
+
 local function name_of(action_id)
-	for _, n in ipairs(EXPECT) do
-		if hash(n) == action_id then return n end
-	end
-	return tostring(action_id)
+	return BY_HASH[action_id] or ("?" .. tostring(action_id):gsub("%D", ""):sub(1, 6))
 end
 
 function on_input(self, action_id, action)

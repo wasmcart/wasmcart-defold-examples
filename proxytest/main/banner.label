@@ -1,4 +1,4 @@
-size { x: 900.0 y: 60.0 z: 0.0 }
+size { x: 900.0 y: 220.0 z: 0.0 }
 color { x: 0.45 y: 0.9 z: 0.55 w: 1.0 }
 outline { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
 shadow { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
@@ -6,7 +6,7 @@ leading: 1.0
 tracking: 0.0
 pivot: PIVOT_CENTER
 blend_mode: BLEND_MODE_ALPHA
-line_break: false
+line_break: true
 text: "LOADED VIA COLLECTION PROXY"
 font: "/main/font/ui.font"
 material: "/builtins/fonts/font.material"
