@@ -121,7 +121,7 @@ source ./dmenv.sh
 # -> tmp/dynamo_home/bin/wasm-web/dmengine_wasmcart.wasm
 
 # 2. Build content and pack a cart (content build + pack in one step)
-cd ../defold-wasmcart-examples
+cd ../wasmcart-defold-examples
 ./build-cart.sh breakout          # -> breakout/breakout.wasc
 ```
 

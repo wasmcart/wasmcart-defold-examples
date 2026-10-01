@@ -15,8 +15,10 @@
 #
 # Neither would have been found by running the host that happened to be handy.
 set -uo pipefail
-EX=/home/monteslu/code/cliemu/defold-wasmcart-examples
-NAT=/home/monteslu/code/cliemu/wasmcart-native/build/wasmcart-run
+# Resolved relative to this script, so the tree can be renamed or cloned
+# anywhere. A rename broke the hardcoded form once already.
+EX="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+NAT="${WASMCART_NATIVE:-$EX/../wasmcart-native/build/wasmcart-run}"
 OUT="${TMPDIR:-/tmp}/bothtest"; mkdir -p "$OUT"
 
 # ONE session for the whole suite, reused for every cart. A session per cart
