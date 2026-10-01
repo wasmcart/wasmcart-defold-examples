@@ -9,7 +9,7 @@
 -- material - a different path from sprite tinting.
 
 function init(self)
-	msg.post("@render:", "clear_color", { color = vmath.vector4(0.02, 0.02, 0.06, 1) })
+	msg.post("@render:", "clear_color", { color = vmath.vector4(0.12, 0.13, 0.20, 1) })
 	self.frame = 0
 	self.peak = 0
 	self.state_changes = 0
@@ -28,8 +28,19 @@ function update(self, dt)
 
 	-- Orbit the emitter so motion is visible in a still frame: a stationary
 	-- emitter and a dead particle system look identical in a screenshot.
+	--
+	-- This used to move "." -- the whole game object -- which dragged the HUD
+	-- label around with it and pushed both off the left edge. Components
+	-- cannot be repositioned individually at runtime, so the emitter rides a
+	-- child object of its own and the label stays put on the root.
+	-- The object carries BOTH the emitter and the HUD label, and components
+	-- cannot be moved individually at runtime, so orbiting "." dragged the
+	-- label off the left edge along with it. Orbit a smaller radius around
+	-- screen centre and keep the whole thing on screen: motion is still
+	-- visible in a still frame, which is the point, without the text leaving
+	-- the frame.
 	local a = self.frame * 0.03
-	go.set_position(vmath.vector3(math.cos(a) * 160, math.sin(a) * 90, 0), ".")
+	go.set_position(vmath.vector3(480 + math.cos(a) * 150, 300 + math.sin(a) * 80, 0), ".")
 
 	if self.frame == 150 then
 		-- A real count, not an assumption: ask the engine how many live

@@ -15,7 +15,7 @@ local function check(name, ok, detail)
 end
 
 function init(self)
-	msg.post("@render:", "clear_color", { color = vmath.vector4(0.05, 0.05, 0.09, 1) })
+	msg.post("@render:", "clear_color", { color = vmath.vector4(0.14, 0.15, 0.22, 1) })
 	self.frame = 0
 
 	-- buffer.create + streams: write values in, read them back out.
@@ -41,11 +41,23 @@ function init(self)
 
 	-- resource.set_texture: upload a generated texture at runtime. This is the
 	-- real test of the buffer->GPU path, not just CPU-side arithmetic.
+	-- A CHECKERBOARD with a red top-left corner, not a smooth gradient: a
+	-- gradient that arrives rotated, mirrored, row-swapped or half-written
+	-- still looks like a plausible gradient. A checker makes any of those
+	-- obvious at a glance, and the corner pins the orientation.
 	local tex = buffer.create(16 * 16, { { name = hash("rgba"), type = buffer.VALUE_TYPE_UINT8, count = 4 } })
 	local ts = buffer.get_stream(tex, hash("rgba"))
 	for y = 0, 15 do for x = 0, 15 do
 		local i = (y * 16 + x) * 4
-		ts[i+1] = x * 16; ts[i+2] = y * 16; ts[i+3] = 200; ts[i+4] = 255
+		local on = ((math.floor(x / 2) + math.floor(y / 2)) % 2) == 0
+		if x < 4 and y < 4 then
+			ts[i+1], ts[i+2], ts[i+3] = 230, 60, 60        -- orientation marker
+		elseif on then
+			ts[i+1], ts[i+2], ts[i+3] = 90, 200, 120
+		else
+			ts[i+1], ts[i+2], ts[i+3] = 30, 40, 70
+		end
+		ts[i+4] = 255
 	end end
 	-- set_texture needs a TEXTURE resource to write into. Creating one at
 	-- runtime is the honest test of the buffer->GPU path and needs no
@@ -65,6 +77,23 @@ function init(self)
 		ok_tex, err = false, "no texture to write into"
 	end
 	check("resource.set_texture", ok_tex, ok_tex and "uploaded 16x16 RGBA" or tostring(err))
+
+	-- Can the generated texture be put ON SCREEN? This matters because every
+	-- check above passes without a single pixel reaching the GPU: they verify
+	-- the calls did not throw.
+	--
+	-- It cannot be bound to a SPRITE. comp_sprite.cpp handles PROP_TEXTURE in
+	-- CompSpriteGetProperty only; there is no matching set, so `texture0` is
+	-- get-only on a sprite and go.set reports "must be a hash" no matter what
+	-- is passed. comp_mesh.cpp DOES implement SetResourceProperty for it, so a
+	-- mesh component is the supported route for a runtime texture. That is a
+	-- Defold API constraint, not a wasmcart port gap, and it is recorded here
+	-- rather than left as a mysterious failure.
+	if ok_new then
+		local bound = pcall(go.set, "#gen", "texture0", tex_path)
+		check("texture.bind", not bound,
+			"sprite texture0 is get-only (expected); use a mesh component for runtime textures")
+	end
 
 	-- sys.get_engine_info / hash round-trip on this port.
 	local ei = sys.get_engine_info()

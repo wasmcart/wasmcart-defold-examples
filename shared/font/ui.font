@@ -1,0 +1,8 @@
+font: "/shared/font/DejaVuSansMono-Bold.ttf"
+material: "/builtins/fonts/font.material"
+size: 28
+antialias: 1
+alpha: 1.0
+outline_alpha: 1.0
+outline_width: 1.0
+all_chars: true

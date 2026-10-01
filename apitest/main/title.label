@@ -8,5 +8,5 @@ pivot: PIVOT_CENTER
 blend_mode: BLEND_MODE_ALPHA
 line_break: false
 text: "label component"
-font: "/builtins/fonts/default.font"
+font: "/main/font/ui.font"
 material: "/builtins/fonts/font.material"

@@ -1,0 +1,8 @@
+DejaVuSansMono-Bold.ttf is from the DejaVu fonts project, a derivative of
+Bitstream Vera. Both are distributed under permissive free licences allowing
+redistribution and modification; see
+https://dejavu-fonts.github.io/License.html
+
+It is bundled here rather than referenced from the system so a cart built on
+any machine gets the same glyphs. Defold's own builtin default font is from
+the same Bitstream Vera lineage (vera_mo_bd.ttf).

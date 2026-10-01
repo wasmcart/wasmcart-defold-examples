@@ -13,6 +13,6 @@ components {
 components {
   id: "hud"
   component: "/main/hud.label"
-  position { x: 0.0 y: 220.0 z: 0.0 }
+  position { x: 0.0 y: 150.0 z: 0.0 }
   rotation { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
 }
