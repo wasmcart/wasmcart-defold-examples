@@ -13,12 +13,12 @@ components {
 components {
   id: "log"
   component: "/main/log.label"
-  position { x: 480.0 y: 480.0 z: 0.0 }
+  position { x: 480.0 y: 505.0 z: 0.0 }
   rotation { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
 }
 components {
   id: "log2"
   component: "/main/log.label"
-  position { x: 480.0 y: 430.0 z: 0.0 }
+  position { x: 480.0 y: 420.0 z: 0.0 }
   rotation { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
 }

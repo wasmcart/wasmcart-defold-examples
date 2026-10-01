@@ -25,7 +25,7 @@ components {
 components {
   id: "label"
   component: "/main/title.label"
-  position { x: 480.0 y: 60.0 z: 0.0 }
+  position { x: 480.0 y: 30.0 z: 0.0 }
   rotation { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
 }
 embedded_components {
