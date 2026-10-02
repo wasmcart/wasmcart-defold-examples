@@ -1,0 +1,2 @@
+prototype: "/main/orange.go"
+load_dynamically: false

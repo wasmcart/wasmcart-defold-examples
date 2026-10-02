@@ -1,6 +1,33 @@
 images {
+  image: "/main/red.png"
+}
+images {
+  image: "/main/orange.png"
+}
+images {
+  image: "/main/yellow.png"
+}
+images {
+  image: "/main/green.png"
+}
+images {
+  image: "/main/blue.png"
+}
+images {
+  image: "/main/purple.png"
+}
+images {
+  image: "/main/cyan.png"
+}
+images {
   image: "/main/white.png"
 }
+images {
+  image: "/main/slate.png"
+}
+images {
+  image: "/main/shadow.png"
+}
 margin: 0
-extrude_borders: 2
+extrude_borders: 0
 inner_padding: 0

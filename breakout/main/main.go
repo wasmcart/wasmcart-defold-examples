@@ -1,12 +1,66 @@
 components {
-  id: "script"
-  component: "/main/main.script"
+  id: "shadowfactory"
+  component: "/main/shadow.factory"
   position { x: 0.0 y: 0.0 z: 0.0 }
   rotation { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
 }
 components {
-  id: "blockfactory"
-  component: "/main/block.factory"
+  id: "redfactory"
+  component: "/main/red.factory"
+  position { x: 0.0 y: 0.0 z: 0.0 }
+  rotation { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+}
+components {
+  id: "orangefactory"
+  component: "/main/orange.factory"
+  position { x: 0.0 y: 0.0 z: 0.0 }
+  rotation { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+}
+components {
+  id: "yellowfactory"
+  component: "/main/yellow.factory"
+  position { x: 0.0 y: 0.0 z: 0.0 }
+  rotation { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+}
+components {
+  id: "greenfactory"
+  component: "/main/green.factory"
+  position { x: 0.0 y: 0.0 z: 0.0 }
+  rotation { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+}
+components {
+  id: "bluefactory"
+  component: "/main/blue.factory"
+  position { x: 0.0 y: 0.0 z: 0.0 }
+  rotation { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+}
+components {
+  id: "purplefactory"
+  component: "/main/purple.factory"
+  position { x: 0.0 y: 0.0 z: 0.0 }
+  rotation { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+}
+components {
+  id: "cyanfactory"
+  component: "/main/cyan.factory"
+  position { x: 0.0 y: 0.0 z: 0.0 }
+  rotation { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+}
+components {
+  id: "whitefactory"
+  component: "/main/white.factory"
+  position { x: 0.0 y: 0.0 z: 0.0 }
+  rotation { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+}
+components {
+  id: "slatefactory"
+  component: "/main/slate.factory"
+  position { x: 0.0 y: 0.0 z: 0.0 }
+  rotation { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+}
+components {
+  id: "script"
+  component: "/main/main.script"
   position { x: 0.0 y: 0.0 z: 0.0 }
   rotation { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
 }
