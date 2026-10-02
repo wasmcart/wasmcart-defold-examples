@@ -37,18 +37,18 @@ Five complete games from the
 [benjames-171/defold-games](https://github.com/benjames-171/defold-games)
 collection.
 
-- **Author:** Ben James ([github.com/benjames-171](https://github.com/benjames-171), [benjames171.itch.io](https://benjames171.itch.io))
+- **Author:** Ben James ([github.com/benjames-171](https://github.com/benjames-171))
 - **Upstream:** https://github.com/benjames-171/defold-games
 - **Copyright:** Copyright (c) 2022 Ben James
 - **Licence:** MIT, reproduced in `LICENSE-benjames.txt` inside each game
 
-| directory | game | itch.io rating |
+| directory | game | source |
 | --- | --- | --- |
-| `mansion/` | Mystery Mansion | 4.3 (120 votes) |
-| `exolon/` | Exolon: REDUX | 4.4 (43 votes) |
-| `planetoid/` | Planetoid | 4.6 (8 votes) |
-| `pathfinder/` | Pathfinder | 4.2 (18 votes) |
-| `unit4/` | Unit 4 | 4.4 (13 votes) |
+| `mansion/` | Mystery Mansion | [Mystery Mansion](https://github.com/benjames-171/defold-games/tree/master/Mystery%20Mansion) |
+| `exolon/` | Exolon: REDUX | [Exolon](https://github.com/benjames-171/defold-games/tree/master/Exolon) |
+| `planetoid/` | Planetoid | [Planetoid](https://github.com/benjames-171/defold-games/tree/master/Planetoid) |
+| `pathfinder/` | Pathfinder | [Pathfinder](https://github.com/benjames-171/defold-games/tree/master/Pathfinder) |
+| `unit4/` | Unit 4 | [Unit 4](https://github.com/benjames-171/defold-games/tree/master/Unit%204) |
 
 Each bundles the author's own art and audio, and none credits a separate
 musician on its title screen. Other games in the same collection do, for

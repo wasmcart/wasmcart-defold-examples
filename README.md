@@ -85,48 +85,50 @@ else a wasmcart host exists. Build the `.wasc` files first with
 
 ## The games
 
-Five complete games by **[Ben James](https://github.com/benjames-171)**,
-ported from his MIT-licensed
-[defold-games](https://github.com/benjames-171/defold-games) collection and
-playable at [benjames171.itch.io](https://benjames171.itch.io). They are
-included here with his licence reproduced in each game directory; the games,
-their code and their art are his work, not ours.
+Five complete games by **[Ben James](https://github.com/benjames-171)**, ported
+from his MIT-licensed
+[defold-games](https://github.com/benjames-171/defold-games) collection. Each
+links to its own source directory in that repository, and ships his licence
+alongside it: the games, their code and their art are his work, not ours.
 
-Chosen by itch.io player rating.
+Each is a single `.wasc` file. The same cart runs in a browser, on the desktop
+player, as a RetroArch core and on Android, with no per-target build and no
+page to embed it in. The ABI is what makes that work: a cart gets a
+framebuffer, input, audio and a save block, and nothing else, so it is safe to
+run a cart from someone you do not know.
 
 ### Mystery Mansion
 
-Explore a haunted house, manage inventory, keep your nerve. Rated 4.3 across
-120 votes, the best-evidenced of the set.
-[itch.io](https://benjames171.itch.io/mystery-mansion)
+Explore a haunted house room by room, managing an inventory and a fear meter
+that rises as you go.
+[source](https://github.com/benjames-171/defold-games/tree/master/Mystery%20Mansion)
 
 ![Mystery Mansion](docs/screenshots/mansion.png)
 
 ### Exolon: REDUX
 
-A side-scrolling shooter: zones, bombs, scoring. Rated 4.4 across 43 votes.
-[itch.io](https://benjames171.itch.io/exolon-redux)
+A side-scrolling shooter across numbered zones, with bombs and a score chase.
+[source](https://github.com/benjames-171/defold-games/tree/master/Exolon)
 
 ![Exolon](docs/screenshots/exolon.png)
 
 ### Planetoid
 
-Scrolling terrain, enemies, radar HUD. Rated 4.6.
-[itch.io](https://benjames171.itch.io/planetoid)
+Fly over scrolling terrain, shooting enemies, with a radar strip along the top.
+[source](https://github.com/benjames-171/defold-games/tree/master/Planetoid)
 
 ![Planetoid](docs/screenshots/planetoid.png)
 
 ### Pathfinder
 
-A puzzle platformer across nine circuit-board levels. Rated 4.2 across 18
-votes. [itch.io](https://benjames171.itch.io/pathfinder)
+A puzzle platformer across nine circuit-board levels. [source](https://github.com/benjames-171/defold-games/tree/master/Pathfinder)
 
 ![Pathfinder](docs/screenshots/pathfinder.png)
 
 ### Unit 4
 
-Miniaturised inside a patient, fighting antibodies on the way out. Rated 4.4.
-[itch.io](https://benjames171.itch.io/unit-4)
+Miniaturised and injected into a patient, fighting antibodies on the way out.
+[source](https://github.com/benjames-171/defold-games/tree/master/Unit%204)
 
 ![Unit 4](docs/screenshots/unit4.png)
 

@@ -329,11 +329,6 @@ end
 function update(self, dt)
 	if dt > 0.05 then dt = 0.05 end
 	update_chips(self, dt)
-	self.tick = (self.tick or 0) + 1
-	if self.tick % 15 == 0 then
-		print(string.format("breakout: paddle=%d ball=%d,%d lvl=%d score=%d bricks=%d",
-			self.paddle_x, self.bx, self.by, self.level, self.score, self.remaining))
-	end
 
 	-- Paddle
 	local dir = (self.right and 1 or 0) - (self.left and 1 or 0)
