@@ -66,22 +66,19 @@ Every example is a self-contained `.wasc`. With Node installed, no checkout is
 needed to play one:
 
 ```bash
-npx wasmcart planetoid/planetoid.wasc --gl --window    # windowed, with input
-npx wasmcart breakout/breakout.wasc --gl --window
+npx wasmcart planetoid/planetoid.wasc --window
+npx wasmcart breakout/breakout.wasc --window
 ```
 
-Headless, for a screenshot or a timed run:
+The same file runs on
+[wasmcart-native](https://github.com/wasmcart/wasmcart-native) on the desktop,
+as a [RetroArch core](https://github.com/wasmcart/wasmcart-libretro), on
+[Android](https://github.com/wasmcart/wasmcart-android), and in a browser. No
+per-target build, no page to embed it in.
 
-```bash
-npx wasmcart apitest/apitest.wasc --gl --frames 320 --shot out.png
-npx wasmcart planetoid/planetoid.wasc --gl --frames 600 --wav out.wav
-```
-
-The same cart also runs under
-[wasmcart-native](https://github.com/wasmcart/wasmcart-native) and anywhere
-else a wasmcart host exists. Build the `.wasc` files first with
-`./build-cart.sh <name>`, or download them from the GitHub Actions artifacts
-(see [Continuous integration](#continuous-integration)).
+Build the carts first with `./build-cart.sh <name>`, or download them from the
+GitHub Actions artifacts (see
+[Continuous integration](#continuous-integration)).
 
 ## The games
 
@@ -247,9 +244,9 @@ default while the engine renders at its own resolution.
 ## Running a cart
 
 ```bash
-npx wasmcart breakout.wasc --gl --window          # windowed, with input
-npx wasmcart breakout.wasc --gl --frames 300      # headless, timed
-npx wasmcart breakout.wasc --gl --frames 60 --shot out.png
+npx wasmcart breakout.wasc --window          # windowed, with input
+npx wasmcart breakout.wasc --frames 300      # headless, timed
+npx wasmcart breakout.wasc --frames 60 --shot out.png
 ```
 
 It also runs under romdev, which is the better harness when you want frame

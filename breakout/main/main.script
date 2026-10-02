@@ -30,6 +30,9 @@ local BRICK_TOP = H - 110
 -- survive being stretched. Width and height therefore scale by different
 -- divisors; a single ART constant would squash every sprite.
 local ART_W, ART_H = 64, 20
+-- Sprites that are not drawn on the 64x20 brick cell need their own divisors,
+-- or a square request renders at the brick's aspect and comes out a sliver.
+local CELL = { ball = { 20, 20 }, laser = { 8, 24 } }
 
 local SAVE_FILE = sys.get_save_file("breakout", "scores")
 
@@ -72,8 +75,10 @@ local MAX_LASERS   = 6
 local GRAVITY_TIME = 8.0
 
 local function spawn(sprite, x, y, w, h)
+	local cw, ch = ART_W, ART_H
+	if CELL[sprite] then cw, ch = CELL[sprite][1], CELL[sprite][2] end
 	return factory.create("#" .. sprite .. "factory", vmath.vector3(x, y, 0), nil, {},
-		vmath.vector3(w / ART_W, h / ART_H, 1))
+		vmath.vector3(w / cw, h / ch, 1))
 end
 
 local function load_high()

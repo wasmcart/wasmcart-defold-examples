@@ -110,7 +110,7 @@ jobs:
           bad=''
           for p in mansion exolon planetoid pathfinder unit4 hello_defold breakout apitest particles proxytest buffertest inputtest; do
             echo "::group::run $p"
-            out=$(cd "$p" && npx --no-install wasmcart "$p.wasc" --gl --frames 320 2>&1 || true)
+            out=$(cd "$p" && npx --no-install wasmcart "$p.wasc" --frames 320 2>&1 || true)
             printf '%s\n' "$out" | tail -40
             printf '%s\n' "$out" | grep -qE 'ERROR:SCRIPT|cart trapped' && bad="$bad $p"
             printf '%s\n' "$out" | grep -qE '[0-9]+ PASS +[1-9][0-9]* FAIL' && bad="$bad $p(assertions)"
