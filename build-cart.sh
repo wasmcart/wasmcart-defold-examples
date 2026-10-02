@@ -78,7 +78,24 @@ for f in game.arci game.arcd game.dmanifest game.projectc; do
   cp "$PROJ/build/default/$f" "$STAGE/assets/"
 done
 
-node "$HERE/../wasmcart/bin/wasmcart-pack.js" \
+# The packer comes from the wasmcart npm package. A sibling checkout is used
+# when there is one, since that is the common development layout, but the
+# installed package and `npx` both work, so this does not require any
+# particular directory structure.
+PACK="$HERE/../wasmcart/bin/wasmcart-pack.js"
+if [ ! -f "$PACK" ]; then
+  PACK="$HERE/node_modules/wasmcart/bin/wasmcart-pack.js"
+fi
+if [ -f "$PACK" ]; then
+  PACK_CMD=(node "$PACK")
+elif command -v npx >/dev/null 2>&1; then
+  PACK_CMD=(npx --yes wasmcart pack)
+else
+  echo "cannot find the wasmcart packer: install it with 'npm install wasmcart'" >&2
+  exit 1
+fi
+
+"${PACK_CMD[@]}" \
   --wasm "$STAGE/cart.wasm" --assets "$STAGE/assets" \
   --name "$NAME" --width "$W" --height "$H" --output "$OUT" >/dev/null
 
