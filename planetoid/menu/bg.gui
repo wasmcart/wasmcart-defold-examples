@@ -1,0 +1,39 @@
+script: "/menu/bg.gui_script"
+textures {
+  name: "main"
+  texture: "/main/main.atlas"
+}
+nodes {
+  position {
+    x: 480.0
+    y: 370.0
+  }
+  type: TYPE_PARTICLEFX
+  id: "pfx"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+  particlefx: "bg"
+}
+nodes {
+  position {
+    x: 480.0
+    y: 48.0
+  }
+  scale {
+    x: 4.0
+    y: 4.0
+  }
+  type: TYPE_BOX
+  texture: "main/bg2"
+  id: "hills"
+  pivot: PIVOT_S
+  adjust_mode: ADJUST_MODE_STRETCH
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+material: "/builtins/materials/gui.material"
+adjust_reference: ADJUST_REFERENCE_PARENT
+particlefxs {
+  name: "bg"
+  particlefx: "/menu/bg.particlefx"
+}

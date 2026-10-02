@@ -1,0 +1,10 @@
+image: "/assets/png/laser.png"
+tile_width: 62
+tile_height: 1
+animations {
+  id: "anim"
+  start_tile: 1
+  end_tile: 7
+  playback: PLAYBACK_LOOP_FORWARD
+}
+extrude_borders: 1

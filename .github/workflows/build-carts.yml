@@ -1,0 +1,119 @@
+name: build carts
+
+# Packs every example into a .wasc and uploads them as artifacts, so a cart can
+# be downloaded and played without building anything locally.
+#
+# The engine is NOT built here. wasmcart-defold publishes a toolchain artifact
+# (engine wasm + bob + builtins) and this job consumes it, which keeps a run to
+# a couple of minutes instead of the best part of an hour.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      toolchain_run_id:
+        description: 'wasmcart-defold run id to take the toolchain from'
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+
+      # Cross-repo download needs a token with read access to wasmcart-defold.
+      # TOOLCHAIN_TOKEN is an org secret; without it the run stops here with a
+      # clear message rather than failing later on a missing engine.
+      - name: Check the toolchain token is present
+        env:
+          TOOLCHAIN_TOKEN: ${{ secrets.TOOLCHAIN_TOKEN }}
+        run: |
+          if [ -z "${TOOLCHAIN_TOKEN}" ]; then
+            echo "::error::TOOLCHAIN_TOKEN is not set. It needs read access to wasmcart-defold so this job can fetch the engine toolchain."
+            exit 1
+          fi
+
+      - name: Fetch the engine toolchain
+        uses: actions/download-artifact@v8
+        with:
+          name: wasmcart-defold-toolchain
+          path: toolchain
+          repository: wasmcart/wasmcart-defold
+          run-id: ${{ github.event.inputs.toolchain_run_id || '' }}
+          github-token: ${{ secrets.TOOLCHAIN_TOKEN }}
+
+      # build-cart.sh expects an engine tree laid out as wasmcart-defold does.
+      # Recreate only the paths it reads rather than cloning a 744 MB repo.
+      - name: Lay the toolchain out as an engine tree
+        run: |
+          set -euo pipefail
+          root=../wasmcart-defold/tmp/dynamo_home
+          mkdir -p "$root/bin/wasm-web" "$root/share/java" "$root/content"
+          cp toolchain/dmengine_wasmcart.wasm "$root/bin/wasm-web/"
+          cp toolchain/bob-light.jar          "$root/share/java/"
+          cp -a toolchain/builtins            "$root/content/builtins"
+          (cd toolchain && sha256sum -c SHA256SUMS)
+
+      - name: Install the packer
+        run: npm install --no-save wasmcart
+
+      - name: Build every cart
+        run: |
+          set -euo pipefail
+          failed=''
+          for p in hello_defold breakout planetoid apitest particles proxytest buffertest inputtest; do
+            echo "::group::build $p"
+            ./build-cart.sh "$p" || failed="$failed $p"
+            echo "::endgroup::"
+          done
+          if [ -n "$failed" ]; then
+            echo "::error::carts failed to build:$failed"
+            exit 1
+          fi
+
+      # A .wasc that packs but does not run is not a pass. Step each cart and
+      # fail on a script error, a trap, or a failed in-cart assertion.
+      - name: Run every cart headless
+        run: |
+          set -uo pipefail
+          bad=''
+          for p in hello_defold breakout planetoid apitest particles proxytest buffertest inputtest; do
+            echo "::group::run $p"
+            out=$(cd "$p" && npx --no-install wasmcart "$p.wasc" --gl --frames 320 2>&1 || true)
+            printf '%s\n' "$out" | tail -40
+            printf '%s\n' "$out" | grep -qE 'ERROR:SCRIPT|cart trapped' && bad="$bad $p"
+            printf '%s\n' "$out" | grep -qE '[0-9]+ PASS +[1-9][0-9]* FAIL' && bad="$bad $p(assertions)"
+            echo "::endgroup::"
+          done
+          if [ -n "$bad" ]; then
+            echo "::error::carts failed at runtime:$bad"
+            exit 1
+          fi
+
+      - name: Collect the carts
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          cp ./*/*.wasc dist/
+          (cd dist && sha256sum ./*.wasc > SHA256SUMS)
+          ls -la dist
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: carts
+          path: dist/
+          retention-days: 30

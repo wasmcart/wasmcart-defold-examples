@@ -1,0 +1,599 @@
+script: "/menu/scoring.gui_script"
+fonts {
+  name: "main"
+  font: "/assets/font/main.font"
+}
+textures {
+  name: "game"
+  texture: "/game/core/game.tilesource"
+}
+nodes {
+  position {
+    x: 480.0
+    y: 320.0
+  }
+  type: TYPE_BOX
+  id: "container"
+  adjust_mode: ADJUST_MODE_STRETCH
+  inherit_alpha: true
+}
+nodes {
+  position {
+    y: 200.0
+  }
+  size {
+    x: 250.0
+    y: 50.0
+  }
+  color {
+    x: 0.5803922
+    y: 0.12941177
+    z: 0.41568628
+  }
+  type: TYPE_TEXT
+  text: "SCORING"
+  font: "main"
+  id: "title"
+  outline {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  outline_alpha: 0.0
+  shadow_alpha: 0.0
+}
+nodes {
+  position {
+    x: -150.0
+    y: 80.0
+  }
+  size {
+    x: 150.0
+    y: 64.0
+  }
+  color {
+    y: 0.81960785
+    z: 0.0
+  }
+  type: TYPE_TEXT
+  text: "lander\n"
+  "150"
+  font: "main"
+  id: "e1"
+  pivot: PIVOT_N
+  outline {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  outline_alpha: 0.0
+  shadow_alpha: 0.0
+}
+nodes {
+  position {
+    y: 32.0
+  }
+  scale {
+    x: 4.0
+    y: 4.0
+  }
+  type: TYPE_BOX
+  texture: "game/lander"
+  id: "1"
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "e1"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    y: 80.0
+  }
+  size {
+    x: 150.0
+    y: 64.0
+  }
+  color {
+    y: 0.81960785
+    z: 0.0
+  }
+  type: TYPE_TEXT
+  text: "mutant\n"
+  "150"
+  font: "main"
+  id: "e2"
+  pivot: PIVOT_N
+  outline {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  outline_alpha: 0.0
+  shadow_alpha: 0.0
+}
+nodes {
+  position {
+    y: 32.0
+  }
+  scale {
+    x: 4.0
+    y: 4.0
+  }
+  type: TYPE_BOX
+  texture: "game/mutant"
+  id: "2"
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "e2"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    x: 150.0
+    y: 80.0
+  }
+  size {
+    x: 150.0
+    y: 64.0
+  }
+  color {
+    y: 0.81960785
+    z: 0.0
+  }
+  type: TYPE_TEXT
+  text: "baiter\n"
+  "200"
+  font: "main"
+  id: "e3"
+  pivot: PIVOT_N
+  outline {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  outline_alpha: 0.0
+  shadow_alpha: 0.0
+}
+nodes {
+  position {
+    y: 32.0
+  }
+  scale {
+    x: 4.0
+    y: 4.0
+  }
+  type: TYPE_BOX
+  texture: "game/baiter"
+  id: "3"
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "e3"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    x: -150.0
+    y: -64.0
+  }
+  size {
+    x: 150.0
+    y: 64.0
+  }
+  color {
+    y: 0.81960785
+    z: 0.0
+  }
+  type: TYPE_TEXT
+  text: "bomber\n"
+  "250"
+  font: "main"
+  id: "e4"
+  pivot: PIVOT_N
+  outline {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  outline_alpha: 0.0
+  shadow_alpha: 0.0
+}
+nodes {
+  position {
+    y: 32.0
+  }
+  scale {
+    x: 4.0
+    y: 4.0
+  }
+  type: TYPE_BOX
+  texture: "game/bomber"
+  id: "4"
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "e4"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    y: -64.0
+  }
+  size {
+    x: 150.0
+    y: 64.0
+  }
+  color {
+    y: 0.81960785
+    z: 0.0
+  }
+  type: TYPE_TEXT
+  text: "pod\n"
+  "1000"
+  font: "main"
+  id: "e5"
+  pivot: PIVOT_N
+  outline {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  outline_alpha: 0.0
+  shadow_alpha: 0.0
+}
+nodes {
+  position {
+    y: 32.0
+  }
+  scale {
+    x: 4.0
+    y: 4.0
+  }
+  type: TYPE_BOX
+  texture: "game/pod"
+  id: "5"
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "e5"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    x: 150.0
+    y: -64.0
+  }
+  size {
+    x: 150.0
+    y: 64.0
+  }
+  color {
+    y: 0.81960785
+    z: 0.0
+  }
+  type: TYPE_TEXT
+  text: "swarmer\n"
+  "150"
+  font: "main"
+  id: "e6"
+  pivot: PIVOT_N
+  outline {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  outline_alpha: 0.0
+  shadow_alpha: 0.0
+}
+nodes {
+  position {
+    y: 32.0
+  }
+  scale {
+    x: 4.0
+    y: 4.0
+  }
+  type: TYPE_BOX
+  texture: "game/swarmer"
+  id: "6"
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "e6"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    x: -320.0
+    y: 80.0
+  }
+  size {
+    x: 150.0
+    y: 64.0
+  }
+  color {
+    x: 0.8392157
+    y: 0.14117648
+    z: 0.06666667
+  }
+  type: TYPE_TEXT
+  text: "spinner\n"
+  "200"
+  font: "main"
+  id: "e7"
+  pivot: PIVOT_N
+  outline {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  outline_alpha: 0.0
+  shadow_alpha: 0.0
+}
+nodes {
+  position {
+    y: 32.0
+  }
+  scale {
+    x: 4.0
+    y: 4.0
+  }
+  type: TYPE_BOX
+  texture: "game/spinner"
+  id: "7"
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "e7"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    x: 320.0
+    y: 80.0
+  }
+  size {
+    x: 150.0
+    y: 64.0
+  }
+  color {
+    x: 0.8392157
+    y: 0.14117648
+    z: 0.06666667
+  }
+  type: TYPE_TEXT
+  text: "ufo\n"
+  "300"
+  font: "main"
+  id: "e8"
+  pivot: PIVOT_N
+  outline {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  outline_alpha: 0.0
+  shadow_alpha: 0.0
+}
+nodes {
+  position {
+    y: 32.0
+  }
+  scale {
+    x: 4.0
+    y: 4.0
+  }
+  type: TYPE_BOX
+  texture: "game/ufo"
+  id: "8"
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "e8"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    x: -320.0
+    y: -64.0
+  }
+  size {
+    x: 150.0
+    y: 64.0
+  }
+  color {
+    x: 0.8392157
+    y: 0.14117648
+    z: 0.06666667
+  }
+  type: TYPE_TEXT
+  text: "dynamo\n"
+  "250"
+  font: "main"
+  id: "e9"
+  pivot: PIVOT_N
+  outline {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  outline_alpha: 0.0
+  shadow_alpha: 0.0
+}
+nodes {
+  position {
+    y: 32.0
+  }
+  scale {
+    x: 4.0
+    y: 4.0
+  }
+  type: TYPE_BOX
+  texture: "game/dynamo"
+  id: "9"
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "e9"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    x: 320.0
+    y: -64.0
+  }
+  size {
+    x: 150.0
+    y: 64.0
+  }
+  color {
+    x: 0.8392157
+    y: 0.14117648
+    z: 0.06666667
+  }
+  type: TYPE_TEXT
+  text: "guppy\n"
+  "350"
+  font: "main"
+  id: "e10"
+  pivot: PIVOT_N
+  outline {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  outline_alpha: 0.0
+  shadow_alpha: 0.0
+}
+nodes {
+  position {
+    y: 32.0
+  }
+  scale {
+    x: 4.0
+    y: 4.0
+  }
+  type: TYPE_BOX
+  texture: "game/guppy"
+  id: "10"
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "e10"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    y: -200.0
+  }
+  size {
+    x: 700.0
+    y: 50.0
+  }
+  color {
+    x: 0.5803922
+    y: 0.12941177
+    z: 0.41568628
+  }
+  type: TYPE_TEXT
+  text: "EXTRA LIFE AND SMART BOMB EVERY 10000 PTS"
+  font: "main"
+  id: "extra"
+  outline {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  outline_alpha: 0.0
+  shadow_alpha: 0.0
+}
+material: "/builtins/materials/gui.material"
+adjust_reference: ADJUST_REFERENCE_PARENT

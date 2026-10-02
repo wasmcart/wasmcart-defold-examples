@@ -31,6 +31,26 @@ A one-second 440 Hz sine wave at 44.1 kHz, generated for this repository.
 Measured at 93% of spectral energy in the 440 Hz bin. Pitch-shifted at
 playback to produce the different effects in `breakout`.
 
+## Bundled game: planetoid
+
+`planetoid/` is **Planetoid** by Ben James, from the
+[benjames-171/defold-games](https://github.com/benjames-171/defold-games)
+collection.
+
+- **Author:** Ben James
+- **Upstream:** https://github.com/benjames-171/defold-games
+- **Copyright:** Copyright (c) 2022 Ben James
+- **Licence:** MIT, reproduced in `planetoid/LICENSE-benjames.txt`
+
+Its 10 images and 20 short sound effects are the author's own: the game bundles
+no music track, and its credit line reads "developed by BEN JAMES | made with
+DEFOLD" with no third party named. Other games in the same collection do credit
+separate musicians and are deliberately not included here for that reason.
+
+Changes made when porting: the 1.13 API migration (`migrate-1.13.sh`), texture
+filtering set to `nearest`, and removal of a `defos` dependency whose calls
+manage a desktop window and have no meaning in a cart.
+
 ## Engine and tooling
 
 The examples build against
@@ -44,7 +64,9 @@ Content is compiled by Defold's own `bob` build tool, and carts are packed by
 
 ## Not included
 
-`bombfrog`, a third-party Defold game used locally as a rendering test, is
-deliberately **not** in this repository: it arrived with no licence file or
-stated provenance. It is excluded by `.gitignore` and will stay out unless its
-author and terms are established.
+Several other games from the same MIT collection build and run on this port
+(Sub Strike, Snowline, Pixel Crypt, Bomb Frog) but are **not** included. They
+bundle music credited to third parties, for example Snowline's title screen
+reads "music by aalezy & gOAT". An MIT grant from the game's author does not
+convey rights to music licensed from someone else, so those stay out until
+their audio terms are established.

@@ -1,0 +1,19 @@
+images {
+  image: "/assets/png/bg1.png"
+}
+images {
+  image: "/assets/png/bg2.png"
+}
+images {
+  image: "/assets/png/scanner.png"
+}
+images {
+  image: "/assets/png/sky.png"
+}
+images {
+  image: "/assets/png/logo.png"
+}
+images {
+  image: "/assets/png/stars.png"
+}
+extrude_borders: 1

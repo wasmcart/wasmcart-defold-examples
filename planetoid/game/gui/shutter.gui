@@ -1,0 +1,19 @@
+script: "/game/gui/shutter.gui_script"
+nodes {
+  size {
+    x: 960.0
+    y: 640.0
+  }
+  color {
+    x: 0.08627451
+    y: 0.09019608
+    z: 0.101960786
+  }
+  type: TYPE_BOX
+  id: "screen"
+  pivot: PIVOT_SW
+  adjust_mode: ADJUST_MODE_STRETCH
+  inherit_alpha: true
+}
+material: "/builtins/materials/gui.material"
+adjust_reference: ADJUST_REFERENCE_PARENT

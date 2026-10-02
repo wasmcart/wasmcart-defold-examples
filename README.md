@@ -60,6 +60,60 @@ reported it as unsupported was wrong. It used the pre-1.13 constant spelling
 (`resource.TEXTURE_TYPE_2D` rather than `graphics.TEXTURE_TYPE_2D`) and a
 `pcall` swallowed the message that said so.
 
+## Play the examples
+
+Every example is a self-contained `.wasc`. With Node installed, no checkout is
+needed to play one:
+
+```bash
+npx wasmcart planetoid/planetoid.wasc --gl --window    # windowed, with input
+npx wasmcart breakout/breakout.wasc --gl --window
+```
+
+Headless, for a screenshot or a timed run:
+
+```bash
+npx wasmcart apitest/apitest.wasc --gl --frames 320 --shot out.png
+npx wasmcart planetoid/planetoid.wasc --gl --frames 600 --wav out.wav
+```
+
+The same cart also runs under
+[wasmcart-native](https://github.com/wasmcart/wasmcart-native) and anywhere
+else a wasmcart host exists. Build the `.wasc` files first with
+`./build-cart.sh <name>`, or download them from the GitHub Actions artifacts
+(see [Continuous integration](#continuous-integration)).
+
+## Screenshots
+
+### planetoid
+
+A complete game: scrolling terrain, enemies, radar HUD, scoring.
+
+![planetoid](docs/screenshots/planetoid.png)
+
+### breakout
+
+Paddle, ball, 50 bricks, lives and scoring, driven by keyboard or gamepad.
+
+![breakout](docs/screenshots/breakout.png)
+
+### apitest
+
+Physics bodies falling between angled walls, with every API check reported on
+screen.
+
+![apitest](docs/screenshots/apitest.png)
+
+### particles
+
+![particles](docs/screenshots/particles.png)
+
+### inputtest
+
+Every delivered input action, named and counted live.
+
+![inputtest](docs/screenshots/inputtest.png)
+
 ## Examples
 
 ### `hello_defold`
@@ -244,6 +298,24 @@ config, so `/builtins/input/all.input_binding` works with no device row in
 Sticks arrive as `gamepad_lstick_*` / `gamepad_rstick_*` past the dead zone and
 triggers as `gamepad_ltrigger` / `gamepad_rtrigger`. All four pad slots are
 polled, and a pad that appears mid-session is picked up on the next frame.
+
+## Continuous integration
+
+`.github/workflows/build-carts.yml` packs every example into a `.wasc` on each
+push, runs each one headless for 320 frames, and fails the build on a script
+error, a cart trap or a failed in-cart assertion. A cart that packs but does
+not run is not treated as a pass.
+
+The finished carts are uploaded as a `carts` artifact with a `SHA256SUMS`
+file, so any run's output can be downloaded and played without building
+anything.
+
+The engine is not rebuilt here. `wasmcart-defold` publishes a toolchain
+artifact (the engine wasm, bob and the builtins tree) and this workflow
+consumes it, which keeps a run to a couple of minutes rather than the best part
+of an hour. That cross-repo download needs a `TOOLCHAIN_TOKEN` secret with read
+access to `wasmcart-defold`; the job stops with a clear message if it is
+missing.
 
 ## Licence and credits
 

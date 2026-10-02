@@ -21,8 +21,9 @@ builtins
 # Ported third-party games are staged locally but NOT committed until the
 # provenance of their bundled audio is established: the upstream MIT LICENSE
 # covers Ben James, while title screens credit other musicians by name.
+# planetoid is cleared: its audio is 20 short effects with no music track, and
+# its own credit line names only Ben James, so the collection's MIT licence
+# covers it. The rest bundle music credited to third parties.
 substrike/
-planetoid/
 pixelcrypt/
 snowline/
-defrog/

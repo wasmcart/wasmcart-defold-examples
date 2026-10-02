@@ -1,0 +1,78 @@
+image: "/assets/png/pixel.png"
+tile_width: 1
+tile_height: 1
+animations {
+  id: "blue"
+  start_tile: 15
+  end_tile: 15
+  playback: PLAYBACK_NONE
+}
+animations {
+  id: "blue-light"
+  start_tile: 12
+  end_tile: 12
+  playback: PLAYBACK_NONE
+}
+animations {
+  id: "cycle"
+  start_tile: 1
+  end_tile: 15
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 10
+}
+animations {
+  id: "green"
+  start_tile: 14
+  end_tile: 14
+  playback: PLAYBACK_NONE
+}
+animations {
+  id: "green-light"
+  start_tile: 13
+  end_tile: 13
+  playback: PLAYBACK_NONE
+}
+animations {
+  id: "pink"
+  start_tile: 8
+  end_tile: 8
+  playback: PLAYBACK_NONE
+}
+animations {
+  id: "pink-light"
+  start_tile: 7
+  end_tile: 7
+  playback: PLAYBACK_NONE
+}
+animations {
+  id: "purple"
+  start_tile: 9
+  end_tile: 9
+  playback: PLAYBACK_NONE
+}
+animations {
+  id: "red"
+  start_tile: 3
+  end_tile: 3
+  playback: PLAYBACK_NONE
+}
+animations {
+  id: "ryb"
+  start_tile: 17
+  end_tile: 19
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 10
+}
+animations {
+  id: "white"
+  start_tile: 6
+  end_tile: 6
+  playback: PLAYBACK_NONE
+}
+animations {
+  id: "yellow"
+  start_tile: 5
+  end_tile: 5
+  playback: PLAYBACK_NONE
+}
+extrude_borders: 1
