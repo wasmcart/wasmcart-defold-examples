@@ -1,22 +1,16 @@
 -- breakout -- the wasmcart-defold example that is actually a game.
 --
--- hello_defold proves the engine BOOTS. This proves it PLAYS, and it exercises
--- the four things a cart runtime has to get right that a clear-colour fixture
--- cannot test at all:
+-- Feature parity with the canvas breakout this was modelled on: eight levels
+-- defined as string maps, special bricks that transform when hit, five
+-- power-ups that fall from broken bricks, multiball, paddle lasers, and a
+-- gravity well that pulls every ball toward it.
 --
---   input   keyboard AND gamepad, as held state, driving the same movement
---   sound   three distinct effects, triggered by gameplay
---   save    a high score via sys.save/sys.load, surviving a restart
---   render  real sprites through the standard pipeline, not debug lines
---
--- On the render choice: an earlier version drew everything with
--- msg.post("@render:", "draw_line"). It worked as game logic (691 messages a
--- frame, verified) but drew nothing, because debug lines are a debugging aid
--- rather than a drawing API. Sprites through a factory are the idiomatic path
--- and are what a reader should copy.
---
--- The only art asset is an 8x8 white square, tinted per sprite. That keeps the
--- example one script plus small .go/.atlas wiring rather than an art pipeline.
+-- One engine constraint shapes the whole file. A sprite's tint is NOT settable
+-- on this build: comp_sprite.cpp implements PROP_TINT in the get path only, so
+-- go.set(url, "tint", ...) always fails and sprite.set_constant is not
+-- registered. Colour therefore comes from the IMAGE, which is why there is one
+-- atlas image, sprite, go and factory per colour, and why spawn() takes a
+-- factory name rather than a vector4.
 
 local W, H = 960, 540
 
@@ -24,7 +18,7 @@ local PADDLE_W, PADDLE_H = 120, 16
 local PADDLE_Y = 44
 local PADDLE_SPEED = 620
 
-local BALL_SIZE = 16
+local BALL_SIZE  = 16
 local BALL_SPEED = 360
 
 local BRICK_COLS, BRICK_ROWS = 10, 5
@@ -32,22 +26,53 @@ local BRICK_W, BRICK_H = 84, 26
 local BRICK_GAP = 8
 local BRICK_TOP = H - 110
 
--- The atlas image is 8x8, so a sprite's scale IS its size in pixels / 8.
--- The sprite images are 32x10, drawn at the bricks' real aspect so the lit top
--- and shadowed base survive being stretched. Width and height therefore scale
--- by different divisors; one ART constant would squash every sprite.
+-- The sprites are drawn at each object's real aspect so gradients and borders
+-- survive being stretched. Width and height therefore scale by different
+-- divisors; a single ART constant would squash every sprite.
 local ART_W, ART_H = 64, 20
 
 local SAVE_FILE = sys.get_save_file("breakout", "scores")
 
-local ROW_COLOUR = { "red", "orange", "yellow", "green", "blue" }
+-- Level maps. Each character is a brick: R O Y G B are colours, A is a grey
+-- brick that becomes a random colour when hit, W is a white brick that becomes
+-- grey, and e is empty.
+local LEVELS = {
+	{ "RRRRRRRRRR", "OOOOOOOOOO", "YYYYYYYYYY", "GGGGGGGGGG", "BBBBBBBBBB" },
+	{ "RRRRRRRRRR", "OOOOOOOOOO", "YYYeeeeYYY", "YYeeeeeeYY",
+	  "GGeeeeeeGG", "GGGeeeeGGG", "BBBBBBBBBB" },
+	{ "ReReReReRe", "eReReReReR", "OeOeOeOeOe", "eOeOeOeOeO", "YeYeYeYeYe",
+	  "eYeYeYeYeY", "GeGeGeGeGe", "eGeGeGeGeG", "BeBeBeBeBe", "eBeBeBeBeB" },
+	{ "eeRRRRee", "eRReeeRe", "ReOOOOeR", "ReeeeeOR", "ReYYYYOR",
+	  "ReYeeYOR", "ReYYYYOR", "ReeeeeOR", "ReOOOOeR", "eRReeeRe", "eeRRRRee" },
+	{ "AAAAAAAAAA", "ARReeeRRAA", "AROeeeORAA", "AROeeeORAA", "AROeeeORAA",
+	  "AROAAAOROA", "AROAAAOROA", "AROAAAOROA", "AAAGGGAAAA" },
+	{ "WAWAWeAWAW", "AWAWAeWAWA", "WAWAWeAWAW", "eeeeeeeeee", "RROOYYGGBB",
+	  "RROOYYGGBB", "RROOYYGGBB", "eeeeeeeeee", "AWAWAAWAWA", "WAWAWWAWAW" },
+	{ "eeeAAAAeee", "eeAAAAAAee", "eAAYAAYAAe", "eAAAAAAAAe", "eAAAAAAAAe",
+	  "eAARAARAAe", "eAAARRAAAe", "eeAAAAAAee", "eeeAAAAeee" },
+	{ "eeeWWWWeee", "eeWWWWWWee", "eWWRWWRWWe", "eWWWWWWWWe", "eWWWWWWWWe",
+	  "eWWWeeWWWe", "eWWeWWeWWe", "eeWWWWWWee", "eeeWWWWeee" },
+}
 
--- Colour comes from the IMAGE, not from a tint. comp_sprite.cpp implements
--- PROP_TINT in the get path only, so go.set(url, "tint", ...) always fails and
--- sprite.set_constant is not registered. One atlas image and one factory per
--- colour is the working route, which is why main.go carries nine factories.
-local function spawn(colour, x, y, w, h)
-	return factory.create("#" .. colour .. "factory", vmath.vector3(x, y, 0), nil, {},
+local CHAR_SPRITE = {
+	R = "red", O = "orange", Y = "yellow", G = "green", B = "blue",
+	A = "grey", W = "whitebrick",
+}
+local CHAR_POINTS = { R = 50, O = 40, Y = 30, G = 20, B = 10, A = 60, W = 70 }
+local RANDOM_COLOURS = { "red", "orange", "yellow", "green", "blue" }
+
+local PICKUPS = { "grow", "shrink", "laser", "gravity", "multi" }
+local PICKUP_SPRITE = {
+	grow = "pu_grow", shrink = "pu_shrink", laser = "pu_laser",
+	gravity = "pu_gravity", multi = "pu_multi",
+}
+local PICKUP_FALL  = 150
+local LASER_SPEED  = 700
+local MAX_LASERS   = 6
+local GRAVITY_TIME = 8.0
+
+local function spawn(sprite, x, y, w, h)
+	return factory.create("#" .. sprite .. "factory", vmath.vector3(x, y, 0), nil, {},
 		vmath.vector3(w / ART_W, h / ART_H, 1))
 end
 
@@ -58,8 +83,90 @@ local function load_high()
 	return t.high or 0
 end
 
-local function save_high(v)
-	sys.save(SAVE_FILE, { high = v })
+local function save_high(v) sys.save(SAVE_FILE, { high = v }) end
+
+-- A short burst of chips in the object's own colour. A brick that simply
+-- vanishes gives no feedback that the hit registered.
+-- Chips are PURELY decorative and must not outlive the thing that spawned
+-- them. Tracking them on self means clear_field can remove them when a level
+-- is rebuilt, which is the only way to stop an in-flight go.animate from
+-- reporting "does not have any property called" against a deleted object.
+local function burst(self, sprite, x, y, n)
+	self.chips = self.chips or {}
+	for i = 1, (n or 6) do
+		local a = (i / (n or 6)) * math.pi * 2 + math.random()
+		local d = 24 + math.random() * 24
+		local chip = spawn(sprite, x, y, 8, 8)
+		self.chips[#self.chips + 1] = { id = chip, life = 0.3,
+			x = x, y = y, vx = math.cos(a) * d / 0.3, vy = math.sin(a) * d / 0.3 }
+	end
+end
+
+-- Stepped by hand rather than with go.animate: an animation holds a reference
+-- to the object until it completes, and a level rebuild deletes chips before
+-- then.
+local function update_chips(self, dt)
+	if not self.chips then return end
+	for i = #self.chips, 1, -1 do
+		local c = self.chips[i]
+		c.life = c.life - dt
+		if c.life <= 0 then
+			if c.id and go.exists(c.id) then go.delete(c.id) end
+			table.remove(self.chips, i)
+		else
+			c.x = c.x + c.vx * dt
+			c.y = c.y + c.vy * dt
+			if c.id and go.exists(c.id) then
+				go.set_position(vmath.vector3(c.x, c.y, 0), c.id)
+				local sc = (c.life / 0.3) * 8
+				go.set_scale(vmath.vector3(sc / ART_W, sc / ART_H, 1), c.id)
+			end
+		end
+	end
+end
+
+local function clear_field(self)
+	for _, b in ipairs(self.bricks or {}) do
+		if b.id then go.delete(b.id) end
+		if b.shadow then go.delete(b.shadow) end
+	end
+	for _, p in ipairs(self.pickups or {}) do if p.id then go.delete(p.id) end end
+	for _, l in ipairs(self.lasers or {}) do if l.id then go.delete(l.id) end end
+	for _, e in ipairs(self.extra_balls or {}) do if e.id then go.delete(e.id) end end
+	for _, c in ipairs(self.chips or {}) do
+		if c.id and go.exists(c.id) then go.delete(c.id) end
+	end
+	self.chips = {}
+	self.bricks, self.pickups, self.lasers, self.extra_balls = {}, {}, {}, {}
+end
+
+local function build_level(self)
+	clear_field(self)
+	local map = LEVELS[((self.level - 1) % #LEVELS) + 1]
+	local cols = #map[1]
+	local total = cols * BRICK_W + (cols - 1) * BRICK_GAP
+	local x0 = (W - total) * 0.5 + BRICK_W * 0.5
+	self.remaining = 0
+	for r = 1, #map do
+		for c = 1, cols do
+			local ch = map[r]:sub(c, c)
+			if ch ~= "e" then
+				local x = x0 + (c - 1) * (BRICK_W + BRICK_GAP)
+				local y = BRICK_TOP - (r - 1) * (BRICK_H + BRICK_GAP)
+				-- A roughly one-in-six brick carries a pickup, as in the
+				-- original. Too many and the board becomes confetti.
+				local pu = (math.random() < 0.16) and PICKUPS[math.random(#PICKUPS)] or nil
+				self.bricks[#self.bricks + 1] = {
+					x = x, y = y, alive = true, kind = ch,
+					sprite = CHAR_SPRITE[ch], points = CHAR_POINTS[ch] or 10,
+					pickup = pu,
+					shadow = spawn("shadow", x + 3, y - 3, BRICK_W, BRICK_H),
+					id = spawn(CHAR_SPRITE[ch], x, y, BRICK_W, BRICK_H),
+				}
+				self.remaining = self.remaining + 1
+			end
+		end
+	end
 end
 
 local function reset_ball(self)
@@ -69,163 +176,228 @@ local function reset_ball(self)
 	go.set_position(vmath.vector3(self.bx, self.by, 0), self.ball_id)
 end
 
-local function build_bricks(self)
-	for _, b in ipairs(self.bricks or {}) do
-		if b.id then go.delete(b.id) end
-		if b.shadow then go.delete(b.shadow) end
-	end
-	self.bricks = {}
-	local total = BRICK_COLS * BRICK_W + (BRICK_COLS - 1) * BRICK_GAP
-	local x0 = (W - total) * 0.5 + BRICK_W * 0.5
-	for r = 1, BRICK_ROWS do
-		for c = 1, BRICK_COLS do
-			local x = x0 + (c - 1) * (BRICK_W + BRICK_GAP)
-			local y = BRICK_TOP - (r - 1) * (BRICK_H + BRICK_GAP)
-			local colour = ROW_COLOUR[r] or "white"
-			self.bricks[#self.bricks + 1] = {
-				x = x, y = y, alive = true, colour = colour,
-				points = (BRICK_ROWS - r + 1) * 10,
-				shadow = spawn("shadow", x + 3, y - 3, BRICK_W, BRICK_H),
-					id = spawn(colour, x, y, BRICK_W, BRICK_H),
-			}
-		end
-	end
-	self.remaining = BRICK_COLS * BRICK_ROWS
+local function set_paddle_width(self, w)
+	self.paddle_w = w
+	go.set_scale(vmath.vector3(w / ART_W, PADDLE_H / ART_H, 1), self.paddle_id)
+	go.set_scale(vmath.vector3(w / ART_W, PADDLE_H / ART_H, 1), self.paddle_shadow)
 end
 
--- The HUD is pips, not text: a font would need its own atlas and this example
--- deliberately ships one 8x8 image. Score is a bar, lives are squares.
-local function layout_hud(self)
-	local hud_y = H - 22
-	local sw = math.max(1, math.min(W * 0.5, self.score * 0.6))
-	go.set_position(vmath.vector3(sw * 0.5 + 16, hud_y, 0), self.score_bar)
-	go.set_scale(vmath.vector3(sw / ART_W, 10 / ART_H, 1), self.score_bar)
-
-	local hw = math.max(1, math.min(W * 0.5, self.high * 0.6))
-	go.set_position(vmath.vector3(hw + 16, hud_y, 0), self.high_mark)
-
-	-- Lives are shown by PRESENCE, not colour: a lost life deletes its pip.
-	for i, pip in ipairs(self.life_pips) do
-		if pip and i > self.lives then
-			go.delete(pip); self.life_pips[i] = false
+local function apply_pickup(self, kind)
+	if kind == "grow" then
+		set_paddle_width(self, PADDLE_W * 1.5)
+		self.powerup_timer = 12
+		burst(self, "pu_grow", self.paddle_x, PADDLE_Y, 8)
+	elseif kind == "shrink" then
+		set_paddle_width(self, PADDLE_W * 0.5)
+		self.powerup_timer = 12
+		burst(self, "pu_shrink", self.paddle_x, PADDLE_Y, 8)
+	elseif kind == "laser" then
+		self.laser_charges = MAX_LASERS
+		burst(self, "pu_laser", self.paddle_x, PADDLE_Y, 8)
+	elseif kind == "gravity" then
+		self.gravity_timer = GRAVITY_TIME
+		self.gravity_x, self.gravity_y = W * 0.5, H * 0.62
+		if not self.gravity_id then
+			self.gravity_id = spawn("gravity", self.gravity_x, self.gravity_y, 180, 180)
 		end
+		burst(self, "pu_gravity", self.paddle_x, PADDLE_Y, 8)
+	elseif kind == "multi" then
+		-- Two extra balls, launched at angles away from the main one.
+		for i = 1, 2 do
+			local a = math.pi * (0.35 + 0.3 * i)
+			self.extra_balls[#self.extra_balls + 1] = {
+				x = self.bx, y = self.by,
+				vx = math.cos(a) * BALL_SPEED, vy = math.abs(math.sin(a)) * BALL_SPEED,
+				id = spawn("ball", self.bx, self.by, BALL_SIZE, BALL_SIZE),
+			}
+		end
+		burst(self, "pu_multi", self.bx, self.by, 8)
 	end
+	sound.play("#bounce")
 end
 
 function init(self)
-	msg.post("@render:", "clear_color", { color = vmath.vector4(0.10, 0.12, 0.21, 1) })
+	msg.post("@render:", "clear_color", { color = vmath.vector4(0.07, 0.08, 0.14, 1) })
 	msg.post(".", "acquire_input_focus")
+	math.randomseed(os.time() or 1)
 
-	self.paddle_x = W * 0.5
-	self.score, self.lives = 0, 3
+	self.level, self.score, self.lives = 1, 0, 3
 	self.high = load_high()
-	self.left, self.right, self.launch = false, false, false
+	self.left, self.right, self.launch, self.fire = false, false, false, false
+	self.paddle_w = PADDLE_W
+	self.laser_charges, self.powerup_timer, self.gravity_timer = 0, 0, 0
+	self.bricks, self.pickups, self.lasers, self.extra_balls = {}, {}, {}, {}
+	self.paddle_x = W * 0.5
 
 	self.paddle_shadow = spawn("shadow", self.paddle_x + 3, PADDLE_Y - 3, PADDLE_W, PADDLE_H)
-	self.paddle_id = spawn("cyan", self.paddle_x, PADDLE_Y, PADDLE_W, PADDLE_H)
-	self.ball_id   = spawn("white", W * 0.5, H * 0.5, BALL_SIZE, BALL_SIZE)
-	self.score_bar = spawn("yellow", 16, H - 22, 1, 10)
-	self.high_mark = spawn("purple", 16, H - 22, 3, 18)
+	self.paddle_id     = spawn("paddle", self.paddle_x, PADDLE_Y, PADDLE_W, PADDLE_H)
+	self.ball_id       = spawn("ball", W * 0.5, H * 0.5, BALL_SIZE, BALL_SIZE)
+
 	self.life_pips = {}
 	for i = 1, 3 do
-		self.life_pips[i] = spawn("red", W - 24 - (i - 1) * 22, H - 22, 12, 12)
+		self.life_pips[i] = spawn("red", W - 30 - (i - 1) * 26, H - 20, 18, 10)
 	end
+	self.score_bar = spawn("yellow", 16, H - 20, 1, 10)
 
-	build_bricks(self)
+	build_level(self)
 	reset_ball(self)
-	layout_hud(self)
 
-	print(string.format("breakout: init (high score %d, loaded from save)", self.high))
-	print(string.format("breakout: spawned %d sprites (paddle+ball+hud+%d bricks)",
-		4 + #self.life_pips + #self.bricks, #self.bricks))
-	local p = go.get_position(self.paddle_id)
-	print(string.format("breakout: paddle at %.0f,%.0f  ball at %.0f,%.0f",
-		p.x, p.y, self.bx, self.by))
-	print("breakout: left/right or d-pad to move, space or gamepad A to launch")
+	print(string.format("breakout: level %d, %d bricks, high score %d",
+		self.level, self.remaining, self.high))
 end
 
 function final(self)
-	-- Persist on a clean quit too, not only on game over.
 	if self.score > self.high then save_high(self.score) end
 end
 
 local function lose_life(self)
 	self.lives = self.lives - 1
 	sound.play("#lose")
-	if self.lives <= 0 then
-		if self.score > self.high then
-			self.high = self.score
-			save_high(self.high)
-			print(string.format("breakout: new high score %d saved", self.high))
-		end
-		self.score, self.lives = 0, 3
-		build_bricks(self)
+	burst(self, "red", self.bx, self.by, 10)
+	if self.life_pips[self.lives + 1] then
+		go.delete(self.life_pips[self.lives + 1]); self.life_pips[self.lives + 1] = false
 	end
+	for _, e in ipairs(self.extra_balls) do if e.id then go.delete(e.id) end end
+	self.extra_balls = {}
+	if self.lives <= 0 then
+		if self.score > self.high then self.high = self.score; save_high(self.high) end
+		print(string.format("breakout: game over on level %d, score %d", self.level, self.score))
+		self.level, self.score, self.lives = 1, 0, 3
+		for i = 1, 3 do
+			if not self.life_pips[i] then
+				self.life_pips[i] = spawn("red", W - 30 - (i - 1) * 26, H - 20, 18, 10)
+			end
+		end
+		build_level(self)
+	end
+	set_paddle_width(self, PADDLE_W)
+	self.laser_charges = 0
 	reset_ball(self)
-	layout_hud(self)
 end
 
-local function hit_bricks(self)
+-- One brick hit. Grey becomes a random colour and white becomes grey rather
+-- than breaking, so those levels take two or three passes to clear.
+local function hit_brick(self, b)
+	if not b.id then return false end
+	if b.kind == "W" then
+		b.kind = "A"; b.sprite = "grey"; b.points = CHAR_POINTS.A
+		go.delete(b.id); b.id = spawn("grey", b.x, b.y, BRICK_W, BRICK_H)
+		self.score = self.score + 5
+		sound.play("#brick")
+		return false
+	elseif b.kind == "A" then
+		local c = RANDOM_COLOURS[math.random(#RANDOM_COLOURS)]
+		b.kind = "R"; b.sprite = c; b.points = CHAR_POINTS.R
+		go.delete(b.id); b.id = spawn(c, b.x, b.y, BRICK_W, BRICK_H)
+		self.score = self.score + 5
+		sound.play("#brick")
+		return false
+	end
+
+	-- A brick can be struck twice in the same frame, by the ball and a laser
+	-- or by two balls at once. Guard on the id rather than on alive: the
+	-- second call would otherwise reach go.delete with nil.
+	if not b.id then return false end
+	b.alive = false
+	burst(self, b.sprite, b.x, b.y, 6)
+	go.delete(b.id); b.id = nil
+	if b.shadow then go.delete(b.shadow); b.shadow = nil end
+	self.remaining = self.remaining - 1
+	self.score = self.score + b.points
+	sound.play("#brick")
+
+	if b.pickup then
+		self.pickups[#self.pickups + 1] = {
+			x = b.x, y = b.y, kind = b.pickup,
+			id = spawn(PICKUP_SPRITE[b.pickup], b.x, b.y, 20, 20),
+		}
+	end
+	return true
+end
+
+local function brick_at(self, x, y)
 	for _, b in ipairs(self.bricks) do
 		if b.alive then
-			local dx, dy = math.abs(self.bx - b.x), math.abs(self.by - b.y)
+			local dx, dy = math.abs(x - b.x), math.abs(y - b.y)
 			if dx <= (BRICK_W + BALL_SIZE) * 0.5 and dy <= (BRICK_H + BALL_SIZE) * 0.5 then
-				b.alive = false
-				-- Burst of chips in the brick's own colour. A brick that simply
-				-- vanishes gives no feedback that the hit registered.
-				for i = 1, 6 do
-					local a = (i / 6) * math.pi * 2 + math.random()
-					local d = 26 + math.random() * 22
-					local chip = spawn(b.colour, b.x, b.y, 6, 6)
-					go.animate(chip, "position.x", go.PLAYBACK_ONCE_FORWARD,
-						b.x + math.cos(a) * d, go.EASING_OUTQUAD, 0.32)
-					go.animate(chip, "position.y", go.PLAYBACK_ONCE_FORWARD,
-						b.y + math.sin(a) * d, go.EASING_OUTQUAD, 0.32)
-					go.animate(chip, "scale.x", go.PLAYBACK_ONCE_FORWARD, 0.05,
-						go.EASING_INQUAD, 0.32, 0, function(_, url) go.delete(url) end)
-					go.animate(chip, "scale.y", go.PLAYBACK_ONCE_FORWARD, 0.05,
-						go.EASING_INQUAD, 0.32)
-				end
-				go.delete(b.id); b.id = nil
-				if b.shadow then go.delete(b.shadow); b.shadow = nil end
-				self.remaining = self.remaining - 1
-				self.score = self.score + b.points
-				sound.play("#brick")
-				-- Flip on the shallower overlap: a side hit reverses x, a face
-				-- hit reverses y. Without this a corner clip picks the wrong axis.
-				local ox = (BRICK_W + BALL_SIZE) * 0.5 - dx
-				local oy = (BRICK_H + BALL_SIZE) * 0.5 - dy
-				if ox < oy then self.vx = -self.vx else self.vy = -self.vy end
-				layout_hud(self)
-				return
+				return b, dx, dy
 			end
 		end
 	end
 end
 
 function update(self, dt)
-	-- Clamp dt so a stalled frame cannot tunnel the ball through a wall.
 	if dt > 0.05 then dt = 0.05 end
-
-	-- Periodic position report. Whether the paddle MOVED is the only thing
-	-- that distinguishes "input arrived" from "input was delivered to a game
-	-- that ignored it", and a screenshot of a symmetric start position cannot
-	-- tell those apart.
+	update_chips(self, dt)
 	self.tick = (self.tick or 0) + 1
-	if self.tick % 30 == 0 then
-		print(string.format("breakout: paddle=%.0f ball=%.0f,%.0f stuck=%s l=%s r=%s",
-			self.paddle_x, self.bx, self.by, tostring(self.stuck),
-			tostring(self.left), tostring(self.right)))
+	if self.tick % 15 == 0 then
+		print(string.format("breakout: paddle=%d ball=%d,%d lvl=%d score=%d bricks=%d",
+			self.paddle_x, self.bx, self.by, self.level, self.score, self.remaining))
 	end
 
+	-- Paddle
 	local dir = (self.right and 1 or 0) - (self.left and 1 or 0)
 	if dir ~= 0 then
-		self.paddle_x = math.max(PADDLE_W * 0.5,
-			math.min(W - PADDLE_W * 0.5, self.paddle_x + dir * PADDLE_SPEED * dt))
+		self.paddle_x = math.max(self.paddle_w * 0.5,
+			math.min(W - self.paddle_w * 0.5, self.paddle_x + dir * PADDLE_SPEED * dt))
 		go.set_position(vmath.vector3(self.paddle_x, PADDLE_Y, 0), self.paddle_id)
 		go.set_position(vmath.vector3(self.paddle_x + 3, PADDLE_Y - 3, 0), self.paddle_shadow)
 	end
 
+	-- Timed effects
+	if self.powerup_timer > 0 then
+		self.powerup_timer = self.powerup_timer - dt
+		if self.powerup_timer <= 0 then set_paddle_width(self, PADDLE_W) end
+	end
+	if self.gravity_timer > 0 then
+		self.gravity_timer = self.gravity_timer - dt
+		if self.gravity_timer <= 0 and self.gravity_id then
+			go.delete(self.gravity_id); self.gravity_id = nil
+		end
+	end
+
+	-- Lasers
+	if self.fire and self.laser_charges > 0 then
+		self.fire = false
+		self.laser_charges = self.laser_charges - 1
+		for _, off in ipairs({ -self.paddle_w * 0.4, self.paddle_w * 0.4 }) do
+			self.lasers[#self.lasers + 1] = {
+				x = self.paddle_x + off, y = PADDLE_Y + 16,
+				id = spawn("laser", self.paddle_x + off, PADDLE_Y + 16, 8, 24),
+			}
+		end
+		sound.play("#bounce")
+	end
+	for i = #self.lasers, 1, -1 do
+		local l = self.lasers[i]
+		l.y = l.y + LASER_SPEED * dt
+		go.set_position(vmath.vector3(l.x, l.y, 0), l.id)
+		local b = brick_at(self, l.x, l.y)
+		if b then hit_brick(self, b) end
+		if b or l.y > H then
+			if l.id then go.delete(l.id); l.id = nil end
+			table.remove(self.lasers, i)
+		end
+	end
+
+	-- Falling pickups
+	for i = #self.pickups, 1, -1 do
+		local p = self.pickups[i]
+		p.y = p.y - PICKUP_FALL * dt
+		go.set_position(vmath.vector3(p.x, p.y, 0), p.id)
+		local caught = p.y <= PADDLE_Y + PADDLE_H
+			and math.abs(p.x - self.paddle_x) <= (self.paddle_w + 20) * 0.5
+		-- Remove BEFORE applying the effect: a multi pickup spawns balls and
+		-- bursts chips, and re-entering this loop with a stale entry deletes
+		-- the same object twice.
+		if caught or p.y < -20 then
+			if p.id then go.delete(p.id); p.id = nil end
+			table.remove(self.pickups, i)
+			if caught then apply_pickup(self, p.kind) end
+		end
+	end
+
+	-- Main ball
 	if self.stuck then
 		self.bx = self.paddle_x
 		self.by = PADDLE_Y + PADDLE_H * 0.5 + BALL_SIZE
@@ -234,82 +406,117 @@ function update(self, dt)
 			sound.play("#bounce")
 		end
 	else
+		if self.gravity_timer > 0 then
+			local dx, dy = self.gravity_x - self.bx, self.gravity_y - self.by
+			local d = math.max(40, math.sqrt(dx * dx + dy * dy))
+			self.vx = self.vx + (dx / d) * 420 * dt
+			self.vy = self.vy + (dy / d) * 420 * dt
+		end
 		self.bx = self.bx + self.vx * dt
 		self.by = self.by + self.vy * dt
 
 		local r = BALL_SIZE * 0.5
-		if self.bx < r then
-			self.bx = r; self.vx = -self.vx; sound.play("#bounce")
-		elseif self.bx > W - r then
-			self.bx = W - r; self.vx = -self.vx; sound.play("#bounce")
-		end
-		if self.by > H - r then
-			self.by = H - r; self.vy = -self.vy; sound.play("#bounce")
-		end
+		if self.bx < r then self.bx = r; self.vx = -self.vx; sound.play("#bounce")
+		elseif self.bx > W - r then self.bx = W - r; self.vx = -self.vx; sound.play("#bounce") end
+		if self.by > H - r then self.by = H - r; self.vy = -self.vy; sound.play("#bounce") end
 
-		-- Paddle hit with english: where the ball lands steers it, so the
-		-- player steers the game rather than watching it.
-		if self.vy < 0
-			and self.by - r <= PADDLE_Y + PADDLE_H * 0.5
+		if self.vy < 0 and self.by - r <= PADDLE_Y + PADDLE_H * 0.5
 			and self.by > PADDLE_Y - PADDLE_H
-			and math.abs(self.bx - self.paddle_x) <= (PADDLE_W + BALL_SIZE) * 0.5 then
+			and math.abs(self.bx - self.paddle_x) <= (self.paddle_w + BALL_SIZE) * 0.5 then
 			self.by = PADDLE_Y + PADDLE_H * 0.5 + r
-			self.vx = ((self.bx - self.paddle_x) / (PADDLE_W * 0.5)) * BALL_SPEED * 0.85
+			self.vx = ((self.bx - self.paddle_x) / (self.paddle_w * 0.5)) * BALL_SPEED * 0.85
 			self.vy = math.abs(self.vy)
-			-- Squash and recover, so a paddle hit reads as contact.
-			go.set_scale(vmath.vector3(PADDLE_W / ART_W * 1.18, PADDLE_H / ART_H * 0.6, 1), self.paddle_id)
+			go.set_scale(vmath.vector3(self.paddle_w / ART_W * 1.18, PADDLE_H / ART_H * 0.6, 1), self.paddle_id)
 			go.animate(self.paddle_id, "scale.x", go.PLAYBACK_ONCE_FORWARD,
-				PADDLE_W / ART_W, go.EASING_OUTBACK, 0.22)
+				self.paddle_w / ART_W, go.EASING_OUTBACK, 0.22)
 			go.animate(self.paddle_id, "scale.y", go.PLAYBACK_ONCE_FORWARD,
 				PADDLE_H / ART_H, go.EASING_OUTBACK, 0.22)
 			sound.play("#bounce")
 		end
 
-		hit_bricks(self)
+		local b, dx, dy = brick_at(self, self.bx, self.by)
+		if b then
+			-- Flip on the shallower overlap: a side hit reverses x, a face hit
+			-- reverses y. Without this a corner clip picks the wrong axis.
+			local ox = (BRICK_W + BALL_SIZE) * 0.5 - dx
+			local oy = (BRICK_H + BALL_SIZE) * 0.5 - dy
+			if ox < oy then self.vx = -self.vx else self.vy = -self.vy end
+			hit_brick(self, b)
+			-- Speed ramps with progress so the last bricks are the hard ones.
+			local sp = math.sqrt(self.vx * self.vx + self.vy * self.vy)
+			local want = BALL_SPEED * (1 + (1 - self.remaining / math.max(1, #self.bricks)) * 0.5)
+			if sp > 0 then self.vx = self.vx / sp * want; self.vy = self.vy / sp * want end
+		end
+
 		if self.by < -BALL_SIZE then lose_life(self) end
 	end
-
 	go.set_position(vmath.vector3(self.bx, self.by, 0), self.ball_id)
 
+	-- Extra balls from multiball: same physics, but losing one is not a life.
+	for i = #self.extra_balls, 1, -1 do
+		local e = self.extra_balls[i]
+		if self.gravity_timer > 0 then
+			local dx, dy = self.gravity_x - e.x, self.gravity_y - e.y
+			local d = math.max(40, math.sqrt(dx * dx + dy * dy))
+			e.vx = e.vx + (dx / d) * 420 * dt
+			e.vy = e.vy + (dy / d) * 420 * dt
+		end
+		e.x = e.x + e.vx * dt
+		e.y = e.y + e.vy * dt
+		local r = BALL_SIZE * 0.5
+		if e.x < r or e.x > W - r then e.vx = -e.vx end
+		if e.y > H - r then e.vy = -e.vy end
+		if e.vy < 0 and e.y - r <= PADDLE_Y + PADDLE_H * 0.5 and e.y > PADDLE_Y - PADDLE_H
+			and math.abs(e.x - self.paddle_x) <= (self.paddle_w + BALL_SIZE) * 0.5 then
+			e.vy = math.abs(e.vy)
+		end
+		local eb, edx, edy = brick_at(self, e.x, e.y)
+		if eb then
+			local ox = (BRICK_W + BALL_SIZE) * 0.5 - edx
+			local oy = (BRICK_H + BALL_SIZE) * 0.5 - edy
+			if ox < oy then e.vx = -e.vx else e.vy = -e.vy end
+			hit_brick(self, eb)
+		end
+		go.set_position(vmath.vector3(e.x, e.y, 0), e.id)
+		if e.y < -BALL_SIZE then go.delete(e.id); table.remove(self.extra_balls, i) end
+	end
+
+	-- Score bar
+	local sw = math.max(1, math.min(W * 0.45, self.score * 0.4))
+	go.set_position(vmath.vector3(sw * 0.5 + 16, H - 20, 0), self.score_bar)
+	go.set_scale(vmath.vector3(sw / ART_W, 10 / ART_H, 1), self.score_bar)
+
 	if self.remaining <= 0 then
-		build_bricks(self)
+		self.level = self.level + 1
+		print(string.format("breakout: level %d cleared, score %d", self.level - 1, self.score))
+		build_level(self)
+		set_paddle_width(self, PADDLE_W)
 		reset_ball(self)
 	end
 end
 
--- Compare action_id against PRE-HASHED constants, never against
--- tostring(action_id). A release build has no reverse hash table, so
--- tostring() on an action hash yields "hash: [<unknown:123...>]" and a
--- string comparison silently matches nothing: input arrives, on_input runs,
--- and the game ignores every button.
---
--- Keyboard and gamepad map onto the SAME booleans, so neither is a
--- second-class alias of the other. gamepad_lpad_* is the d-pad;
--- gamepad_lstick_* is the stick past its deadzone.
-local LEFT = {
-	[hash("key_left")] = true,
-	[hash("gamepad_lpad_left")] = true,
-	[hash("gamepad_lstick_left")] = true,
-}
-local RIGHT = {
-	[hash("key_right")] = true,
-	[hash("gamepad_lpad_right")] = true,
-	[hash("gamepad_lstick_right")] = true,
-}
-local LAUNCH = {
-	[hash("key_space")] = true,
-	[hash("gamepad_rpad_down")] = true,
-	[hash("gamepad_start")] = true,
-}
+-- Compare action_id against PRE-HASHED constants, never tostring(action_id).
+-- A release build has no reverse hash table, so tostring() on an action hash
+-- yields "hash: [<unknown:123...>]" and a string comparison matches nothing:
+-- input arrives, on_input runs, and the game ignores every button.
+local LEFT   = { [hash("key_left")] = true,  [hash("gamepad_lpad_left")] = true,
+                 [hash("gamepad_lstick_left")] = true }
+local RIGHT  = { [hash("key_right")] = true, [hash("gamepad_lpad_right")] = true,
+                 [hash("gamepad_lstick_right")] = true }
+local LAUNCH = { [hash("key_space")] = true, [hash("gamepad_rpad_down")] = true,
+                 [hash("gamepad_start")] = true }
+local FIRE   = { [hash("key_lshift")] = true, [hash("gamepad_rpad_left")] = true,
+                 [hash("gamepad_rshoulder")] = true }
 
 function on_input(self, action_id, action)
 	if action_id == nil then return end
-
 	if LEFT[action_id] then
 		if action.pressed then self.left = true elseif action.released then self.left = false end
 	elseif RIGHT[action_id] then
 		if action.pressed then self.right = true elseif action.released then self.right = false end
 	elseif LAUNCH[action_id] then
 		if action.pressed then self.launch = true end
+	elseif FIRE[action_id] then
+		if action.pressed then self.fire = true end
 	end
 end

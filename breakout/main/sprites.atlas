@@ -1,32 +1,65 @@
 images {
-  image: "/main/red.png"
-}
-images {
-  image: "/main/orange.png"
-}
-images {
-  image: "/main/yellow.png"
-}
-images {
-  image: "/main/green.png"
+  image: "/main/ball.png"
 }
 images {
   image: "/main/blue.png"
 }
 images {
-  image: "/main/purple.png"
-}
-images {
   image: "/main/cyan.png"
 }
 images {
-  image: "/main/white.png"
+  image: "/main/gravity.png"
+}
+images {
+  image: "/main/green.png"
+}
+images {
+  image: "/main/grey.png"
+}
+images {
+  image: "/main/laser.png"
+}
+images {
+  image: "/main/orange.png"
+}
+images {
+  image: "/main/paddle.png"
+}
+images {
+  image: "/main/pu_gravity.png"
+}
+images {
+  image: "/main/pu_grow.png"
+}
+images {
+  image: "/main/pu_laser.png"
+}
+images {
+  image: "/main/pu_multi.png"
+}
+images {
+  image: "/main/pu_shrink.png"
+}
+images {
+  image: "/main/purple.png"
+}
+images {
+  image: "/main/red.png"
+}
+images {
+  image: "/main/shadow.png"
 }
 images {
   image: "/main/slate.png"
 }
 images {
-  image: "/main/shadow.png"
+  image: "/main/white.png"
+}
+images {
+  image: "/main/whitebrick.png"
+}
+images {
+  image: "/main/yellow.png"
 }
 margin: 0
 extrude_borders: 0

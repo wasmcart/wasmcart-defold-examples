@@ -1,0 +1,2 @@
+prototype: "/main/pu_shrink.go"
+load_dynamically: false

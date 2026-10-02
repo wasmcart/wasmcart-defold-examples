@@ -1,0 +1,2 @@
+prototype: "/main/gravity.go"
+load_dynamically: false

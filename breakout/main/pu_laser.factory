@@ -1,0 +1,2 @@
+prototype: "/main/pu_laser.go"
+load_dynamically: false

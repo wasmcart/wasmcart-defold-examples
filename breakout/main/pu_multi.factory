@@ -1,0 +1,2 @@
+prototype: "/main/pu_multi.go"
+load_dynamically: false
