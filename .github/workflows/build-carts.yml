@@ -42,15 +42,16 @@ jobs:
         with:
           node-version: '22'
 
-      # The carts render through native-gles, which needs EGL plus Mesa's
-      # software rasterizer: the runner has no GPU. Installed explicitly rather
-      # than relying on whatever the image happens to ship.
+      # The carts render through native-gles, which links libEGL and libGLESv2
+      # and needs Mesa's software rasterizer because the runner has no GPU. The
+      # GLES client library is the part a GL-only image leaves out. Listed in
+      # full rather than relying on what the image ships or on transitive deps.
       - name: Install the software GL stack
         run: |
           set -euo pipefail
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends \
-            libegl1 libgl1 libgl1-mesa-dri libglx-mesa0 libgbm1
+            libegl1 libgles2 libglvnd0 libgl1-mesa-dri libglx-mesa0 libgbm1
 
       # The action needs a concrete run id: an empty value is coerced to NaN and
       # the API call 404s on /runs/NaN/artifacts. Resolve the most recent
