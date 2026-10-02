@@ -42,6 +42,16 @@ jobs:
         with:
           node-version: '22'
 
+      # The carts render through native-gles, which needs EGL plus Mesa's
+      # software rasterizer: the runner has no GPU. Installed explicitly rather
+      # than relying on whatever the image happens to ship.
+      - name: Install the software GL stack
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            libegl1 libgl1 libgl1-mesa-dri libglx-mesa0 libgbm1
+
       # The action needs a concrete run id: an empty value is coerced to NaN and
       # the API call 404s on /runs/NaN/artifacts. Resolve the most recent
       # successful toolchain build unless one was named explicitly.
@@ -105,15 +115,28 @@ jobs:
           fi
 
       # A .wasc that packs but does not run is not a pass. Step each cart and
-      # fail on a script error, a trap, or a failed in-cart assertion.
+      # require positive proof of a completed run: the runtime's own
+      # "ran N frames" line, with N equal to what was asked for. Checking only
+      # for error strings is not enough. A runner with no GL at all never loads
+      # the cart, so it prints no error this step knows and every cart "passes".
       - name: Run every cart headless
+        env:
+          # The runner has no GPU and no display. native-gles skips its
+          # hardware device-enumeration path when LIBGL_ALWAYS_SOFTWARE=1, and
+          # Mesa needs the surfaceless platform to initialise EGL without one.
+          LIBGL_ALWAYS_SOFTWARE: '1'
+          EGL_PLATFORM: surfaceless
         run: |
           set -uo pipefail
+          frames=320
           bad=''
           for p in mansion exolon planetoid pathfinder unit4 hello_defold breakout apitest particles proxytest buffertest inputtest; do
             echo "::group::run $p"
-            out=$(cd "$p" && npx --no-install wasmcart "$p.wasc" --frames 320 2>&1 || true)
+            out=$(cd "$p" && npx --no-install wasmcart "$p.wasc" --frames "$frames" 2>&1 || true)
             printf '%s\n' "$out" | tail -40
+            if ! printf '%s\n' "$out" | grep -qE "^ran $frames frames"; then
+              bad="$bad $p(no-run)"
+            fi
             printf '%s\n' "$out" | grep -qE 'ERROR:SCRIPT|cart trapped' && bad="$bad $p"
             printf '%s\n' "$out" | grep -qE '[0-9]+ PASS +[1-9][0-9]* FAIL' && bad="$bad $p(assertions)"
             echo "::endgroup::"
