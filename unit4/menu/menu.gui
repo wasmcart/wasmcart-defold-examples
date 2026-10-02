@@ -1,0 +1,277 @@
+script: "/menu/menu.gui_script"
+fonts {
+  name: "main"
+  font: "/assets/font/main.font"
+}
+fonts {
+  name: "large"
+  font: "/assets/font/large.font"
+}
+textures {
+  name: "main"
+  texture: "/main/main.atlas"
+}
+nodes {
+  position {
+    x: 384.0
+    y: 288.0
+  }
+  type: TYPE_BOX
+  id: "container"
+  adjust_mode: ADJUST_MODE_STRETCH
+  inherit_alpha: true
+}
+nodes {
+  position {
+    y: -150.0
+  }
+  scale {
+    x: 4.0
+    y: 4.0
+  }
+  type: TYPE_BOX
+  texture: "main/menu"
+  id: "bg"
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    y: 100.0
+  }
+  scale {
+    x: 4.0
+    y: 4.0
+  }
+  type: TYPE_BOX
+  texture: "main/logo"
+  id: "logo"
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    x: -146.0
+    y: 208.0
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  color {
+    x: 0.32156864
+    y: 0.7058824
+    z: 0.4
+  }
+  type: TYPE_TEXT
+  text: "LAST: 0\n"
+  "BEST: 0"
+  font: "main"
+  id: "lastbest"
+  outline {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  outline_alpha: 0.0
+  shadow_alpha: 0.0
+}
+nodes {
+  position {
+    x: 1.0
+    y: -228.0
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  color {
+    x: 0.84705883
+    y: 0.88235295
+    z: 0.6627451
+  }
+  type: TYPE_TEXT
+  text: "USE ARROW KEYS + SPACE"
+  font: "main"
+  id: "text"
+  outline {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  outline_alpha: 0.0
+  shadow_alpha: 0.0
+}
+nodes {
+  position {
+    y: -71.0
+  }
+  size {
+    x: 400.0
+    y: 32.0
+  }
+  color {
+    x: 0.84705883
+    y: 0.88235295
+    z: 0.6627451
+  }
+  type: TYPE_BOX
+  id: "select"
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+}
+nodes {
+  position {
+    y: -69.0
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  color {
+    x: 0.84705883
+    y: 0.88235295
+    z: 0.6627451
+  }
+  type: TYPE_TEXT
+  text: "DIFFICULTY: NORMAL"
+  font: "main"
+  id: "0"
+  outline {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  outline_alpha: 0.0
+  shadow_alpha: 0.0
+}
+nodes {
+  position {
+    y: -107.0
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  color {
+    x: 0.84705883
+    y: 0.88235295
+    z: 0.6627451
+  }
+  type: TYPE_TEXT
+  text: "START GAME"
+  font: "main"
+  id: "1"
+  outline {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  outline_alpha: 0.0
+  shadow_alpha: 0.0
+}
+nodes {
+  position {
+    y: -145.0
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  color {
+    x: 0.84705883
+    y: 0.88235295
+    z: 0.6627451
+  }
+  type: TYPE_TEXT
+  text: "CONTROLS"
+  font: "main"
+  id: "2"
+  outline {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  outline_alpha: 0.0
+  shadow_alpha: 0.0
+}
+nodes {
+  position {
+    y: -183.0
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  color {
+    x: 0.84705883
+    y: 0.88235295
+    z: 0.6627451
+  }
+  type: TYPE_TEXT
+  text: "CREDITS"
+  font: "main"
+  id: "3"
+  outline {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  outline_alpha: 0.0
+  shadow_alpha: 0.0
+}
+material: "/builtins/materials/gui.material"
+adjust_reference: ADJUST_REFERENCE_PARENT

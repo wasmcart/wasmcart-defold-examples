@@ -31,25 +31,35 @@ A one-second 440 Hz sine wave at 44.1 kHz, generated for this repository.
 Measured at 93% of spectral energy in the 440 Hz bin. Pitch-shifted at
 playback to produce the different effects in `breakout`.
 
-## Bundled game: planetoid
+## Bundled games
 
-`planetoid/` is **Planetoid** by Ben James, from the
+Five complete games from the
 [benjames-171/defold-games](https://github.com/benjames-171/defold-games)
 collection.
 
-- **Author:** Ben James
+- **Author:** Ben James ([github.com/benjames-171](https://github.com/benjames-171), [benjames171.itch.io](https://benjames171.itch.io))
 - **Upstream:** https://github.com/benjames-171/defold-games
 - **Copyright:** Copyright (c) 2022 Ben James
-- **Licence:** MIT, reproduced in `planetoid/LICENSE-benjames.txt`
+- **Licence:** MIT, reproduced in `LICENSE-benjames.txt` inside each game
 
-Its 10 images and 20 short sound effects are the author's own: the game bundles
-no music track, and its credit line reads "developed by BEN JAMES | made with
-DEFOLD" with no third party named. Other games in the same collection do credit
-separate musicians and are deliberately not included here for that reason.
+| directory | game | itch.io rating |
+| --- | --- | --- |
+| `mansion/` | Mystery Mansion | 4.3 (120 votes) |
+| `exolon/` | Exolon: REDUX | 4.4 (43 votes) |
+| `planetoid/` | Planetoid | 4.6 (8 votes) |
+| `pathfinder/` | Pathfinder | 4.2 (18 votes) |
+| `unit4/` | Unit 4 | 4.4 (13 votes) |
 
-Changes made when porting: the 1.13 API migration (`migrate-1.13.sh`), texture
-filtering set to `nearest`, and removal of a `defos` dependency whose calls
-manage a desktop window and have no meaning in a cart.
+Each bundles the author's own art and audio, and none credits a separate
+musician on its title screen. Other games in the same collection do, for
+example Snowline's reads "music by dalezy & gOAT"; an MIT grant from the game's
+author does not convey rights to music licensed from someone else, so those are
+not included here.
+
+Changes made when porting, all mechanical: the 1.13 API migration
+(`migrate-1.13.sh`), texture filtering set to `nearest`, and removal of a
+`defos` dependency whose calls manage a desktop window and have no meaning in a
+cart.
 
 ## Engine and tooling
 
@@ -65,8 +75,5 @@ Content is compiled by Defold's own `bob` build tool, and carts are packed by
 ## Not included
 
 Several other games from the same MIT collection build and run on this port
-(Sub Strike, Snowline, Pixel Crypt, Bomb Frog) but are **not** included. They
-bundle music credited to third parties, for example Snowline's title screen
-reads "music by aalezy & gOAT". An MIT grant from the game's author does not
-convey rights to music licensed from someone else, so those stay out until
-their audio terms are established.
+but are left out because they bundle music credited to third parties:
+Sub Strike, Snowline and Pixel Crypt.

@@ -1,0 +1,97 @@
+script: "/game/gui/game.gui_script"
+fonts {
+  name: "large"
+  font: "/assets/font/large.font"
+}
+nodes {
+  position {
+    x: 512.0
+    y: 288.0
+  }
+  type: TYPE_BOX
+  id: "container"
+  inherit_alpha: true
+}
+nodes {
+  position {
+    y: 34.0
+  }
+  size {
+    x: 1024.0
+    y: 4.0
+  }
+  color {
+    x: 0.8509804
+    y: 0.8117647
+    z: 0.5686275
+  }
+  type: TYPE_BOX
+  id: "line-top"
+  parent: "container"
+  inherit_alpha: true
+}
+nodes {
+  position {
+    y: -34.0
+  }
+  size {
+    x: 1024.0
+    y: 4.0
+  }
+  color {
+    x: 0.8509804
+    y: 0.8117647
+    z: 0.5686275
+  }
+  type: TYPE_BOX
+  id: "line-botton"
+  parent: "container"
+  inherit_alpha: true
+}
+nodes {
+  size {
+    x: 1024.0
+    y: 64.0
+  }
+  color {
+    x: 0.14509805
+    y: 0.16078432
+    z: 0.27058825
+  }
+  type: TYPE_BOX
+  id: "bg1"
+  parent: "container"
+  inherit_alpha: true
+}
+nodes {
+  size {
+    x: 1024.0
+    y: 64.0
+  }
+  color {
+    x: 0.8509804
+    y: 0.8117647
+    z: 0.5686275
+  }
+  type: TYPE_TEXT
+  text: "..."
+  font: "large"
+  id: "tutorial"
+  outline {
+    x: 0.14509805
+    y: 0.16078432
+    z: 0.27058825
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  outline_alpha: 0.0
+  shadow_alpha: 0.0
+}
+material: "/builtins/materials/gui.material"
+adjust_reference: ADJUST_REFERENCE_PARENT

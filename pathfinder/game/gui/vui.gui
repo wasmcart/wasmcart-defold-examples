@@ -1,0 +1,120 @@
+script: "/game/gui/vui.gui_script"
+textures {
+  name: "vui"
+  texture: "/game/core/vui.tilesource"
+}
+nodes {
+  position {
+    x: 512.0
+    y: 288.0
+  }
+  type: TYPE_BOX
+  id: "container"
+  adjust_mode: ADJUST_MODE_STRETCH
+  inherit_alpha: true
+  alpha: 0.0
+}
+nodes {
+  position {
+    x: -400.0
+    y: -210.0
+  }
+  scale {
+    x: 4.0
+    y: 4.0
+  }
+  type: TYPE_BOX
+  texture: "vui/left"
+  id: "left"
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    x: -250.0
+    y: -210.0
+  }
+  scale {
+    x: 4.0
+    y: 4.0
+  }
+  type: TYPE_BOX
+  texture: "vui/right"
+  id: "right"
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    x: 250.0
+    y: -210.0
+  }
+  scale {
+    x: 4.0
+    y: 4.0
+  }
+  type: TYPE_BOX
+  texture: "vui/jump"
+  id: "jump"
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    x: 440.0
+    y: 220.0
+  }
+  scale {
+    x: 4.0
+    y: 4.0
+  }
+  type: TYPE_BOX
+  texture: "vui/restart"
+  id: "restart"
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    x: -440.0
+    y: 220.0
+  }
+  scale {
+    x: 4.0
+    y: 4.0
+  }
+  type: TYPE_BOX
+  texture: "vui/menu"
+  id: "menu"
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    x: 400.0
+    y: -150.0
+  }
+  scale {
+    x: 4.0
+    y: 4.0
+  }
+  type: TYPE_BOX
+  texture: "vui/use"
+  id: "use"
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+material: "/builtins/materials/gui.material"
+adjust_reference: ADJUST_REFERENCE_PARENT

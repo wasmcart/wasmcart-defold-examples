@@ -1,0 +1,7 @@
+images {
+  image: "/assets/png/bg.png"
+}
+images {
+  image: "/assets/png/logo.png"
+}
+extrude_borders: 1

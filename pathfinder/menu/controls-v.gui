@@ -1,0 +1,355 @@
+script: "/menu/controls-v.gui_script"
+fonts {
+  name: "main"
+  font: "/assets/font/main.font"
+}
+fonts {
+  name: "large"
+  font: "/assets/font/large.font"
+}
+textures {
+  name: "game"
+  texture: "/game/core/game.tilesource"
+}
+textures {
+  name: "vui"
+  texture: "/game/core/vui.tilesource"
+}
+nodes {
+  position {
+    x: 512.0
+    y: 288.0
+  }
+  type: TYPE_BOX
+  id: "container"
+  adjust_mode: ADJUST_MODE_STRETCH
+  inherit_alpha: true
+}
+nodes {
+  size {
+    x: 500.0
+    y: 50.0
+  }
+  color {
+    x: 0.8509804
+    y: 0.8117647
+    z: 0.5686275
+  }
+  type: TYPE_TEXT
+  text: "..."
+  font: "large"
+  id: "controls"
+  outline {
+    x: 0.14509805
+    y: 0.16078432
+    z: 0.27058825
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  shadow_alpha: 0.0
+  text_tracking: 0.04
+}
+nodes {
+  position {
+    x: -420.0
+  }
+  scale {
+    x: 4.0
+    y: 4.0
+  }
+  type: TYPE_BOX
+  texture: "vui/back"
+  id: "back-icon"
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    x: -400.0
+    y: -210.0
+  }
+  scale {
+    x: 4.0
+    y: 4.0
+  }
+  type: TYPE_BOX
+  texture: "vui/left"
+  id: "left"
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  alpha: 0.5
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    x: -250.0
+    y: -210.0
+  }
+  scale {
+    x: 4.0
+    y: 4.0
+  }
+  type: TYPE_BOX
+  texture: "vui/right"
+  id: "right"
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  alpha: 0.5
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    x: 220.0
+    y: -210.0
+  }
+  scale {
+    x: 4.0
+    y: 4.0
+  }
+  type: TYPE_BOX
+  texture: "vui/jump"
+  id: "jump-icon"
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  alpha: 0.5
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    x: 440.0
+    y: 220.0
+  }
+  scale {
+    x: 4.0
+    y: 4.0
+  }
+  type: TYPE_BOX
+  texture: "vui/restart"
+  id: "restart-icon"
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  alpha: 0.5
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    x: -440.0
+    y: 220.0
+  }
+  scale {
+    x: 4.0
+    y: 4.0
+  }
+  type: TYPE_BOX
+  texture: "vui/menu"
+  id: "menu-icon"
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  alpha: 0.5
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    x: 370.0
+    y: -150.0
+  }
+  scale {
+    x: 4.0
+    y: 4.0
+  }
+  type: TYPE_BOX
+  texture: "vui/use"
+  id: "use-icon"
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  alpha: 0.5
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    x: -325.0
+    y: -146.0
+  }
+  size {
+    x: 320.0
+    y: 32.0
+  }
+  color {
+    x: 0.8509804
+    y: 0.8509804
+    z: 0.8
+  }
+  type: TYPE_TEXT
+  text: "..."
+  font: "main"
+  id: "move"
+  outline {
+    x: 0.14509805
+    y: 0.16078432
+    z: 0.27058825
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  shadow_alpha: 0.0
+  text_tracking: 0.08
+}
+nodes {
+  position {
+    x: 220.0
+    y: -134.0
+  }
+  size {
+    x: 320.0
+    y: 32.0
+  }
+  color {
+    x: 0.8509804
+    y: 0.8509804
+    z: 0.8
+  }
+  type: TYPE_TEXT
+  text: "..."
+  font: "main"
+  id: "jump"
+  outline {
+    x: 0.14509805
+    y: 0.16078432
+    z: 0.27058825
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  shadow_alpha: 0.0
+  text_tracking: 0.08
+}
+nodes {
+  position {
+    x: 370.0
+    y: -74.0
+  }
+  size {
+    x: 320.0
+    y: 32.0
+  }
+  color {
+    x: 0.8509804
+    y: 0.8509804
+    z: 0.8
+  }
+  type: TYPE_TEXT
+  text: "..."
+  font: "main"
+  id: "use"
+  outline {
+    x: 0.14509805
+    y: 0.16078432
+    z: 0.27058825
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  shadow_alpha: 0.0
+  text_tracking: 0.08
+}
+nodes {
+  position {
+    x: 382.0
+    y: 220.0
+  }
+  size {
+    x: 320.0
+    y: 32.0
+  }
+  color {
+    x: 0.8509804
+    y: 0.8509804
+    z: 0.8
+  }
+  type: TYPE_TEXT
+  text: "..."
+  font: "main"
+  id: "restart"
+  pivot: PIVOT_E
+  outline {
+    x: 0.14509805
+    y: 0.16078432
+    z: 0.27058825
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  shadow_alpha: 0.0
+  text_tracking: 0.08
+}
+nodes {
+  position {
+    x: -384.0
+    y: 220.0
+  }
+  size {
+    x: 320.0
+    y: 32.0
+  }
+  color {
+    x: 0.8509804
+    y: 0.8509804
+    z: 0.8
+  }
+  type: TYPE_TEXT
+  text: "..."
+  font: "main"
+  id: "options"
+  pivot: PIVOT_W
+  outline {
+    x: 0.14509805
+    y: 0.16078432
+    z: 0.27058825
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  shadow_alpha: 0.0
+  text_tracking: 0.08
+}
+material: "/builtins/materials/gui.material"
+adjust_reference: ADJUST_REFERENCE_PARENT

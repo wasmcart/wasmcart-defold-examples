@@ -1,0 +1,61 @@
+name: "common"
+instances {
+  id: "player"
+  prototype: "/game/player/player.go"
+  position {
+    z: 0.1
+  }
+}
+instances {
+  id: "exit"
+  prototype: "/game/fx/exit.go"
+}
+scale_along_z: 0
+embedded_instances {
+  id: "view"
+  data: "components {\n"
+  "  id: \"game\"\n"
+  "  component: \"/game/gui/game.gui\"\n"
+  "}\n"
+  "components {\n"
+  "  id: \"shutter\"\n"
+  "  component: \"/game/gui/shutter.gui\"\n"
+  "}\n"
+  "components {\n"
+  "  id: \"gameover\"\n"
+  "  component: \"/game/gui/gameover.gui\"\n"
+  "}\n"
+  "components {\n"
+  "  id: \"complete\"\n"
+  "  component: \"/game/gui/complete.gui\"\n"
+  "}\n"
+  ""
+}
+embedded_instances {
+  id: "enemy"
+  data: "components {\n"
+  "  id: \"handler\"\n"
+  "  component: \"/game/enemy/handler.script\"\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"enemy_factory\"\n"
+  "  type: \"factory\"\n"
+  "  data: \"prototype: \\\"/game/enemy/enemy.go\\\"\\n"
+  "\"\n"
+  "}\n"
+  ""
+}
+embedded_instances {
+  id: "fx"
+  data: "components {\n"
+  "  id: \"script\"\n"
+  "  component: \"/game/fx/handler.script\"\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"fx_factory\"\n"
+  "  type: \"factory\"\n"
+  "  data: \"prototype: \\\"/game/fx/fx.go\\\"\\n"
+  "\"\n"
+  "}\n"
+  ""
+}

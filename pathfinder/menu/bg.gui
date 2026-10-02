@@ -1,0 +1,26 @@
+textures {
+  name: "main"
+  texture: "/menu/menu.atlas"
+}
+textures {
+  name: "pixel"
+  texture: "/game/core/pixel.tilesource"
+}
+nodes {
+  position {
+    x: 512.0
+    y: 288.0
+  }
+  scale {
+    x: 4.0
+    y: 4.0
+  }
+  type: TYPE_BOX
+  texture: "main/bg-m"
+  id: "bg"
+  adjust_mode: ADJUST_MODE_STRETCH
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+material: "/builtins/materials/gui.material"
+adjust_reference: ADJUST_REFERENCE_PARENT

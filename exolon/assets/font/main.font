@@ -1,0 +1,9 @@
+font: "/assets/font/Tecmo Bowl.ttf"
+material: "/builtins/fonts/font.material"
+size: 24
+antialias: 0
+outline_alpha: 1.0
+shadow_alpha: 1.0
+shadow_y: -3.0
+render_mode: MODE_MULTI_LAYER
+characters: " !\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"

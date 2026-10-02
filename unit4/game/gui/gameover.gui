@@ -1,0 +1,100 @@
+script: "/game/gui/gameover.gui_script"
+fonts {
+  name: "main"
+  font: "/assets/font/main.font"
+}
+textures {
+  name: "main"
+  texture: "/main/main.atlas"
+}
+nodes {
+  position {
+    x: 288.0
+    y: 250.0
+  }
+  type: TYPE_BOX
+  id: "container"
+  adjust_mode: ADJUST_MODE_STRETCH
+  inherit_alpha: true
+}
+nodes {
+  scale {
+    x: 4.0
+    y: 4.0
+  }
+  type: TYPE_BOX
+  texture: "main/dialog"
+  id: "box"
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    y: 22.0
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  color {
+    x: 0.84705883
+    y: 0.88235295
+    z: 0.6627451
+  }
+  type: TYPE_TEXT
+  text: "GAME OVER"
+  font: "main"
+  id: "text"
+  outline {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  outline_alpha: 0.0
+  shadow_alpha: 0.0
+}
+nodes {
+  position {
+    y: -18.0
+  }
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  color {
+    x: 0.84705883
+    y: 0.88235295
+    z: 0.6627451
+  }
+  type: TYPE_TEXT
+  text: "PRESS SPACE"
+  font: "main"
+  id: "text1"
+  outline {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "container"
+  inherit_alpha: true
+  outline_alpha: 0.0
+  shadow_alpha: 0.0
+}
+material: "/builtins/materials/gui.material"
+adjust_reference: ADJUST_REFERENCE_PARENT

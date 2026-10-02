@@ -83,36 +83,62 @@ else a wasmcart host exists. Build the `.wasc` files first with
 `./build-cart.sh <name>`, or download them from the GitHub Actions artifacts
 (see [Continuous integration](#continuous-integration)).
 
-## Screenshots
+## The games
 
-### planetoid
+Five complete games by **[Ben James](https://github.com/benjames-171)**,
+ported from his MIT-licensed
+[defold-games](https://github.com/benjames-171/defold-games) collection and
+playable at [benjames171.itch.io](https://benjames171.itch.io). They are
+included here with his licence reproduced in each game directory; the games,
+their code and their art are his work, not ours.
 
-A complete game: scrolling terrain, enemies, radar HUD, scoring.
+Chosen by itch.io player rating.
 
-![planetoid](docs/screenshots/planetoid.png)
+### Mystery Mansion
+
+Explore a haunted house, manage inventory, keep your nerve. Rated 4.3 across
+120 votes, the best-evidenced of the set.
+[itch.io](https://benjames171.itch.io/mystery-mansion)
+
+![Mystery Mansion](docs/screenshots/mansion.png)
+
+### Exolon: REDUX
+
+A side-scrolling shooter: zones, bombs, scoring. Rated 4.4 across 43 votes.
+[itch.io](https://benjames171.itch.io/exolon-redux)
+
+![Exolon](docs/screenshots/exolon.png)
+
+### Planetoid
+
+Scrolling terrain, enemies, radar HUD. Rated 4.6.
+[itch.io](https://benjames171.itch.io/planetoid)
+
+![Planetoid](docs/screenshots/planetoid.png)
+
+### Pathfinder
+
+A puzzle platformer across nine circuit-board levels. Rated 4.2 across 18
+votes. [itch.io](https://benjames171.itch.io/pathfinder)
+
+![Pathfinder](docs/screenshots/pathfinder.png)
+
+### Unit 4
+
+Miniaturised inside a patient, fighting antibodies on the way out. Rated 4.4.
+[itch.io](https://benjames171.itch.io/unit-4)
+
+![Unit 4](docs/screenshots/unit4.png)
 
 ### breakout
 
-Paddle, ball, 50 bricks, lives and scoring, driven by keyboard or gamepad.
+Written for this repo rather than ported: paddle, ball, 50 bricks, lives and
+scoring, driven by keyboard or gamepad.
 
 ![breakout](docs/screenshots/breakout.png)
 
-### apitest
-
-Physics bodies falling between angled walls, with every API check reported on
-screen.
-
-![apitest](docs/screenshots/apitest.png)
-
-### particles
-
-![particles](docs/screenshots/particles.png)
-
-### inputtest
-
-Every delivered input action, named and counted live.
-
-![inputtest](docs/screenshots/inputtest.png)
+The remaining examples are test fixtures rather than games. They report pass or
+fail on screen and are listed below.
 
 ## Examples
 

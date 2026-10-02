@@ -1,0 +1,5 @@
+font: "/assets/font/EXEPixelPerfect.ttf"
+material: "/builtins/fonts/font.material"
+size: 64
+antialias: 0
+characters: " !\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"

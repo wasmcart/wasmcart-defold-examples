@@ -1,0 +1,155 @@
+script: "/game/gui/game.gui_script"
+fonts {
+  name: "main"
+  font: "/assets/font/main.font"
+}
+nodes {
+  position {
+    x: 384.0
+    y: 24.0
+  }
+  size {
+    x: 768.0
+    y: 48.0
+  }
+  color {
+    x: 0.08627451
+    y: 0.09019608
+    z: 0.101960786
+  }
+  type: TYPE_BOX
+  id: "box"
+  adjust_mode: ADJUST_MODE_STRETCH
+  inherit_alpha: true
+}
+nodes {
+  position {
+    x: -370.0
+  }
+  size {
+    x: 200.0
+    y: 32.0
+  }
+  color {
+    y: 0.81960785
+    z: 0.0
+  }
+  type: TYPE_TEXT
+  text: "BOMBS 10"
+  font: "main"
+  id: "bombs"
+  pivot: PIVOT_W
+  outline {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  shadow {
+    x: 0.8392157
+    y: 0.14117648
+    z: 0.06666667
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "box"
+  inherit_alpha: true
+  outline_alpha: 0.0
+}
+nodes {
+  size {
+    x: 200.0
+    y: 32.0
+  }
+  color {
+    x: 0.98039216
+    y: 0.99215686
+  }
+  type: TYPE_TEXT
+  text: "000000"
+  font: "main"
+  id: "score"
+  outline {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  shadow {
+    x: 1.0
+    y: 0.14901961
+    z: 0.45490196
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "box"
+  inherit_alpha: true
+  outline_alpha: 0.0
+}
+nodes {
+  position {
+    x: 370.0
+  }
+  size {
+    x: 200.0
+    y: 32.0
+  }
+  color {
+    y: 0.81960785
+    z: 0.0
+  }
+  type: TYPE_TEXT
+  text: "ZONE 1"
+  font: "main"
+  id: "zone"
+  pivot: PIVOT_E
+  outline {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  shadow {
+    x: 0.8392157
+    y: 0.14117648
+    z: 0.06666667
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "box"
+  inherit_alpha: true
+  outline_alpha: 0.0
+}
+nodes {
+  position {
+    x: 384.0
+    y: 312.0
+  }
+  type: TYPE_BOX
+  id: "status"
+  adjust_mode: ADJUST_MODE_STRETCH
+  inherit_alpha: true
+}
+nodes {
+  size {
+    x: 600.0
+    y: 32.0
+  }
+  color {
+    x: 0.98039216
+    y: 0.99215686
+  }
+  type: TYPE_TEXT
+  font: "main"
+  id: "status-text"
+  outline {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  shadow {
+    x: 1.0
+    y: 0.14901961
+    z: 0.45490196
+  }
+  adjust_mode: ADJUST_MODE_STRETCH
+  parent: "status"
+  inherit_alpha: true
+  outline_alpha: 0.0
+}
+material: "/builtins/materials/gui.material"
+adjust_reference: ADJUST_REFERENCE_PARENT

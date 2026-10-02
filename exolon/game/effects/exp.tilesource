@@ -1,0 +1,9 @@
+image: "/assets/png/exp.png"
+tile_width: 46
+tile_height: 46
+animations {
+  id: "anim"
+  start_tile: 1
+  end_tile: 10
+}
+extrude_borders: 2

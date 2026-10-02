@@ -40,13 +40,37 @@ jobs:
         with:
           node-version: '22'
 
+      # The action needs a concrete run id: an empty value is coerced to NaN and
+      # the API call 404s on /runs/NaN/artifacts. Resolve the most recent
+      # successful toolchain build unless one was named explicitly.
+      - name: Resolve the toolchain run
+        id: toolchain
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REQUESTED: ${{ github.event.inputs.toolchain_run_id }}
+        run: |
+          set -euo pipefail
+          if [ -n "${REQUESTED}" ]; then
+            echo "run-id=${REQUESTED}" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          id=$(gh run list --repo wasmcart/wasmcart-defold \
+                 --workflow wasmcart-runtime.yml --status success \
+                 --limit 1 --json databaseId --jq '.[0].databaseId // empty')
+          if [ -z "$id" ]; then
+            echo "::error::No successful wasmcart-runtime run found in wasmcart/wasmcart-defold. Run that workflow first so a toolchain artifact exists."
+            exit 1
+          fi
+          echo "using toolchain from run $id"
+          echo "run-id=$id" >> "$GITHUB_OUTPUT"
+
       - name: Fetch the engine toolchain
         uses: actions/download-artifact@v8
         with:
           name: wasmcart-defold-toolchain
           path: toolchain
           repository: wasmcart/wasmcart-defold
-          run-id: ${{ github.event.inputs.toolchain_run_id || '' }}
+          run-id: ${{ steps.toolchain.outputs.run-id }}
           github-token: ${{ github.token }}
 
       # build-cart.sh expects an engine tree laid out as wasmcart-defold does.
@@ -68,7 +92,7 @@ jobs:
         run: |
           set -euo pipefail
           failed=''
-          for p in hello_defold breakout planetoid apitest particles proxytest buffertest inputtest; do
+          for p in mansion exolon planetoid pathfinder unit4 hello_defold breakout apitest particles proxytest buffertest inputtest; do
             echo "::group::build $p"
             ./build-cart.sh "$p" || failed="$failed $p"
             echo "::endgroup::"
@@ -84,7 +108,7 @@ jobs:
         run: |
           set -uo pipefail
           bad=''
-          for p in hello_defold breakout planetoid apitest particles proxytest buffertest inputtest; do
+          for p in mansion exolon planetoid pathfinder unit4 hello_defold breakout apitest particles proxytest buffertest inputtest; do
             echo "::group::run $p"
             out=$(cd "$p" && npx --no-install wasmcart "$p.wasc" --gl --frames 320 2>&1 || true)
             printf '%s\n' "$out" | tail -40

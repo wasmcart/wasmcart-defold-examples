@@ -1,0 +1,10 @@
+image: "/assets/png/firetrail.png"
+tile_width: 8
+tile_height: 8
+animations {
+  id: "anim"
+  start_tile: 1
+  end_tile: 8
+  fps: 15
+}
+extrude_borders: 1

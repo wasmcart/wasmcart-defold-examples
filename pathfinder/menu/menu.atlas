@@ -1,0 +1,9 @@
+images {
+  image: "/assets/png/bg-m.png"
+}
+images {
+  image: "/assets/png/logo.png"
+}
+images {
+  image: "/assets/png/defold.png"
+}

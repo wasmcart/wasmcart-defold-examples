@@ -8,22 +8,15 @@ build/
 *.wasc
 *.sav
 
-# bombfrog is third-party content with no licence file in the tree. It stays
-# on disk as a render test on real assets, but is NOT committed until its
-# origin and licence are confirmed.
-bombfrog/
 
 # Each project needs a builtins/ link into the engine tree. It is an absolute
 # path to wherever the engine was cloned, so it is created by build-cart.sh at
 # build time rather than committed.
 builtins
 
-# Ported third-party games are staged locally but NOT committed until the
-# provenance of their bundled audio is established: the upstream MIT LICENSE
-# covers Ben James, while title screens credit other musicians by name.
-# planetoid is cleared: its audio is 20 short effects with no music track, and
-# its own credit line names only Ben James, so the collection's MIT licence
-# covers it. The rest bundle music credited to third parties.
+# Games from the same MIT collection whose title screens credit a separate
+# musician. An MIT grant from the game's author does not convey rights to music
+# licensed from someone else, so these stay out until those terms are known.
 substrike/
 pixelcrypt/
 snowline/

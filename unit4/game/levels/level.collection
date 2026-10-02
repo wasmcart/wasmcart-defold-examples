@@ -1,0 +1,30 @@
+name: "level1"
+collection_instances {
+  id: "common"
+  collection: "/game/core/common.collection"
+}
+scale_along_z: 0
+embedded_instances {
+  id: "level"
+  data: "components {\n"
+  "  id: \"tilemap\"\n"
+  "  component: \"/game/levels/level.tilemap\"\n"
+  "}\n"
+  "components {\n"
+  "  id: \"level\"\n"
+  "  component: \"/game/levels/level.script\"\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"co\"\n"
+  "  type: \"collisionobject\"\n"
+  "  data: \"collision_shape: \\\"/game/levels/level.tilemap\\\"\\n"
+  "type: COLLISION_OBJECT_TYPE_KINEMATIC\\n"
+  "mass: 0.0\\n"
+  "friction: 0.1\\n"
+  "restitution: 0.5\\n"
+  "group: \\\"world\\\"\\n"
+  "mask: \\\"player\\\"\\n"
+  "\"\n"
+  "}\n"
+  ""
+}
