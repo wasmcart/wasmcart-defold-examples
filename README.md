@@ -264,6 +264,11 @@ romdev loads `.wasc` carts directly: `wasmcart` is one of its platforms.
 
 Two limits worth knowing before writing a test around either harness:
 
+- **A headless machine needs Mesa's software GL.** The carts render through
+  real GL, so with no GPU and no display EGL fails to initialise and the
+  runtime exits before loading the cart. Install `libegl1` and
+  `libgl1-mesa-dri`, then run with `LIBGL_ALWAYS_SOFTWARE=1` and
+  `EGL_PLATFORM=surfaceless`. This is what CI does.
 - **Headless `--frames` does not persist the save block.** It calls
   `host.destroy()` without the save step the interactive player runs, so a
   cart's `sys.save` survives within the run and is gone on the next one. To
@@ -329,9 +334,11 @@ polled, and a pad that appears mid-session is picked up on the next frame.
 ## Continuous integration
 
 `.github/workflows/build-carts.yml` packs every example into a `.wasc` on each
-push, runs each one headless for 320 frames, and fails the build on a script
-error, a cart trap or a failed in-cart assertion. A cart that packs but does
-not run is not treated as a pass.
+push and runs each one headless for 320 frames. A cart passes only if the
+runtime reports completing all 320 frames; it fails on a short run, a script
+error, a cart trap or a failed in-cart assertion. Checking only for error
+messages is not enough: a runner with no working GL never loads the cart at
+all, so it produces none of those errors and every cart would look fine.
 
 The finished carts are uploaded as a `carts` artifact with a `SHA256SUMS`
 file, so any run's output can be downloaded and played without building

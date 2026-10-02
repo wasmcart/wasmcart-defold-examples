@@ -100,6 +100,15 @@ jobs:
       - name: Install the packer
         run: npm install --no-save wasmcart
 
+
+      # Fail fast with a reason if the runner cannot make a GL context at all.
+      # Without this, a GL-less runner produces twelve carts that never start
+      # and no message explaining why.
+      - name: Check GL works on this runner
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+          EGL_PLATFORM: surfaceless
+        run: node tools/gl-probe.mjs
       - name: Build every cart
         run: |
           set -euo pipefail
