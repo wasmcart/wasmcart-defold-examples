@@ -3,9 +3,10 @@ name: build carts
 # Packs every example into a .wasc and uploads them as artifacts, so a cart can
 # be downloaded and played without building anything locally.
 #
-# The engine is NOT built here. wasmcart-defold publishes a toolchain artifact
-# (engine wasm + bob + builtins) and this job consumes it, which keeps a run to
-# a couple of minutes instead of the best part of an hour.
+# The engine is NOT built here. wasmcart-defold publishes the engine wasm as an
+# artifact and this job consumes it, which keeps a run to a couple of minutes
+# instead of the best part of an hour. Defold's bob.jar is downloaded from
+# Defold's own archive by build-cart.sh, not taken from that artifact.
 on:
   push:
     branches: [main]
@@ -13,7 +14,7 @@ on:
   workflow_dispatch:
     inputs:
       toolchain_run_id:
-        description: 'wasmcart-defold run id to take the toolchain from'
+        description: 'wasmcart-defold run id to take the engine from'
         required: false
 
 permissions:
@@ -55,8 +56,8 @@ jobs:
 
       # The action needs a concrete run id: an empty value is coerced to NaN and
       # the API call 404s on /runs/NaN/artifacts. Resolve the most recent
-      # successful toolchain build unless one was named explicitly.
-      - name: Resolve the toolchain run
+      # successful engine build unless one was named explicitly.
+      - name: Resolve the engine run
         id: toolchain
         env:
           GH_TOKEN: ${{ github.token }}
@@ -71,30 +72,32 @@ jobs:
                  --workflow wasmcart-runtime.yml --status success \
                  --limit 1 --json databaseId --jq '.[0].databaseId // empty')
           if [ -z "$id" ]; then
-            echo "::error::No successful wasmcart-runtime run found in wasmcart/wasmcart-defold. Run that workflow first so a toolchain artifact exists."
+            echo "::error::No successful wasmcart-runtime run found in wasmcart/wasmcart-defold. Run that workflow first so an engine artifact exists."
             exit 1
           fi
-          echo "using toolchain from run $id"
+          echo "using the engine from run $id"
           echo "run-id=$id" >> "$GITHUB_OUTPUT"
 
-      - name: Fetch the engine toolchain
+      # The artifact was renamed from -toolchain to -engine when it stopped
+      # carrying bob and builtins. Accept either so a run still works against
+      # an engine build made before the rename.
+      - name: Fetch the engine
         uses: actions/download-artifact@v8
         with:
-          name: wasmcart-defold-toolchain
-          path: toolchain
+          pattern: wasmcart-defold-*
+          merge-multiple: true
+          path: engine
           repository: wasmcart/wasmcart-defold
           run-id: ${{ steps.toolchain.outputs.run-id }}
           github-token: ${{ github.token }}
 
-      # build-cart.sh needs only the engine binary from the toolchain: it
-      # downloads Defold's own bob.jar, which carries its own builtins.
-      - name: Lay the toolchain out as an engine tree
+      - name: Lay the engine out as an engine tree
         run: |
           set -euo pipefail
           root=../wasmcart-defold/tmp/dynamo_home
           mkdir -p "$root/bin/wasm-web"
-          cp toolchain/dmengine_wasmcart.wasm "$root/bin/wasm-web/"
-          (cd toolchain && sha256sum -c --ignore-missing SHA256SUMS)
+          cp engine/dmengine_wasmcart.wasm "$root/bin/wasm-web/"
+          (cd engine && sha256sum -c --ignore-missing SHA256SUMS)
 
       # bob.jar is ~230 MB; cache it so only the first run on a new Defold
       # release pays the download.
