@@ -1,9 +1,14 @@
-# defold-wasmcart examples
+# wasmcart-defold-examples
 
-Defold games built as [wasmcart](https://github.com/monteslu/wasmcart) carts.
-The engine is a fork on the `wasmcart` branch of
-[Defold](https://github.com/defold/defold); see
-`internal-wasmcart/DEFOLD_STATE.md` for what is built, measured and still open.
+Example [Defold](https://defold.com) games built as
+[wasmcart](https://github.com/wasmcart/wasmcart) carts: a `.wasc` holds a
+WebAssembly program plus its assets and runs unmodified on any host that
+implements the ABI.
+
+The engine these build against is
+[wasmcart-defold](https://github.com/wasmcart/wasmcart-defold), which vendors
+Defold and adds a cart runtime. Build it first; the instructions below assume
+it sits beside this repo.
 
 ## Status
 
@@ -21,7 +26,7 @@ The engine is a fork on the `wasmcart` branch of
 | `resource.create_texture` / `set_texture` | works |
 | Particle FX, collection proxies, buffers | works |
 
-`apitest` reports **14 PASS 0 FAIL** and `buffertest` **6 PASS 0 FAIL** on this
+`apitest` reports **14 PASS 0 FAIL** and `buffertest` **7 PASS 0 FAIL** on this
 engine. Four defects were open when these examples were first written and all
 four are now closed; each is worth recording because none of them announced
 itself as what it was.
@@ -113,8 +118,8 @@ runtime-generated texture uploaded to the GPU.
 Nothing about this was previously written down, and two steps are easy to miss.
 
 ```bash
-# 1. Build the engine once (see DEFOLD_STATE.md for the environment setup)
-cd defold
+# 1. Build the engine once (see the wasmcart-defold README)
+cd ../wasmcart-defold
 source ./dmenv.sh
 ./scripts/build.py --platform=wasm-web --skip-tests build_engine -- \
     --skip-build-tests --with-wasmcart
@@ -131,7 +136,7 @@ apart. It is the supported path; what follows is what it does, for when
 something needs changing.
 
 ```bash
-java -jar ../defold/tmp/dynamo_home/share/java/bob-light.jar \
+java -jar ../wasmcart-defold/tmp/dynamo_home/share/java/bob-light.jar \
     --root . --platform wasm-web --archive --use-uncompressed-lua-source build
 # -> build/default/game.{arci,arcd,dmanifest,projectc}
 
@@ -174,8 +179,7 @@ frame({ op: 'step', frames: 60 })
 frame({ op: 'screenshot', path: 'out.png' })
 ```
 
-(An earlier note in `DEFOLD_STATE.md` claimed romdev could not load a `.wasc`.
-That was wrong: `wasmcart` is a romdev platform and loads these carts fine.)
+romdev loads `.wasc` carts directly: `wasmcart` is one of its platforms.
 
 Two limits worth knowing before writing a test around either harness:
 
@@ -241,11 +245,18 @@ Sticks arrive as `gamepad_lstick_*` / `gamepad_rstick_*` past the dead zone and
 triggers as `gamepad_ltrigger` / `gamepad_rtrigger`. All four pad slots are
 polled, and a pad that appears mid-session is picked up on the next frame.
 
-## Licence
+## Licence and credits
 
-The Defold engine is under the [Defold License
-1.0](https://defold.com/license/), which permits a fork ("You can modify the
-engine as much as you like") but whose clause 4(a) forbids *selling* the work
-as a Game Engine Product - and the definition explicitly covers the runtime. A
-free defold-wasmcart is fine; a paid one, or a paid hosted service producing
-cart runtimes, is not.
+The example code in this repository is MIT licensed; see `LICENSE`.
+
+Bundled third-party content is listed with its author and licence in
+[CREDITS.md](CREDITS.md). In short: the only third-party asset is DejaVu Sans
+Mono Bold, bundled unmodified under the Bitstream Vera licence, with the full
+licence text beside every copy of the font. The 8x8 white sprite and the
+440 Hz tone were generated for this repository.
+
+The engine itself is separate: Defold is under the
+[Defold License 1.0](https://defold.com/license/), which permits modification
+but whose clause 4(a) forbids *selling* the work as a Game Engine Product, and
+the definition covers the runtime. A free wasmcart-defold is fine; a paid one,
+or a paid hosted service producing cart runtimes, is not.

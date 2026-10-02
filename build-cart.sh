@@ -11,13 +11,35 @@ PROJ="$(cd "$PROJ" && pwd)"
 HERE="$(cd "$(dirname "$0")" && pwd)"
 OUT="${2:-$PROJ/$(basename "$PROJ").wasc}"
 
-DEFOLD="$HERE/../defold"
+# The engine repo, expected beside this one. DEFOLD_TREE overrides it and is
+# honoured exactly as given: silently falling back from an explicit setting
+# would mask a mistyped path and build against some other engine without
+# saying so. Without it, ../defold is tried as well, so an existing local
+# clone under the engine's old directory name keeps working.
+if [ -n "${DEFOLD_TREE:-}" ]; then
+  DEFOLD="$DEFOLD_TREE"
+else
+  DEFOLD="$HERE/../wasmcart-defold"
+  [ -d "$DEFOLD" ] || DEFOLD="$HERE/../defold"
+fi
 ENGINE="$DEFOLD/tmp/dynamo_home/bin/wasm-web/dmengine_wasmcart.wasm"
 BOB="$DEFOLD/tmp/dynamo_home/share/java/bob-light.jar"
-JAVA="$DEFOLD/tmp/jdk/jdk-25/bin/java"
+# The engine tree ships a JDK; use it when present, else whatever java is on PATH.
+JAVA="$(ls -d "$DEFOLD"/tmp/jdk/*/bin/java 2>/dev/null | head -1 || true)"
 [ -x "$JAVA" ] || JAVA="$(command -v java)"
 
-[ -f "$ENGINE" ] || { echo "no engine at $ENGINE - build it first (see README)"; exit 1; }
+[ -f "$ENGINE" ] || {
+  echo "no engine at $ENGINE"
+  echo
+  echo "Build it first:"
+  echo "  git clone https://github.com/wasmcart/wasmcart-defold   # beside this repo"
+  echo "  cd wasmcart-defold && ./scripts/build.py shell"
+  echo "  ./scripts/build.py --platform=wasm-web --skip-tests build_engine -- \\"
+  echo "      --skip-build-tests --with-wasmcart"
+  echo
+  echo "Or point DEFOLD_TREE at an existing checkout."
+  exit 1
+}
 [ -f "$BOB" ]    || { echo "no bob-light.jar at $BOB"; exit 1; }
 
 # Resolution comes from game.project so the cart manifest matches what the

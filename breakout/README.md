@@ -21,13 +21,12 @@ clear-colour fixture cannot test:
 
 ## Known limitations
 
-- **Sprites do not draw yet.** The game runs correctly - 57 sprites created at
-  the right coordinates, input and sound working - but only the clear colour
-  reaches the screen. This is a port-level gap, not a bug in this example; see
-  `internal-wasmcart/DEFOLD_STATE.md`.
-- **No colour.** Everything is white. The `tint` constant is unreachable for
-  the same reason geometry does not draw: the engine cannot see the shader's
-  uniforms. One bug, two symptoms.
+- **No per-sprite colour.** Everything is white, and shape carries the meaning
+  instead. `sprite.set_constant` is not registered in this engine build (only
+  `reset_constant` is), and `go.set(url, "tint", ...)` reports "does not have
+  any property called" on a factory-created object, so there is no working
+  route to a per-sprite tint from Lua. This is a Defold API limit rather than
+  something the cart runtime removed.
 - **The high score does not persist.** `sys.save` fails - no writable
   filesystem is mounted for carts. The save/load code is correct and is left
   in place as the test case for when that is fixed.
