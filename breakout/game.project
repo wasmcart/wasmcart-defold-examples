@@ -17,3 +17,9 @@ gamepads = /builtins/input/default.gamepadsc
 [graphics]
 default_texture_min_filter = nearest
 default_texture_mag_filter = nearest
+
+[sprite]
+max_count = 320
+
+[collection]
+max_instances = 512
