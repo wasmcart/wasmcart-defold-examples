@@ -44,11 +44,25 @@ JAVA="$(ls -d "$DEFOLD"/tmp/jdk/*/bin/java 2>/dev/null | head -1 || true)"
 
 # Resolution comes from game.project so the cart manifest matches what the
 # engine actually renders; a mismatch puts the frame in a corner of the window.
-W=$(grep -A4 '^\[display\]' "$PROJ/game.project" | sed -n 's/^width *= *//p'  | head -1)
-H=$(grep -A4 '^\[display\]' "$PROJ/game.project" | sed -n 's/^height *= *//p' | head -1)
+W=$(grep -A4 '^\[display\]' "$PROJ/game.project" | sed -n 's/^width *= *//p'  | head -1 || true)
+H=$(grep -A4 '^\[display\]' "$PROJ/game.project" | sed -n 's/^height *= *//p' | head -1 || true)
+# A project may omit [display] entirely and rely on Defold's defaults, and the
+# grep above then yields an empty string. Under `set -e` that used to abort the
+# script with no message at all, which reads as a mysterious silent failure.
 W="${W:-960}"; H="${H:-540}"
-NAME="$(sed -n 's/^title *= *//p' "$PROJ/game.project" | head -1)"
+case "$W" in ''|*[!0-9]*) W=960;; esac
+case "$H" in ''|*[!0-9]*) H=540;; esac
+NAME="$(sed -n 's/^title *= *//p' "$PROJ/game.project" | head -1 || true)"
 NAME="${NAME:-$(basename "$PROJ")}"
+
+# Defold resolves /builtins/... against a builtins directory inside the project
+# root, so each project needs one pointing into the engine tree. The link holds
+# an absolute path to wherever the engine was cloned, which is why it is built
+# here rather than committed: a checked-in link would carry one machine's paths
+# and break on every other.
+BUILTINS="$DEFOLD/tmp/dynamo_home/content/builtins"
+[ -d "$BUILTINS" ] || { echo "no builtins at $BUILTINS - build the engine first"; exit 1; }
+ln -sfn "$BUILTINS" "$PROJ/builtins"
 
 echo "building $NAME (${W}x${H})"
 ( cd "$PROJ" && "$JAVA" -jar "$BOB" --root . \

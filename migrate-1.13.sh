@@ -12,7 +12,7 @@ set -euo pipefail
 PROJ="${1:?usage: migrate-1.13.sh <project-dir>}"
 cd "$PROJ"
 
-FILES=$(grep -rl --include='*.script' --include='*.lua' --include='*.render_script' \
+FILES=$(grep -rl --include='*.script' --include='*.lua' --include='*.render_script' --include='*.gui_script' \
   -E 'sys\.get_config\(|render\.(BUFFER_|STATE_|BLEND_FACTOR_|COMPARE_FUNC_|FACE_)' . 2>/dev/null || true)
 [ -z "$FILES" ] && { echo "  nothing to migrate in $PROJ"; exit 0; }
 
@@ -23,6 +23,11 @@ for f in $FILES; do
   #    numbers (clear colours, sizes); a string config needs get_config_string
   #    and is left alone for a human to classify.
   sed -i -E 's/sys\.get_config\(("[^"]*(color|colour|width|height|_red|_green|_blue|_alpha)[^"]*")/sys.get_config_number(\1/g' "$f"
+
+  # 1b. Everything else sys.get_config read is a STRING on these projects
+  #     (project.title, project.version). Left as get_config it is simply nil
+  #     and the call fails at runtime with "attempt to call field 'get_config'".
+  sed -i -E 's/sys\.get_config\(/sys.get_config_string(/g' "$f"
 
   # 2. Render constants moved from the `render` module to `graphics`, and the
   #    buffer names changed shape as well, and COLOR gained a render-target

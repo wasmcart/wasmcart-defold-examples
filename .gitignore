@@ -12,3 +12,17 @@ build/
 # on disk as a render test on real assets, but is NOT committed until its
 # origin and licence are confirmed.
 bombfrog/
+
+# Each project needs a builtins/ link into the engine tree. It is an absolute
+# path to wherever the engine was cloned, so it is created by build-cart.sh at
+# build time rather than committed.
+builtins
+
+# Ported third-party games are staged locally but NOT committed until the
+# provenance of their bundled audio is established: the upstream MIT LICENSE
+# covers Ben James, while title screens credit other musicians by name.
+substrike/
+planetoid/
+pixelcrypt/
+snowline/
+defrog/
