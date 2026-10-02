@@ -66,8 +66,8 @@ Every example is a self-contained `.wasc`. With Node installed, no checkout is
 needed to play one:
 
 ```bash
-npx wasmcart planetoid/planetoid.wasc --window
-npx wasmcart breakout/breakout.wasc --window
+npx wasmcart planetoid/planetoid.wasc
+npx wasmcart breakout/breakout.wasc
 ```
 
 The same file runs on
@@ -241,11 +241,13 @@ And in the pack step, **`--width`/`--height` are not optional**: the window
 sizes itself from the manifest, so a cart that omits them opens at the 1280x720
 default while the engine renders at its own resolution.
 
-## Running a cart
+## Testing a cart
+
+Playing one is covered above. For development, a cart can also be stepped a
+fixed number of frames and captured, which is what CI does:
 
 ```bash
-npx wasmcart breakout.wasc --window          # windowed, with input
-npx wasmcart breakout.wasc --frames 300      # headless, timed
+npx wasmcart breakout.wasc --frames 300
 npx wasmcart breakout.wasc --frames 60 --shot out.png
 ```
 
