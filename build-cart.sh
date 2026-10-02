@@ -23,7 +23,34 @@ else
   [ -d "$DEFOLD" ] || DEFOLD="$HERE/../defold"
 fi
 ENGINE="$DEFOLD/tmp/dynamo_home/bin/wasm-web/dmengine_wasmcart.wasm"
-BOB="$DEFOLD/tmp/dynamo_home/share/java/bob-light.jar"
+
+# Defold's content compiler. It is upstream Defold's tool, not ours, so it is
+# downloaded from Defold's own archive rather than built or vendored here. The
+# stable channel is used deliberately: this project tracks a Defold release, it
+# does not need the beta or alpha one.
+#
+# Note this is the full bob.jar, which carries its own /builtins. The engine
+# tree's bob-light.jar does not, which is why a local engine build injects a
+# builtins link and this path must not.
+BOB_CACHE="${BOB_CACHE:-${XDG_CACHE_HOME:-$HOME/.cache}/wasmcart-defold}"
+BOB="${BOB_JAR:-}"
+if [ -z "$BOB" ]; then
+  INFO="$(curl -fsSL --max-time 30 https://d.defold.com/stable/info.json)" || {
+    echo "cannot reach d.defold.com to resolve the Defold version" >&2; exit 1; }
+  DEFOLD_VERSION="$(printf '%s' "$INFO" | sed -n 's/.*"version"[: ]*"\([^"]*\)".*/\1/p')"
+  DEFOLD_SHA1="$(printf '%s' "$INFO" | sed -n 's/.*"sha1"[: ]*"\([^"]*\)".*/\1/p')"
+  [ -n "$DEFOLD_SHA1" ] || { echo "could not read the Defold sha1 from info.json" >&2; exit 1; }
+  BOB="$BOB_CACHE/bob-$DEFOLD_SHA1.jar"
+  if [ ! -f "$BOB" ]; then
+    echo "downloading Defold $DEFOLD_VERSION bob.jar"
+    mkdir -p "$BOB_CACHE"
+    curl -fL --max-time 900 -o "$BOB.part" \
+      "https://d.defold.com/archive/stable/$DEFOLD_SHA1/bob/bob.jar" || {
+        rm -f "$BOB.part"; echo "failed to download bob.jar" >&2; exit 1; }
+    mv "$BOB.part" "$BOB"
+  fi
+fi
+
 # The engine tree ships a JDK; use it when present, else whatever java is on PATH.
 JAVA="$(ls -d "$DEFOLD"/tmp/jdk/*/bin/java 2>/dev/null | head -1 || true)"
 [ -x "$JAVA" ] || JAVA="$(command -v java)"
@@ -40,7 +67,7 @@ JAVA="$(ls -d "$DEFOLD"/tmp/jdk/*/bin/java 2>/dev/null | head -1 || true)"
   echo "Or point DEFOLD_TREE at an existing checkout."
   exit 1
 }
-[ -f "$BOB" ]    || { echo "no bob-light.jar at $BOB"; exit 1; }
+[ -f "$BOB" ]    || { echo "no bob.jar at $BOB"; exit 1; }
 
 # Resolution comes from game.project so the cart manifest matches what the
 # engine actually renders; a mismatch puts the frame in a corner of the window.
@@ -55,14 +82,10 @@ case "$H" in ''|*[!0-9]*) H=540;; esac
 NAME="$(sed -n 's/^title *= *//p' "$PROJ/game.project" | head -1 || true)"
 NAME="${NAME:-$(basename "$PROJ")}"
 
-# Defold resolves /builtins/... against a builtins directory inside the project
-# root, so each project needs one pointing into the engine tree. The link holds
-# an absolute path to wherever the engine was cloned, which is why it is built
-# here rather than committed: a checked-in link would carry one machine's paths
-# and break on every other.
-BUILTINS="$DEFOLD/tmp/dynamo_home/content/builtins"
-[ -d "$BUILTINS" ] || { echo "no builtins at $BUILTINS - build the engine first"; exit 1; }
-ln -sfn "$BUILTINS" "$PROJ/builtins"
+# bob.jar carries its own /builtins, so the project must NOT contain one too:
+# two copies of the same path make the content build abort with a relative path
+# conflict. Remove any link left by an older build or a local engine tree.
+rm -f "$PROJ/builtins"
 
 echo "building $NAME (${W}x${H})"
 ( cd "$PROJ" && "$JAVA" -jar "$BOB" --root . \

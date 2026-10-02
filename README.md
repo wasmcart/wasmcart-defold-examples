@@ -215,7 +215,9 @@ apart. It is the supported path; what follows is what it does, for when
 something needs changing.
 
 ```bash
-java -jar ../wasmcart-defold/tmp/dynamo_home/share/java/bob-light.jar \
+# bob.jar is Defold's content compiler, downloaded from Defold's archive on
+# first use and cached under ~/.cache/wasmcart-defold.
+java -jar ~/.cache/wasmcart-defold/bob-<sha1>.jar \
     --root . --platform wasm-web --archive --use-uncompressed-lua-source build
 # -> build/default/game.{arci,arcd,dmanifest,projectc}
 
@@ -344,10 +346,11 @@ The finished carts are uploaded as a `carts` artifact with a `SHA256SUMS`
 file, so any run's output can be downloaded and played without building
 anything.
 
-The engine is not rebuilt here. `wasmcart-defold` publishes a toolchain
-artifact (the engine wasm, bob and the builtins tree) and this workflow
-consumes it, which keeps a run to a couple of minutes rather than the best part
-of an hour. Artifacts are not publicly readable the way repo contents are, so
+The engine is not rebuilt here. `wasmcart-defold` publishes the engine wasm as
+an artifact and this workflow consumes it, which keeps a run to a couple of
+minutes rather than the best part of an hour. Defold's `bob.jar` is downloaded
+from Defold's own archive and cached by sha1: it is upstream's tool, so it is
+not vendored, rebuilt or redistributed here. Artifacts are not publicly readable the way repo contents are, so
 the download is authenticated with the job's own `GITHUB_TOKEN` and the
 workflow grants itself `actions: read`. No separate secret is needed while both
 repos are public and in the same org.

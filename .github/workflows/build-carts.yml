@@ -86,17 +86,32 @@ jobs:
           run-id: ${{ steps.toolchain.outputs.run-id }}
           github-token: ${{ github.token }}
 
-      # build-cart.sh expects an engine tree laid out as wasmcart-defold does.
-      # Recreate only the paths it reads rather than cloning a 744 MB repo.
+      # build-cart.sh needs only the engine binary from the toolchain: it
+      # downloads Defold's own bob.jar, which carries its own builtins.
       - name: Lay the toolchain out as an engine tree
         run: |
           set -euo pipefail
           root=../wasmcart-defold/tmp/dynamo_home
-          mkdir -p "$root/bin/wasm-web" "$root/share/java" "$root/content"
+          mkdir -p "$root/bin/wasm-web"
           cp toolchain/dmengine_wasmcart.wasm "$root/bin/wasm-web/"
-          cp toolchain/bob-light.jar          "$root/share/java/"
-          cp -a toolchain/builtins            "$root/content/builtins"
-          (cd toolchain && sha256sum -c SHA256SUMS)
+          (cd toolchain && sha256sum -c --ignore-missing SHA256SUMS)
+
+      # bob.jar is ~230 MB; cache it so only the first run on a new Defold
+      # release pays the download.
+      - name: Resolve the Defold release
+        id: defold
+        run: |
+          set -euo pipefail
+          sha=$(curl -fsSL --max-time 30 https://d.defold.com/stable/info.json \
+                | sed -n 's/.*"sha1"[: ]*"\([^"]*\)".*/\1/p')
+          [ -n "$sha" ] || { echo "::error::could not resolve the Defold sha1"; exit 1; }
+          echo "sha1=$sha" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Defold bob.jar
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/wasmcart-defold
+          key: bob-${{ steps.defold.outputs.sha1 }}
 
       - name: Install the packer
         run: npm install --no-save wasmcart
