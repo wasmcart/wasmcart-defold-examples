@@ -313,9 +313,10 @@ anything.
 The engine is not rebuilt here. `wasmcart-defold` publishes a toolchain
 artifact (the engine wasm, bob and the builtins tree) and this workflow
 consumes it, which keeps a run to a couple of minutes rather than the best part
-of an hour. That cross-repo download needs a `TOOLCHAIN_TOKEN` secret with read
-access to `wasmcart-defold`; the job stops with a clear message if it is
-missing.
+of an hour. Artifacts are not publicly readable the way repo contents are, so
+the download is authenticated with the job's own `GITHUB_TOKEN` and the
+workflow grants itself `actions: read`. No separate secret is needed while both
+repos are public and in the same org.
 
 ## Licence and credits
 

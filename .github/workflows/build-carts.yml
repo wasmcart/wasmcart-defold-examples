@@ -18,6 +18,11 @@ on:
 
 permissions:
   contents: read
+  # Needed to read artifacts from wasmcart-defold. Both repos are public and in
+  # the same org, so the job's own GITHUB_TOKEN is enough: artifacts are not
+  # publicly readable the way repo contents are, but `actions: read` on a token
+  # from the same org covers a public repo without any extra secret.
+  actions: read
 
 jobs:
   build:
@@ -35,18 +40,6 @@ jobs:
         with:
           node-version: '22'
 
-      # Cross-repo download needs a token with read access to wasmcart-defold.
-      # TOOLCHAIN_TOKEN is an org secret; without it the run stops here with a
-      # clear message rather than failing later on a missing engine.
-      - name: Check the toolchain token is present
-        env:
-          TOOLCHAIN_TOKEN: ${{ secrets.TOOLCHAIN_TOKEN }}
-        run: |
-          if [ -z "${TOOLCHAIN_TOKEN}" ]; then
-            echo "::error::TOOLCHAIN_TOKEN is not set. It needs read access to wasmcart-defold so this job can fetch the engine toolchain."
-            exit 1
-          fi
-
       - name: Fetch the engine toolchain
         uses: actions/download-artifact@v8
         with:
@@ -54,7 +47,7 @@ jobs:
           path: toolchain
           repository: wasmcart/wasmcart-defold
           run-id: ${{ github.event.inputs.toolchain_run_id || '' }}
-          github-token: ${{ secrets.TOOLCHAIN_TOKEN }}
+          github-token: ${{ github.token }}
 
       # build-cart.sh expects an engine tree laid out as wasmcart-defold does.
       # Recreate only the paths it reads rather than cloning a 744 MB repo.
