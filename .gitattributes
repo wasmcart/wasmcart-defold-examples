@@ -1,0 +1,24 @@
+# Defold's game-object files use the .go extension, which collides with Go.
+# GitHub's linguist reported this repo as 62% Go before this file existed.
+# They are protobuf text, not source: mark them as data so the language
+# breakdown reflects the Lua the games are actually written in.
+*.go           linguist-language=Protocol Buffer Text Format
+*.collection   linguist-language=Protocol Buffer Text Format
+*.sprite       linguist-language=Protocol Buffer Text Format
+*.factory      linguist-language=Protocol Buffer Text Format
+*.label        linguist-language=Protocol Buffer Text Format
+*.atlas        linguist-language=Protocol Buffer Text Format
+*.tilemap      linguist-language=Protocol Buffer Text Format
+*.tilesource   linguist-language=Protocol Buffer Text Format
+*.particlefx   linguist-language=Protocol Buffer Text Format
+*.font         linguist-language=Protocol Buffer Text Format
+*.material     linguist-language=Protocol Buffer Text Format
+*.gui          linguist-language=Protocol Buffer Text Format
+*.input_binding linguist-language=Protocol Buffer Text Format
+*.gamepads     linguist-language=Protocol Buffer Text Format
+*.collisionobject linguist-language=Protocol Buffer Text Format
+*.render       linguist-language=Protocol Buffer Text Format
+*.display_profiles linguist-language=Protocol Buffer Text Format
+
+# Vendored builtins and generated content are not this project's code.
+*/builtins/**  linguist-vendored
