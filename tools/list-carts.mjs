@@ -5,7 +5,7 @@
 // project at the repo root that has a game.project, then every games/<id>
 // whose game.json is not "enabled": false. With --frames <project>, prints
 // the number of frames CI runs that cart for: game.json "ci": {"frames": N},
-// else 320 for an example and 120 for a game (the games are 1080p 3D scenes
+// else 480 for an example (apitest's physics verdict is at frame 420) and 120 for a game (the games are 1080p 3D scenes
 // and run on a software rasterizer in CI). With --runs <project>, prints
 // "yes" unless game.json has "ci": {"run": false}: a cart CI builds but does
 // not run, with the reason beside the flag (a host bug the cart trips, say).
@@ -36,7 +36,7 @@ if (args[0] === '--runs') {
 } else if (args[0] === '--frames') {
   const p = args[1];
   const meta = p.startsWith('games/') ? JSON.parse(fs.readFileSync(path.join(ROOT, p, 'game.json'), 'utf8')) : {};
-  console.log(meta.ci?.frames ?? (p.startsWith('games/') ? 120 : 320));
+  console.log(meta.ci?.frames ?? (p.startsWith('games/') ? 120 : 480));
 } else {
   for (const p of [...examples, ...games]) console.log(p);
 }

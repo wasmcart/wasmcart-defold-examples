@@ -530,7 +530,7 @@ polled, and a pad that appears mid-session is picked up on the next frame.
 
 `.github/workflows/build-carts.yml` packs every example and every enabled
 showcase game into GL and WebGPU `.wasc` carts on each push, and runs each GL
-cart headless (320 frames for an example, 120 for a game; the WebGPU carts
+cart headless (480 frames for an example, 120 for a game; the WebGPU carts
 are packed but not run, as a runner has no WebGPU device). A cart passes only
 if the runtime reports completing all its frames; it fails on a short run, a
 script error, a cart trap or a failed in-cart assertion. Checking only for

@@ -29,8 +29,10 @@ local ART = 8
 
 -- The balls need about four seconds of gravity to reach the angled walls, so
 -- the physics verdict cannot be read at frame 120 - it would report a working
--- world as broken purely because nothing had touched yet.
-local VERDICT_FRAME = 300
+-- world as broken purely because nothing had touched yet. At frame 300 the
+-- first contact had only just happened (one message on one run, none on the
+-- next), so the verdict waits for frame 420, by which every ball has hit.
+local VERDICT_FRAME = 420
 
 local results = {}
 local order = {}
