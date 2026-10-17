@@ -11,6 +11,10 @@
   "skipExtensions": [
     "DefoldImGui"
   ],
+  "ci": {
+    "run": false,
+    "reason": "webgl-node 1.6.1 (the npm wasmcart host's GL layer) overruns the heap on a uniform block of more than a few uniforms (getActiveUniformBlockParameter queried ACTIVE_UNIFORM_INDICES into a one-element buffer) and this cart dies at load on it; fixed in webgl-node main, unreleased. Built here, run again when a release carries the fix."
+  },
   "credits": [
     "Original Unity implementation by Daniel Shervheim (danielshervheim/unity-stylized-water)."
   ],

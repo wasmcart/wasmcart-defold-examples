@@ -134,6 +134,10 @@ jobs:
           for p in $(node tools/list-carts.mjs); do
             name=$(basename "$p")
             cart="$p/$name.wasc"
+            if [ "$(node tools/list-carts.mjs --runs "$p")" != yes ]; then
+              echo "skipping the run of $name (game.json ci.run is false; see its ci.reason)"
+              continue
+            fi
             frames=$(node tools/list-carts.mjs --frames "$p")
             echo "::group::run $name ($frames frames)"
             out=$(npx --no-install wasmcart "$cart" --frames "$frames" 2>&1 || true)
