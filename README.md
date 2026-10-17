@@ -8,7 +8,16 @@ implements the ABI.
 The engine these build against is
 [wasmcart-defold](https://github.com/wasmcart/wasmcart-defold), which vendors
 Defold and adds a cart runtime. Build it first; the instructions below assume
-it sits beside this repo.
+it sits beside this repo. The release this repo is built against is named in
+[`engine.lock`](engine.lock).
+
+Two kinds of cart come out of here: the twelve small examples and 2D games
+under the repo root, and the 3D **[showcase games](#showcase-games)** under
+`games/`, open-source Defold projects by other developers fetched at a pinned
+commit and built as carts. Every cart is built twice from one content
+archive: a GL cart (`<name>.wasc`) and, where the game's shaders compile to
+WGSL, a WebGPU cart (`<name>_webgpu.wasc`) for hosts with wasmcart's WebGPU
+tier.
 
 ## Status
 
@@ -79,6 +88,167 @@ per-target build, no page to embed it in.
 Build the carts first with `./build-cart.sh <name>`, or download them from the
 GitHub Actions artifacts (see
 [Continuous integration](#continuous-integration)).
+
+## Showcase games
+
+Seven open-source Defold projects by other developers, built as carts at a
+pinned upstream commit. Each stays theirs: the credit, the licence and the
+link below are the point of this section, and the whole of what this repo
+changes is in `games/<id>/patches/` (and `overrides/`, for a shader inside a
+dependency). `games/<id>/game.json` records the repository, commit, author,
+licence and the changes' reasons; `tools/fetch-games.mjs` checks a game out
+at that commit and applies the patches, and `tools/build-cart.mjs` builds it,
+relinking the engine through the wasmcart-defold SDK when a game has native
+extensions.
+
+Every screenshot below was taken from the cart as it runs on the wasmcart Node
+host, on WebGPU where the game has a WebGPU cart (`tools/screenshot.mjs`).
+
+### Treasure Scene
+
+![Treasure Scene](docs/screenshots/treasure3d.png)
+
+A stylized 3D scene showing Defold's rendering features: a treasure chest on
+a turntable among crates and trees, with lighting, shadows and a PBR-style
+material setup. A/D or left/right turn the table; the left mouse button opens
+the chest.
+
+**By [FlexYourBrain](https://github.com/FlexYourBrain)** (Agustin), from
+[FlexYourBrain/Basic3d_TreasureScene](https://github.com/FlexYourBrain/Basic3d_TreasureScene),
+MIT. Art by Agustin R. Also on [itch.io](https://flexyourbrain.itch.io/treasure-scene).
+GL and WebGPU carts; no changes to the project.
+
+### Little Coaster
+
+![Little Coaster](docs/screenshots/littlecoaster.png)
+
+A miniature roller coaster on a playroom floor: a looping track, a ferris
+wheel, toy blocks and crayons, rendered with Defold PBR. FlexYourBrain's entry
+to the Defold [Tiny Worlds community challenge](https://forum.defold.com/t/community-challenge-tiny-worlds/81931);
+every asset was made from scratch for it. The play button starts the ride.
+
+**By [FlexYourBrain](https://github.com/FlexYourBrain)** (Agustin), from
+[FlexYourBrain/sample_littlecoaster](https://github.com/FlexYourBrain/sample_littlecoaster),
+MIT. Uses [vantage](https://github.com/Jhonnyg/vantage) by Jhonny Göransson,
+[dirtylarry](https://github.com/andsve/dirtylarry) by Sven Andersson and
+[defold-pbr](https://github.com/defold/defold-pbr) by the Defold Foundation.
+GL and WebGPU carts; no changes to the project. This game is what found the
+WebGPU cube-map binding bug fixed in wasmcart-defold (its environment map
+drew nothing in compatibility mode).
+
+### Horror 3D
+
+![Horror 3D](docs/screenshots/horror3d.png)
+
+A first-person horror game in the style of Slender: collect the pages
+scattered through a dark forest before the thing hunting you catches up.
+Pawel Jarosz's entry to Made With Defold Jam 2023. WASD moves, Shift runs,
+Space jumps, C crouches, F is the flashlight, the mouse looks; N disables the
+scare jumps and 1/2 adjust brightness.
+
+**By [Pawel Jarosz](https://github.com/paweljarosz)**, from
+[paweljarosz/horror_3d_game_mwdj_2023](https://github.com/paweljarosz/horror_3d_game_mwdj_2023),
+MIT. Built on [Illumination](https://github.com/astrochili/defold-illumination)
+by Roman Silin (MIT) and [Horri-fold](https://github.com/TheKing0x9/horri-fold)
+post-processing by Aayush Kashyap; textures by
+[Joao Paulo (3dtextures.me)](https://3dtextures.me); models from cgtrader's
+free models (low-poly zombie, dead trees, realistic trees, metal door, cross
+stone, candles, meatcube arm), each linked in the project's README; uses
+[defold-operator](https://github.com/astrochili/defold-operator) and
+[defold-trenchbroom](https://github.com/astrochili/defold-trenchbroom) by Roman
+Silin, [pigeon](https://github.com/paweljarosz/pigeon) by Pawel Jarosz and
+[defold-pointer-lock](https://github.com/indiesoftby/defold-pointer-lock) by
+Indiesoft LLC. GL and WebGPU carts. Changes: Defold 1.14 no longer reads
+Collada, so its ten `.dae` models are converted to glTF
+(`tools/dae2gltf.mjs`); the Illumination shader's texture reads are hoisted
+out of branches so it compiles to WGSL; the skybox shader's `transpose` helper
+is renamed; the browser pointer-lock extension is replaced by
+`cart-ext/pointer_lock`.
+
+### Illumination
+
+![Illumination](docs/screenshots/illumination.png)
+
+The demo scene of Illumination, a forward-shading lighting library for
+Defold: point and spot lights, a flashlight, fog, normal and specular maps,
+walked in first person. WASD moves, E is the flashlight, F is spectator mode.
+
+**By [Roman Silin (astrochili)](https://github.com/astrochili)**, from
+[astrochili/defold-illumination](https://github.com/astrochili/defold-illumination),
+MIT. Textures from [Tiny Texture Pack 1 and 2](https://screamingbrainstudios.itch.io/tiny-texture-pack)
+by Screaming Brain Studios; normal and specular maps made with
+[Normal Map Online](https://cpetry.github.io/NormalMap-Online/) by @cpetry.
+GL and WebGPU carts. Changes: the model shader's texture reads are hoisted out
+of branches for WGSL. This scene found the second wasmcart-defold WebGPU fix:
+its material declares a light-map texcoord most meshes do not supply, which
+GL tolerates and WebGPU refused, so nothing drew.
+
+### Merge Getaway
+
+![Merge Getaway](docs/screenshots/mergegetaway.png)
+
+A 3D car-merging getaway: the police are after you, so merge cars of the same
+colour to accelerate and escape. Artsiom Trubchyk's Ludum Dare 50 compo
+entry. A/D steer, M toggles the music, R restarts.
+
+**By [Artsiom Trubchyk (aglitchman)](https://github.com/aglitchman)**, from
+[aglitchman/defold-ld50-game](https://github.com/aglitchman/defold-ld50-game),
+MIT. Built on [Scene3D](https://github.com/indiesoftby/defold-scene3d) by
+Indiesoft LLC (MIT); models in SideFX Houdini, 2D art in Affinity Designer and
+music in Bandlab, all by the author; uses
+[ludobits](https://github.com/britzl/ludobits) by Björn Ritzl. Also on
+[itch.io](https://glitchman.itch.io/merge-getaway). GL and WebGPU carts.
+Changes: Scene3D is moved to its latest commit for Defold 1.14, and three of
+its shaders that pass a `sampler2D` as a function parameter are replaced
+(`overrides/`); the desktop and browser extensions it depends on (defos,
+screenshot, clipboard, its own HTML5 glue) are left out and the two fullscreen
+calls guarded; the physics object limit is raised.
+
+### BRDF Deferred Rendering
+
+![BRDF Deferred Rendering](docs/screenshots/brdfdeferred.png)
+
+A deferred PBR rendering pipeline for Defold with tiled light culling,
+shadows, tone mapping and post-processing, shown in a walkable interior. WASD
+moves, the mouse looks.
+
+**By [Mikhail Martianov (martianovdev)](https://github.com/martianovdev)**
+([martianov.tech](https://martianov.tech)), from
+[martianovdev/Defold-BRDF-Deferred-Rendering-V2](https://github.com/martianovdev/Defold-BRDF-Deferred-Rendering-V2),
+CC BY 4.0: this cart is a redistribution of that project at the pinned commit
+with the changes in its `patches/`, and the credit here is the attribution
+the licence asks for. GL cart only: its shaders pass samplers as function
+parameters and do not compile to WGSL. Changes: the Defold 1.13 API migration
+(the legacy LiveUpdate loader, the physics listener, `profiler` guarded) and
+the builtin Collada quad replaced by the glTF one.
+
+### Stylized Water
+
+![Stylized Water](docs/screenshots/stylizedwater.png)
+
+A stylized water shader: animated waves, foam, sparkles and refraction around
+floating objects under a cloudy sky. The camera is fixed.
+
+**By [Selim Anaç (selimanac)](https://github.com/selimanac)**, from
+[selimanac/defold-stylized-water-shader](https://github.com/selimanac/defold-stylized-water-shader),
+MIT, a port of [unity-stylized-water](https://github.com/danielshervheim/unity-stylized-water)
+by Daniel Shervheim. GL cart only: the shader samples inside non-uniform
+control flow, which WGSL forbids. Changes: none to the project; the
+extension-imgui dependency, which the sample never calls, is left out of the
+cart engine. This cart found a heap overrun in webgl-node (the Node host's GL
+layer) that killed the host on any cart with a large uniform block.
+
+### Not built yet
+
+**[SuperWEIRD Game Kit](https://github.com/ludenio/SuperWEIRDGameKit)** by
+[Luden.io](https://luden.io) (CC0) and the
+**[Slasher prototype](https://github.com/Dragosha/slasher-prototype)** by
+[Igor Suntsev (Dragosha)](https://github.com/Dragosha) (code MIT, art CC0)
+are both pinned under `games/` but disabled. Each needs
+[extension-spine](https://github.com/defold/extension-spine), which compiles
+the Spine Runtimes into the engine, and the
+[Spine Runtimes License](https://esotericsoftware.com/spine-runtimes-license)
+needs a decision before that ships in a cart engine.
 
 ## The games
 
@@ -206,13 +376,36 @@ source ./dmenv.sh
 
 # 2. Build content and pack a cart (content build + pack in one step)
 cd ../wasmcart-defold-examples
-./build-cart.sh breakout          # -> breakout/breakout.wasc
+./build-cart.sh breakout          # -> breakout/breakout.wasc, breakout_webgpu.wasc
+
+# 3. A showcase game: fetch it at its pinned commit, then build it
+node tools/fetch-games.mjs horror3d
+node tools/build-cart.mjs games/horror3d
 ```
 
-`build-cart.sh` reads the resolution and title out of `game.project`, stages
-into a `mktemp -d` and packs the result, so the two steps below cannot drift
-apart. It is the supported path; what follows is what it does, for when
-something needs changing.
+`build-cart.sh` wraps `tools/build-cart.mjs`, which reads the resolution and
+title out of `game.project`, builds the content once with WGSL beside the
+GLSL, and packs a GL cart and (when the engine tree has
+`dmengine_wasmcart_webgpu.wasm`) a WebGPU cart. It is the supported path;
+what follows is what it does, for when something needs changing.
+
+Two things it does beyond that, both for the showcase games:
+
+- **Native extensions.** bob sends any extension with C++ sources to Defold's
+  build server, which cannot build a cart engine. The builder gives bob a copy
+  of the project with those sources left out, and compiles them into the
+  engine itself with the wasmcart-defold SDK (`WASMCART_DEFOLD_SDK`, default
+  `../wasmcart-defold/tmp/wasmcart-defold-sdk`, made by `sdk/make-sdk.mjs`
+  there). A game's `game.json` can leave an extension out
+  (`skipExtensions`, for browser- or desktop-only ones) or replace it with a
+  cart implementation (`cartExtensions`, see `cart-ext/pointer_lock`).
+- **The Defold 1.13 API migration.** Defold 1.13 removed its deprecated Lua
+  APIs and constants, and 1.14 dropped Collada models and some builtins. The
+  builder rewrites the mechanical cases (`tools/migrate-defold.mjs`: renamed
+  constants, same-argument renames, moved builtins) on its staged copy of the
+  project and of every dependency, and names anything it cannot rewrite, so
+  a game written for 1.12 or older mostly builds as is. The rest goes in the
+  game's `patches/`.
 
 ```bash
 # bob.jar is Defold's content compiler, downloaded from Defold's archive on
@@ -335,25 +528,27 @@ polled, and a pad that appears mid-session is picked up on the next frame.
 
 ## Continuous integration
 
-`.github/workflows/build-carts.yml` packs every example into a `.wasc` on each
-push and runs each one headless for 320 frames. A cart passes only if the
-runtime reports completing all 320 frames; it fails on a short run, a script
-error, a cart trap or a failed in-cart assertion. Checking only for error
-messages is not enough: a runner with no working GL never loads the cart at
-all, so it produces none of those errors and every cart would look fine.
+`.github/workflows/build-carts.yml` packs every example and every enabled
+showcase game into GL and WebGPU `.wasc` carts on each push, and runs each GL
+cart headless (320 frames for an example, 120 for a game; the WebGPU carts
+are packed but not run, as a runner has no WebGPU device). A cart passes only
+if the runtime reports completing all its frames; it fails on a short run, a
+script error, a cart trap or a failed in-cart assertion. Checking only for
+error messages is not enough: a runner with no working GL never loads the
+cart at all, so it produces none of those errors and every cart would look
+fine.
 
 The finished carts are uploaded as a `carts` artifact with a `SHA256SUMS`
-file, so any run's output can be downloaded and played without building
-anything.
+file. **A pushed `v*` tag also gets a GitHub release with every cart attached**,
+so a version can be pinned and downloaded without an account.
 
-The engine is not rebuilt here. `wasmcart-defold` publishes the engine wasm as
-an artifact and this workflow consumes it, which keeps a run to a couple of
-minutes rather than the best part of an hour. Defold's `bob.jar` is downloaded
-from Defold's own archive and cached by sha1: it is upstream's tool, so it is
-not vendored, rebuilt or redistributed here. Artifacts are not publicly readable the way repo contents are, so
-the download is authenticated with the job's own `GITHUB_TOKEN` and the
-workflow grants itself `actions: read`. No separate secret is needed while both
-repos are public and in the same org.
+The engine is not rebuilt here. [`engine.lock`](engine.lock) names a
+wasmcart-defold release, and the workflow downloads that release's two
+engines and its SDK (checksummed against the release's `SHA256SUMS`), then
+installs the emsdk the SDK names for the games' native extensions. Moving to
+a new engine is a one-line change to that file. Defold's `bob.jar` is pinned
+to the engine's Defold release and cached: it is upstream's tool, so it is
+not vendored, rebuilt or redistributed here.
 
 ## Licence and credits
 

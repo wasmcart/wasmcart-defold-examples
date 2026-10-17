@@ -1,0 +1,140 @@
+diff --git a/src/Content/Rooms/Scene.script b/src/Content/Rooms/Scene.script
+index f2c955a..b2170c3 100644
+--- a/src/Content/Rooms/Scene.script
++++ b/src/Content/Rooms/Scene.script
+@@ -6,7 +6,10 @@ local Core = require("src.Modules.Core.Core")
+ function init(self)
+ 	
+ 	--profiler.enable_ui(true)
+-	profiler.set_ui_view_mode(profiler.VIEW_MODE_MINIMIZED)
++	-- The cart engine links Defold's null profiler, which has no Lua module.
++	if profiler then
++		profiler.set_ui_view_mode(profiler.VIEW_MODE_MINIMIZED)
++	end
+ 	--pprint(profiler.dump_frame())
+ 	
+ 	Core:world(function(toolkit)
+diff --git a/src/Modules/Common/ProxyLoader.lua b/src/Modules/Common/ProxyLoader.lua
+index 9634531..710ca48 100644
+--- a/src/Modules/Common/ProxyLoader.lua
++++ b/src/Modules/Common/ProxyLoader.lua
+@@ -4,7 +4,10 @@ function ProxyLoader:new()
+ 	local this = {
+ 		init = function(this)
+ 			this.data_by_collection_name = {}
+-			this.manifest = liveupdate.get_current_manifest()
++			-- The legacy LiveUpdate API (get_current_manifest, store_resource,
++			-- collectionproxy.missing_resources) went away in Defold 1.13. No
++			-- collection here is excluded from the archive, so every proxy's
++			-- resources are already present and a proxy simply loads.
+ 			this.is_desktop = sys.get_sys_info().system_name == "Windows" or 
+ 			sys.get_sys_info().system_name == "Mac OS X" or
+ 			sys.get_sys_info().system_name == "Linux"
+@@ -26,68 +29,7 @@ function ProxyLoader:new()
+ 			local collection_name_hash = hash(collection_name)
+ 			this.data_by_collection_name[collection_name_hash] = init_data
+ 
+-			local resources = collectionproxy.missing_resources(proxy_url)
+-
+-			-- If no missing resources, load proxy immediately
+-			if #resources == 0 then
+-				msg.post(proxy_url, "load")
+-				return
+-			end
+-
+-			-- Counter of remaining resources to load
+-			local pending_resources = #resources
+-
+-			for _, resource_hash in ipairs(resources) do
+-				if this.is_desktop then
+-					-- For desktop version read files directly from disk
+-					local path = sys.get_application_path() .. "/data/" .. resource_hash
+-					local file = io.open(path, "rb")
+-					if file then
+-						local content = file:read("*a")
+-						file:close()
+-						-- liveupdate.store_archive(path, function(self2, _path, status)
+-						-- 	this:callback_store_resource(_path, status)
+-						-- 	pending_resources = pending_resources - 1
+-						-- 	if pending_resources == 0 then
+-						-- 		msg.post(proxy_url, "load")
+-						-- 	end
+-						-- end)
+-						liveupdate.store_resource(this.manifest, content, resource_hash, function(self2, hexdigest, status)
+-							this:callback_store_resource(hexdigest, status)
+-							pending_resources = pending_resources - 1
+-							if pending_resources == 0 then
+-								msg.post(proxy_url, "load")
+-							end
+-						end)
+-					else
+-						print("Failed to read resource file: " .. path)
+-						pending_resources = pending_resources - 1
+-						if pending_resources == 0 then
+-							msg.post(proxy_url, "load")
+-						end
+-					end
+-				else
+-					-- For mobile platforms load via HTTP
+-					local baseurl = "/data/"
+-					http.request(baseurl .. resource_hash, "GET", function(self1, id, response)
+-						if response.status == 200 then
+-							liveupdate.store_resource(this.manifest, response.response, resource_hash, function(self2, hexdigest, status)
+-								this:callback_store_resource(hexdigest, status)
+-								pending_resources = pending_resources - 1
+-								if pending_resources == 0 then
+-									msg.post(proxy_url, "load")
+-								end
+-							end)
+-						else
+-							print("Failed to download resource: " .. resource_hash)
+-							pending_resources = pending_resources - 1
+-							if pending_resources == 0 then
+-								msg.post(proxy_url, "load")
+-							end
+-						end
+-					end)
+-				end
+-			end
++			msg.post(proxy_url, "load")
+ 		end,
+ 
+ 		get_init_data = function(this)
+diff --git a/src/Modules/Core/Modules/World.lua b/src/Modules/Core/Modules/World.lua
+index 3a18c5c..f8c6236 100644
+--- a/src/Modules/Core/Modules/World.lua
++++ b/src/Modules/Core/Modules/World.lua
+@@ -35,8 +35,23 @@ function World:new(init_callback, update_callback)
+ 		ambient_color = vmath.vector4(0.1, 0.1, 0.1, 1),
+ 		
+ 		init = function(this)
+-			physics.set_listener(function(_, event, data)
+-				this.physics_master:update(event, data)
++		end,
++
++		-- Defold 1.13 replaced the per-event physics listener, fn(self, event, data),
++		-- with set_event_listener, fn(self, events): one call per frame with
++		-- every event, each tagged by its "type" field. It binds the calling
++		-- script's physics world and errors where there is none, so it is set
++		-- from the first subscriber, which lives in the loaded world, rather
++		-- than at construction in the bootstrap collection.
++		listen_for_physics = function(this)
++			if this.physics_listening then
++				return
++			end
++			this.physics_listening = true
++			physics.set_event_listener(function(_, events)
++				for _, event in ipairs(events) do
++					this.physics_master:update(event.type, event)
++				end
+ 			end)
+ 		end,
+ 
+@@ -54,6 +69,7 @@ function World:new(init_callback, update_callback)
+ 		end,
+ 
+ 		physics_subscribe = function(this, obj_url, event_callback)
++			this:listen_for_physics()
+ 			this.physics_master:subscribe(obj_url, event_callback)
+ 		end,
+ 

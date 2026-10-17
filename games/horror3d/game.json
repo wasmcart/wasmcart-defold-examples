@@ -1,0 +1,26 @@
+{
+  "title": "Horror 3D",
+  "description": "A first-person horror game in the style of Slender: collect the pages scattered through a dark forest before the thing hunting you catches up. Pawel Jarosz's entry to Made With Defold Jam 2023.",
+  "repo": "https://github.com/paweljarosz/horror_3d_game_mwdj_2023",
+  "commit": "40a23b6d9aa4330cee530fbc8290a29a3e372bf2",
+  "author": "Pawel Jarosz",
+  "authorUrl": "https://github.com/paweljarosz",
+  "license": "MIT",
+  "webgpu": true,
+  "controls": "WASD move, Shift run, Space jump, C crouch, F flashlight, mouse look, N disables scare jumps, 1/2 adjust brightness.",
+  "skipExtensions": [
+    "pointer_lock"
+  ],
+  "cartExtensions": [
+    "../../cart-ext/pointer_lock"
+  ],
+  "credits": [
+    "Based on Illumination by Roman Silin (astrochili), MIT, and Horri-fold post-processing by Aayush Kashyap (TheKing0x9).",
+    "Textures by Joao Paulo (3dtextures.me).",
+    "Models from cgtrader free models: low-poly zombie, dead trees, realistic trees pack, metal door, cross stone, candles set, meatcube arm; each is credited by link in the project README.",
+    "Depends on defold-operator and defold-trenchbroom (Roman Silin), pigeon (Pawel Jarosz) and defold-pointer-lock (Indiesoft LLC)."
+  ],
+  "notes": [
+    "pointer_lock (indiesoftby/defold-pointer-lock) is replaced by cart-ext/pointer_lock: the original locks the cursor through GLFW or the browser, neither of which a cart has. Its Lua half is unchanged."
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "title": "Merge Getaway",
+  "description": "A 3D car-merging getaway: the police are after you, so merge cars of the same colour to accelerate and escape. Artsiom Trubchyk's Ludum Dare 50 compo entry.",
+  "repo": "https://github.com/aglitchman/defold-ld50-game",
+  "commit": "1668afb8200f41c83cafa8b3310793590537e280",
+  "author": "Artsiom Trubchyk (aglitchman)",
+  "authorUrl": "https://github.com/aglitchman",
+  "license": "MIT",
+  "webgpu": true,
+  "controls": "A/D or left/right steer; M toggles music; R restarts.",
+  "skipExtensions": [
+    "defos",
+    "Screenshot",
+    "clipboard",
+    "LD50"
+  ],
+  "cartExtensions": [
+    "../../cart-ext/pointer_lock"
+  ],
+  "credits": [
+    "Built on Scene3D by Indiesoft LLC (MIT). Models made in SideFX Houdini, 2D art in Affinity Designer, music in Bandlab, by the author.",
+    "Depends on ludobits (Björn Ritzl)."
+  ],
+  "notes": [
+    "defos (fullscreen toggle), Screenshot, clipboard and the game's own LD50 HTML5 glue are desktop or browser extensions a cart cannot use; the Lua guards its two defos calls. pointer_lock is replaced by cart-ext/pointer_lock. scene3d is pinned to its latest commit (3b7048a) for Defold 1.14; its three shaders with sampler2D parameters are replaced under overrides/."
+  ]
+}

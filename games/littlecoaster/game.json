@@ -1,0 +1,16 @@
+{
+  "title": "Little Coaster",
+  "description": "A miniature roller coaster on a playroom floor: a looping track, a ferris wheel, toy blocks and crayons, rendered with Defold PBR. FlexYourBrain's entry to the Defold \"Tiny Worlds\" community challenge.",
+  "repo": "https://github.com/FlexYourBrain/sample_littlecoaster",
+  "commit": "52b6dc38bda089a75ed41a129d7a61a5a3f0da43",
+  "author": "FlexYourBrain",
+  "authorUrl": "https://github.com/FlexYourBrain",
+  "license": "MIT",
+  "webgpu": true,
+  "controls": "Play button starts the ride; settings in the corner.",
+  "credits": [
+    "All assets made from scratch for the challenge by FlexYourBrain, per the project README.",
+    "Depends on vantage (Jhonny Göransson) and dirtylarry (Sven Andersson), both Lua.",
+    "Bundles defold-pbr (the Defold Foundation)."
+  ]
+}

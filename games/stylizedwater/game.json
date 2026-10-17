@@ -1,0 +1,20 @@
+{
+  "title": "Stylized Water",
+  "description": "A stylized water shader: animated waves, foam, sparkles and refraction around floating objects under a cloudy sky. Selim Anaç's Defold port of Daniel Shervheim's Unity stylized water.",
+  "repo": "https://github.com/selimanac/defold-stylized-water-shader",
+  "commit": "bdcc1d863c64015fb70b117042f551795eb04211",
+  "author": "Selim Anaç (selimanac)",
+  "authorUrl": "https://github.com/selimanac",
+  "license": "MIT",
+  "webgpu": false,
+  "controls": "None; the camera is fixed.",
+  "skipExtensions": [
+    "DefoldImGui"
+  ],
+  "credits": [
+    "Original Unity implementation by Daniel Shervheim (danielshervheim/unity-stylized-water)."
+  ],
+  "notes": [
+    "extension-imgui is a dependency the sample never calls (no imgui.* in its Lua); its C++ does not compile against Defold 1.14, so it is left out of the cart engine."
+  ]
+}

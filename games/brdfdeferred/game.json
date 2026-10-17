@@ -1,0 +1,14 @@
+{
+  "title": "BRDF Deferred Rendering",
+  "description": "A deferred PBR rendering pipeline for Defold with tiled light culling, shadows, tone mapping and post-processing, shown in a walkable interior. By Mikhail Martianov.",
+  "repo": "https://github.com/martianovdev/Defold-BRDF-Deferred-Rendering-V2",
+  "commit": "4de9b8bfa3d5d3c1fdc26a010af6f458ffbaa91c",
+  "author": "martianovdev",
+  "authorUrl": "https://github.com/martianovdev",
+  "license": "CC-BY-4.0",
+  "webgpu": false,
+  "controls": "WASD move, mouse look.",
+  "credits": [
+    "CC BY 4.0: this cart is a redistribution of the project at the pinned commit with the changes in patches/, credited to Mikhail Martianov (martianov.tech)."
+  ]
+}

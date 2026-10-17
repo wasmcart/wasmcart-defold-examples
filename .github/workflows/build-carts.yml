@@ -1,39 +1,33 @@
 name: build carts
 
-# Packs every example into a .wasc and uploads them as artifacts, so a cart can
-# be downloaded and played without building anything locally.
+# Builds every example and every game as .wasc carts, runs each one headless
+# on the wasmcart Node host, and uploads the carts: as a workflow artifact on
+# every run, and attached to the release when a tag is pushed.
 #
-# The engine is NOT built here. wasmcart-defold publishes the engine wasm as an
-# artifact and this job consumes it, which keeps a run to a couple of minutes
-# instead of the best part of an hour. Defold's bob.jar is downloaded from
-# Defold's own archive by build-cart.sh, not taken from that artifact.
+# The engine is NOT built here. wasmcart-defold publishes the two cart engines
+# (GL and WebGPU) and the SDK that relinks them with native extensions on each
+# of its releases, and this job takes them from the release that engine.lock
+# names, so a cart here is built against a known engine and the two repos
+# move together on purpose.
 on:
   push:
     branches: [main]
+    tags: ['v*']
   pull_request:
   workflow_dispatch:
-    inputs:
-      toolchain_run_id:
-        description: 'wasmcart-defold run id to take the engine from'
-        required: false
 
 permissions:
-  contents: read
-  # Needed to read artifacts from wasmcart-defold. Both repos are public and in
-  # the same org, so the job's own GITHUB_TOKEN is enough: artifacts are not
-  # publicly readable the way repo contents are, but `actions: read` on a token
-  # from the same org covers a public repo without any extra secret.
-  actions: read
+  # The release step attaches the carts to the release for the pushed tag.
+  contents: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v7
 
-      # bob-light.jar is compiled for Java 25 (class-file major version 69),
-      # so an older JDK fails with UnsupportedClassVersionError.
+      # bob.jar is compiled for Java 25 (class-file major version 69).
       - uses: actions/setup-java@v6
         with:
           distribution: temurin
@@ -41,100 +35,85 @@ jobs:
 
       - uses: actions/setup-node@v7
         with:
-          node-version: '22'
+          node-version: '24'
 
       # The carts render through native-gles, which links libEGL and libGLESv2
-      # and needs Mesa's software rasterizer because the runner has no GPU. The
-      # GLES client library is the part a GL-only image leaves out. Listed in
-      # full rather than relying on what the image ships or on transitive deps.
+      # and needs Mesa's software rasterizer because the runner has no GPU.
       - name: Install the software GL stack
         run: |
           set -euo pipefail
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends \
-            libegl1 libgles2 libglvnd0 libgl1-mesa-dri libglx-mesa0 libgbm1
+            libegl1 libgles2 libglvnd0 libgl1-mesa-dri libglx-mesa0 libgbm1 rsync zip unzip
 
-      # The action needs a concrete run id: an empty value is coerced to NaN and
-      # the API call 404s on /runs/NaN/artifacts. Resolve the most recent
-      # successful engine build unless one was named explicitly.
-      - name: Resolve the engine run
-        id: toolchain
+      - name: Read the engine pin
+        id: engine
+        run: |
+          set -euo pipefail
+          tag=$(sed -n 's/^wasmcart-defold *= *//p' engine.lock | tr -d ' ')
+          [ -n "$tag" ] || { echo "::error::engine.lock names no wasmcart-defold release"; exit 1; }
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "engine: wasmcart-defold $tag"
+
+      # Both engines and the SDK come from that release, checksummed against
+      # the SHA256SUMS the release carries.
+      - name: Fetch the engines and the SDK
         env:
           GH_TOKEN: ${{ github.token }}
-          REQUESTED: ${{ github.event.inputs.toolchain_run_id }}
+          TAG: ${{ steps.engine.outputs.tag }}
         run: |
           set -euo pipefail
-          if [ -n "${REQUESTED}" ]; then
-            echo "run-id=${REQUESTED}" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          id=$(gh run list --repo wasmcart/wasmcart-defold \
-                 --workflow wasmcart-runtime.yml --status success \
-                 --limit 1 --json databaseId --jq '.[0].databaseId // empty')
-          if [ -z "$id" ]; then
-            echo "::error::No successful wasmcart-runtime run found in wasmcart/wasmcart-defold. Run that workflow first so an engine artifact exists."
-            exit 1
-          fi
-          echo "using the engine from run $id"
-          echo "run-id=$id" >> "$GITHUB_OUTPUT"
-
-      # The artifact was renamed from -toolchain to -engine when it stopped
-      # carrying bob and builtins. Accept either so a run still works against
-      # an engine build made before the rename.
-      - name: Fetch the engine
-        uses: actions/download-artifact@v8
-        with:
-          pattern: wasmcart-defold-*
-          merge-multiple: true
-          path: engine
-          repository: wasmcart/wasmcart-defold
-          run-id: ${{ steps.toolchain.outputs.run-id }}
-          github-token: ${{ github.token }}
-
-      - name: Lay the engine out as an engine tree
-        run: |
-          set -euo pipefail
-          root=../wasmcart-defold/tmp/dynamo_home
-          mkdir -p "$root/bin/wasm-web"
-          cp engine/dmengine_wasmcart.wasm "$root/bin/wasm-web/"
+          mkdir -p engine
+          gh release download "$TAG" --repo wasmcart/wasmcart-defold --dir engine \
+            --pattern 'dmengine_wasmcart.wasm' --pattern 'dmengine_wasmcart_webgpu.wasm' \
+            --pattern 'wasmcart-defold-sdk.tar.gz' --pattern 'SHA256SUMS'
           (cd engine && sha256sum -c --ignore-missing SHA256SUMS)
+          tar -xzf engine/wasmcart-defold-sdk.tar.gz -C engine
+          ls engine engine/wasmcart-defold-sdk
+          {
+            echo "ENGINE_DIR=$GITHUB_WORKSPACE/engine"
+            echo "WASMCART_DEFOLD_SDK=$GITHUB_WORKSPACE/engine/wasmcart-defold-sdk"
+          } >> "$GITHUB_ENV"
 
-      # bob.jar is ~230 MB; cache it so only the first run on a new Defold
-      # release pays the download.
-      - name: Resolve the Defold release
-        id: defold
+      # Native extensions are compiled with the emsdk the engine was built
+      # with; the SDK names it and link.mjs refuses any other.
+      - name: Install the Emscripten SDK the engine was built with
         run: |
           set -euo pipefail
-          sha=$(curl -fsSL --max-time 30 https://d.defold.com/stable/info.json \
-                | sed -n 's/.*"sha1"[: ]*"\([^"]*\)".*/\1/p')
-          [ -n "$sha" ] || { echo "::error::could not resolve the Defold sha1"; exit 1; }
-          echo "sha1=$sha" >> "$GITHUB_OUTPUT"
+          ver=$(node -e "console.log(require('$WASMCART_DEFOLD_SDK/sdk.json').emscripten)")
+          git clone --depth 1 https://github.com/emscripten-core/emsdk.git "$HOME/emsdk"
+          "$HOME/emsdk/emsdk" install "$ver"
+          "$HOME/emsdk/emsdk" activate "$ver"
+          echo "WASMCART_EMSDK=$HOME/emsdk" >> "$GITHUB_ENV"
+          echo "EM_CONFIG=$HOME/emsdk/.emscripten" >> "$GITHUB_ENV"
 
+      # bob.jar is ~230 MB and pinned to the engine's Defold release; cache it.
       - name: Cache Defold bob.jar
         uses: actions/cache@v4
         with:
           path: ~/.cache/wasmcart-defold
-          key: bob-${{ steps.defold.outputs.sha1 }}
+          key: bob-${{ hashFiles('tools/build-cart.mjs') }}
 
-      - name: Install the packer
-        run: npm install --no-save wasmcart
-
+      - name: Install the packer and host
+        run: npm install --no-save --no-audit --no-fund wasmcart
 
       # Fail fast with a reason if the runner cannot make a GL context at all.
-      # Without this, a GL-less runner produces twelve carts that never start
-      # and no message explaining why.
       - name: Check GL works on this runner
         env:
           LIBGL_ALWAYS_SOFTWARE: '1'
           EGL_PLATFORM: surfaceless
         run: node tools/gl-probe.mjs
+
+      - name: Fetch the games at their pinned commits
+        run: node tools/fetch-games.mjs
+
       - name: Build every cart
         run: |
           set -euo pipefail
           failed=''
-          for p in mansion exolon planetoid pathfinder unit4 hello_defold breakout apitest particles proxytest buffertest inputtest; do
+          for p in $(node tools/list-carts.mjs); do
             echo "::group::build $p"
-            ./build-cart.sh "$p" || failed="$failed $p"
+            node tools/build-cart.mjs "$p" || failed="$failed $p"
             echo "::endgroup::"
           done
           if [ -n "$failed" ]; then
@@ -142,31 +121,28 @@ jobs:
             exit 1
           fi
 
-      # A .wasc that packs but does not run is not a pass. Step each cart and
-      # require positive proof of a completed run: the runtime's own
-      # "ran N frames" line, with N equal to what was asked for. Checking only
-      # for error strings is not enough. A runner with no GL at all never loads
-      # the cart, so it prints no error this step knows and every cart "passes".
-      - name: Run every cart headless
+      # A .wasc that packs but does not run is not a pass. Step each GL cart
+      # and require the runtime's own "ran N frames" line. The WebGPU carts
+      # are packed but not run: the runner has no WebGPU device.
+      - name: Run every GL cart headless
         env:
-          # The runner has no GPU and no display. native-gles skips its
-          # hardware device-enumeration path when LIBGL_ALWAYS_SOFTWARE=1, and
-          # Mesa needs the surfaceless platform to initialise EGL without one.
           LIBGL_ALWAYS_SOFTWARE: '1'
           EGL_PLATFORM: surfaceless
         run: |
           set -uo pipefail
-          frames=320
           bad=''
-          for p in mansion exolon planetoid pathfinder unit4 hello_defold breakout apitest particles proxytest buffertest inputtest; do
-            echo "::group::run $p"
-            out=$(cd "$p" && npx --no-install wasmcart "$p.wasc" --frames "$frames" 2>&1 || true)
-            printf '%s\n' "$out" | tail -40
+          for p in $(node tools/list-carts.mjs); do
+            name=$(basename "$p")
+            cart="$p/$name.wasc"
+            frames=$(node tools/list-carts.mjs --frames "$p")
+            echo "::group::run $name ($frames frames)"
+            out=$(npx --no-install wasmcart "$cart" --frames "$frames" 2>&1 || true)
+            printf '%s\n' "$out" | grep -vE 'maxDynamic' | tail -30
             if ! printf '%s\n' "$out" | grep -qE "^ran $frames frames"; then
-              bad="$bad $p(no-run)"
+              bad="$bad $name(no-run)"
             fi
-            printf '%s\n' "$out" | grep -qE 'ERROR:SCRIPT|cart trapped' && bad="$bad $p"
-            printf '%s\n' "$out" | grep -qE '[0-9]+ PASS +[1-9][0-9]* FAIL' && bad="$bad $p(assertions)"
+            printf '%s\n' "$out" | grep -qE 'ERROR:SCRIPT|cart trapped' && bad="$bad $name"
+            printf '%s\n' "$out" | grep -qE '[0-9]+ PASS +[1-9][0-9]* FAIL' && bad="$bad $name(assertions)"
             echo "::endgroup::"
           done
           if [ -n "$bad" ]; then
@@ -178,7 +154,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p dist
-          cp ./*/*.wasc dist/
+          for p in $(node tools/list-carts.mjs); do cp "$p"/*.wasc dist/; done
           (cd dist && sha256sum ./*.wasc > SHA256SUMS)
           ls -la dist
 
@@ -187,3 +163,17 @@ jobs:
           name: carts
           path: dist/
           retention-days: 30
+
+      # A pushed tag gets a release carrying every cart, so a version can be
+      # pinned and downloaded without a GitHub account.
+      - name: Attach the carts to the release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME}"
+          if ! gh release view "$tag" >/dev/null 2>&1; then
+            gh release create "$tag" --title "$tag" --generate-notes
+          fi
+          gh release upload "$tag" dist/*.wasc dist/SHA256SUMS --clobber

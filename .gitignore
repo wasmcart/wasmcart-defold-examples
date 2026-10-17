@@ -20,3 +20,6 @@ builtins
 substrike/
 pixelcrypt/
 snowline/
+
+# third-party games: fetched at a pinned commit by tools/fetch-games.mjs
+games/*/src/

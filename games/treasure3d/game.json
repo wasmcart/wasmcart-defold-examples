@@ -1,0 +1,14 @@
+{
+  "title": "Treasure Scene",
+  "description": "A stylized 3D scene showing Defold's rendering features: a treasure chest on a turntable among crates and trees, with lighting, shadows and a PBR-style material setup.",
+  "repo": "https://github.com/FlexYourBrain/Basic3d_TreasureScene",
+  "commit": "5876b8c4e0e91121e8f4effe568df055b43cceec",
+  "author": "FlexYourBrain",
+  "authorUrl": "https://github.com/FlexYourBrain",
+  "license": "MIT",
+  "webgpu": true,
+  "controls": "A/D or left/right turn the table; left mouse opens the chest.",
+  "credits": [
+    "Art by Agustin R. (FlexYourBrain), per the project README."
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "title": "SuperWEIRD Game Kit",
+  "description": "Six visual styles and the gameplay of a shop and production simulator from the development of SuperWEIRD, released by Luden.io under CC0.",
+  "repo": "https://github.com/ludenio/SuperWEIRDGameKit",
+  "commit": "4e86c38078964b745496f84b8c97512d129f5b7b",
+  "author": "Ludenio",
+  "authorUrl": "https://luden.io",
+  "license": "CC0-1.0",
+  "enabled": false,
+  "notes": [
+    "NOT BUILT YET: the game uses extension-spine, which compiles the Spine Runtimes into the engine. The Spine Runtimes License needs a decision before that is shipped in a cart engine."
+  ]
+}

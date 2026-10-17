@@ -1,0 +1,15 @@
+{
+  "title": "Illumination",
+  "description": "The demo scene of Illumination, a forward-shading lighting library for Defold: point and spot lights, a flashlight, fog, normal and specular maps, walked in first person.",
+  "repo": "https://github.com/astrochili/defold-illumination",
+  "commit": "7bf05fcbf1504fbf6922f70387f4c80cc9b1be86",
+  "author": "Roman Silin (astrochili)",
+  "authorUrl": "https://github.com/astrochili",
+  "license": "MIT",
+  "webgpu": true,
+  "controls": "WASD move, Shift run, Space jump, C crouch, E flashlight, F spectator mode, mouse look.",
+  "credits": [
+    "Textures from Tiny Texture Pack 1 and 2 by Screaming Brain Studios.",
+    "Specular and normal maps generated with Normal Map Online by @cpetry."
+  ]
+}

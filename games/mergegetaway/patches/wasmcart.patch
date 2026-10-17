@@ -1,0 +1,45 @@
+diff --git a/game.project b/game.project
+index 511627a..34c55fc 100755
+--- a/game.project
++++ b/game.project
+@@ -18,7 +18,7 @@ input_method = HiddenInputField
+ title = ld50_game
+ developer = Artsiom Trubchyk
+ version = 1.0.0
+-dependencies#0 = https://github.com/indiesoftby/defold-scene3d/archive/ff30cc3e40e5180b6a39bb0cfbee1840b2bc02fe.zip
++dependencies#0 = https://github.com/indiesoftby/defold-scene3d/archive/3b7048a45e6b6dacea580d530644b5ff03fd27c1.zip
+ dependencies#1 = https://github.com/britzl/ludobits/archive/7.1.0.zip
+ dependencies#2 = https://github.com/britzl/defold-screenshot/archive/1.8.2.zip
+ dependencies#3 = https://github.com/britzl/defold-clipboard/archive/1.3.0.zip
+@@ -45,6 +45,7 @@ scale = 1.0
+ gravity_y = -9.8
+ type = 3D
+ max_collisions = 1000
++max_collision_object_count = 1024
+ max_contacts = 1000
+ ray_cast_limit_3d = 1000
+ trigger_overlap_capacity = 100
+diff --git a/ld50/main.script b/ld50/main.script
+index 59e2bf1..d3bd4d2 100755
+--- a/ld50/main.script
++++ b/ld50/main.script
+@@ -106,7 +106,8 @@ function on_input(self, action_id, action)
+     --     print("Loading next scene", next_id)
+     --     main.load_scene(self, next_id)
+     elseif action_id == hash("key_f11") and action.pressed then
+-        defos.toggle_fullscreen()
++        -- defos is a desktop extension; a cart has no window of its own.
++        if defos then defos.toggle_fullscreen() end
+     elseif action_id == hash("key_ralt") or action_id == hash("key_lalt") then
+         if action.released then
+             self.alt_is_held = false
+@@ -114,7 +115,8 @@ function on_input(self, action_id, action)
+             self.alt_is_held = true
+         end
+     elseif self.alt_is_held and action_id == hash("key_enter") and action.pressed then
+-        defos.toggle_fullscreen()
++        -- defos is a desktop extension; a cart has no window of its own.
++        if defos then defos.toggle_fullscreen() end
+     elseif self.alt_is_held and action_id == hash("key_f4") and action.pressed then
+         msg.post("@system:", "exit", {code = 0})
+     elseif action_id == hash("touch_multi") then
