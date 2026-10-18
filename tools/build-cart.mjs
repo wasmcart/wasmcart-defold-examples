@@ -78,6 +78,10 @@ const gameMeta = fs.existsSync(gameJson) ? JSON.parse(fs.readFileSync(gameJson, 
 const cartExts = (gameMeta.cartExtensions || []).map(d => path.join(input, d));
 const cartExtNames = cartExts.map(d => (fs.readFileSync(path.join(d, 'ext.manifest'), 'utf8').match(/^name:\s*"?([^"\n]+)"?/m) || [])[1]);
 const skipExts = [...(gameMeta.skipExtensions || []), ...cartExtNames];
+// "webgpu": false in game.json: build the GL cart only. For a game whose WebGPU
+// cart is known not to draw (a WGSL-valid cart that renders black is worse than
+// no WebGPU cart), with the reason in "notes".
+if (gameMeta.webgpu === false) webgpu = false;
 outDir = path.resolve(outDir || input);
 
 // --- tools -------------------------------------------------------------------
