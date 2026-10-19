@@ -85,9 +85,11 @@ as a [RetroArch core](https://github.com/wasmcart/wasmcart-libretro), on
 [Android](https://github.com/wasmcart/wasmcart-android), and in a browser. No
 per-target build, no page to embed it in.
 
-Build the carts first with `./build-cart.sh <name>`, or download them from the
-GitHub Actions artifacts (see
-[Continuous integration](#continuous-integration)).
+Download the carts from the
+[latest release](https://github.com/wasmcart/wasmcart-defold-examples/releases/latest),
+which CI builds and attaches on every tag (see
+[Continuous integration](#continuous-integration)), or build them yourself
+with `./build-cart.sh <name>`.
 
 ## Showcase games
 
@@ -232,11 +234,14 @@ floating objects under a cloudy sky. The camera is fixed.
 **By [Selim Anaç (selimanac)](https://github.com/selimanac)**, from
 [selimanac/defold-stylized-water-shader](https://github.com/selimanac/defold-stylized-water-shader),
 MIT, a port of [unity-stylized-water](https://github.com/danielshervheim/unity-stylized-water)
-by Daniel Shervheim. GL cart only: the shader samples inside non-uniform
-control flow, which WGSL forbids. Changes: none to the project; the
-extension-imgui dependency, which the sample never calls, is left out of the
-cart engine. This cart found a heap overrun in webgl-node (the Node host's GL
-layer) that killed the host on any cart with a large uniform block.
+by Daniel Shervheim. GL cart only: the shader samples textures inside
+distance-based branches, which WGSL forbids, and with those samples hoisted
+out of the branches the WebGPU cart compiles but draws black, so none ships
+until that is understood (`"webgpu": false` in its `game.json`). Changes:
+none to the project; the extension-imgui dependency, which the sample never
+calls, is left out of the cart engine. This cart found a heap overrun in
+webgl-node (the Node host's GL layer) that killed the host on any cart with a
+large uniform block; fixed in webgl-node 1.6.2.
 
 ### Not built yet
 
@@ -457,7 +462,7 @@ frame({ op: 'screenshot', path: 'out.png' })
 
 romdev loads `.wasc` carts directly: `wasmcart` is one of its platforms.
 
-Two limits worth knowing before writing a test around either harness:
+Limits worth knowing before writing a test around either harness:
 
 - **A headless machine needs Mesa's software GL.** The carts render through
   real GL, so with no GPU and no display EGL fails to initialise and the
@@ -529,7 +534,8 @@ polled, and a pad that appears mid-session is picked up on the next frame.
 ## Continuous integration
 
 `.github/workflows/build-carts.yml` packs every example and every enabled
-showcase game into GL and WebGPU `.wasc` carts on each push, and runs each GL
+showcase game into a GL `.wasc` cart and, unless its `game.json` sets
+`"webgpu": false`, a WebGPU one, on each push, and runs each GL
 cart headless (480 frames for an example, 120 for a game; the WebGPU carts
 are packed but not run, as a runner has no WebGPU device). A cart passes only
 if the runtime reports completing all its frames; it fails on a short run, a
@@ -554,11 +560,14 @@ not vendored, rebuilt or redistributed here.
 
 The example code in this repository is MIT licensed; see `LICENSE`.
 
-Bundled third-party content is listed with its author and licence in
-[CREDITS.md](CREDITS.md). In short: the only third-party asset is DejaVu Sans
-Mono Bold, bundled unmodified under the Bitstream Vera licence, with the full
-licence text beside every copy of the font. The 8x8 white sprite and the
-440 Hz tone were generated for this repository.
+The games are not: Ben James's five games are his, under MIT, with his
+licence in each game's directory, and each showcase game stays under its
+author's licence (see [Showcase games](#showcase-games) and its
+`game.json`). Bundled third-party content is listed with its author and
+licence in [CREDITS.md](CREDITS.md), including DejaVu Sans Mono Bold, bundled
+unmodified under the Bitstream Vera licence with the full licence text beside
+every copy of the font. The 8x8 white sprite and the 440 Hz tone were
+generated for this repository.
 
 The engine itself is separate: Defold is under the
 [Defold License 1.0](https://defold.com/license/), which permits modification
