@@ -74,10 +74,16 @@ local LASER_SPEED  = 700
 local MAX_LASERS   = 6
 local GRAVITY_TIME = 8.0
 
+-- Drop shadows sit below everything else. At equal z the draw order of two
+-- sprites is not defined, and the GL and WebGPU engines break the tie
+-- differently: on WebGPU every shadow covered its brick.
+local SHADOW_Z = -0.1
+
 local function spawn(sprite, x, y, w, h)
 	local cw, ch = ART_W, ART_H
 	if CELL[sprite] then cw, ch = CELL[sprite][1], CELL[sprite][2] end
-	return factory.create("#" .. sprite .. "factory", vmath.vector3(x, y, 0), nil, {},
+	local z = sprite == "shadow" and SHADOW_Z or 0
+	return factory.create("#" .. sprite .. "factory", vmath.vector3(x, y, z), nil, {},
 		vmath.vector3(w / cw, h / ch, 1))
 end
 
@@ -341,7 +347,7 @@ function update(self, dt)
 		self.paddle_x = math.max(self.paddle_w * 0.5,
 			math.min(W - self.paddle_w * 0.5, self.paddle_x + dir * PADDLE_SPEED * dt))
 		go.set_position(vmath.vector3(self.paddle_x, PADDLE_Y, 0), self.paddle_id)
-		go.set_position(vmath.vector3(self.paddle_x + 3, PADDLE_Y - 3, 0), self.paddle_shadow)
+		go.set_position(vmath.vector3(self.paddle_x + 3, PADDLE_Y - 3, SHADOW_Z), self.paddle_shadow)
 	end
 
 	-- Timed effects

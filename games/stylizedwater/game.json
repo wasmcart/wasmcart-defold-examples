@@ -6,7 +6,6 @@
   "author": "Selim Anaç (selimanac)",
   "authorUrl": "https://github.com/selimanac",
   "license": "MIT",
-  "webgpu": false,
   "controls": "None; the camera is fixed.",
   "skipExtensions": [
     "DefoldImGui"
@@ -16,6 +15,6 @@
   ],
   "notes": [
     "extension-imgui is a dependency the sample never calls (no imgui.* in its Lua); its C++ does not compile against Defold 1.14, so it is left out of the cart engine.",
-    "WebGPU: the fragment shader samples textures inside distance-based branches, which WGSL rejects; hoisting those samples ahead of the branches (stylized_water.fp lines 123-146 and the sparkle block) makes it compile, but the resulting WebGPU cart draws black with no validation error, even with only the skybox drawn, with high_dpi, Basis compression and face culling each ruled out. Not shipped until that is understood."
+    "WebGPU: patches/ samples the foam and sparkle textures before the per-pixel distance tests that pick among them (WGSL samples only in uniform control flow); the result is the same."
   ]
 }

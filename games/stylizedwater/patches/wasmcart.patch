@@ -1,0 +1,42 @@
+diff --git a/water/material/stylized_water/stylized_water.fp b/water/material/stylized_water/stylized_water.fp
+index 1554956..849ad57 100644
+--- a/water/material/stylized_water/stylized_water.fp
++++ b/water/material/stylized_water/stylized_water.fp
+@@ -281,17 +281,11 @@ void main()
+ 
+     // LOD
+     vec2 foam_uv = (var_world_position.xz / foam_params.x) + (foam_params.z * normal_ts.xz);
+-    vec3 foam_color;
+-    if (distance_to_camera < lod_params.y)
+-    {
+-        // Close range: 4 texture samples
+-        foam_color = motion_four_way_chaos_texture(foam_uv, foam_params.y);
+-    }
+-    else
+-    {
+-        // Far range: 1 texture sample
+-        foam_color = motion_simple_foam(foam_uv, foam_params.y);
+-    }
++    // Both LODs are sampled before choosing: WGSL samples textures only in
++    // uniform control flow, and the distance varies per pixel.
++    vec3 foam_close = motion_four_way_chaos_texture(foam_uv, foam_params.y); // close range: 4 texture samples
++    vec3 foam_far   = motion_simple_foam(foam_uv, foam_params.y);            // far range: 1 texture sample
++    vec3 foam_color = distance_to_camera < lod_params.y ? foam_close : foam_far;
+     foam_color *= distance_mask * foam_params.w;
+ 
+     // ------------------ //
+@@ -309,11 +303,12 @@ void main()
+     // ------------- //
+ 
+     vec3 sparkle = vec3(0.0);
++    // Sampled before the per-pixel LOD test, for WGSL as above.
++    vec3  sparkle1 = motion_four_way_sparkle(var_world_position.xz / sparkle_params.x, vec4(1.0, 2.0, 3.0, 4.0), sparkle_params.y);
++    vec3  sparkle2 = motion_four_way_sparkle(var_world_position.xz / sparkle_params.x, vec4(1.0, 0.5, 2.5, 2.0), sparkle_params.y);
+     // LOD
+     if (sparkle_params.w > 0.5 && distance_to_camera < lod_params.x)
+     {
+-        vec3  sparkle1 = motion_four_way_sparkle(var_world_position.xz / sparkle_params.x, vec4(1.0, 2.0, 3.0, 4.0), sparkle_params.y);
+-        vec3  sparkle2 = motion_four_way_sparkle(var_world_position.xz / sparkle_params.x, vec4(1.0, 0.5, 2.5, 2.0), sparkle_params.y);
+ 
+         float sparkle_mask = dot(sparkle1, sparkle2) *
+         saturate(3.0 * sqrt(saturate(sparkle1.x * sparkle2.x)));

@@ -17,8 +17,8 @@ under the repo root, and the 3D **[showcase games](#showcase-games)** under
 commit and built as carts. Each is one file, `<name>.wasc`. Where the
 game's shaders compile to WGSL it is a dual cart, with both Defold's GL and
 WebGPU renderers inside: a host with wasmcart's WebGPU tier runs it on
-WebGPU, and any other host runs the same file on GL. The two games whose
-shaders do not compile to WGSL are GL carts.
+WebGPU, and any other host runs the same file on GL. Every cart here is a
+dual cart.
 
 ## Status
 
@@ -220,10 +220,20 @@ moves, the mouse looks.
 [martianovdev/Defold-BRDF-Deferred-Rendering-V2](https://github.com/martianovdev/Defold-BRDF-Deferred-Rendering-V2),
 CC BY 4.0: this cart is a redistribution of that project at the pinned commit
 with the changes in its `patches/`, and the credit here is the attribution
-the licence asks for. GL only: its shaders pass samplers as function
-parameters and do not compile to WGSL (`"webgpu": false` in its `game.json`). Changes: the Defold 1.13 API migration
-(the legacy LiveUpdate loader, the physics listener, `profiler` guarded) and
-the builtin Collada quad replaced by the glTF one.
+the licence asks for. Dual GL and WebGPU cart. Changes: the Defold 1.13 API
+migration (the legacy LiveUpdate loader, the physics listener, `profiler`
+guarded), the builtin Collada quad replaced by the glTF one, and its shaders
+made WGSL-valid: the shadow, tiled-lighting and model shaders read their
+sampler uniforms directly instead of taking samplers as function parameters,
+reads in per-pixel branches use an explicit LOD (the targets have no mips),
+and scalar fragment outputs are widened to `vec4` with alpha 1, since every
+pass draws with blending on. GL renders the same pixels as before. This
+deferred renderer found six wasmcart-defold WebGPU fixes: mipmapped JPEG
+textures came out empty, viewports away from the origin had the wrong size,
+R32F targets need the cart's own float32-filterable device, a sampler the
+game never binds reads unit 0 as on GL, a `max_anisotropy` of 0 made an
+invalid sampler, and a minification filter of linear or nearest set the
+magnification filter instead.
 
 ### Stylized Water
 
@@ -235,12 +245,14 @@ floating objects under a cloudy sky. The camera is fixed.
 **By [Selim Anaç (selimanac)](https://github.com/selimanac)**, from
 [selimanac/defold-stylized-water-shader](https://github.com/selimanac/defold-stylized-water-shader),
 MIT, a port of [unity-stylized-water](https://github.com/danielshervheim/unity-stylized-water)
-by Daniel Shervheim. GL only: the shader samples textures inside
-distance-based branches, which WGSL forbids, and with those samples hoisted
-out of the branches it compiles but draws black on WebGPU, so the cart stays
-on GL until that is understood (`"webgpu": false` in its `game.json`). Changes:
-none to the project; the extension-imgui dependency, which the sample never
-calls, is left out of the cart engine. This cart found a heap overrun in
+by Daniel Shervheim. Dual GL and WebGPU cart. Changes: the water shader
+samples its foam and sparkle textures before the per-pixel distance tests
+that choose among them (WGSL samples only in uniform control flow); the
+extension-imgui dependency, which the sample never calls, is left out of the
+cart engine. On WebGPU this scene needed three wasmcart-defold fixes: it
+samples the depth buffer (bound now as unfilterable float, read without
+filtering), `render.set_cull_face` did nothing (the skybox, drawn inside out
+with front faces culled, vanished), and its cube map is JPEG. This cart found a heap overrun in
 webgl-node (the Node host's GL layer) that killed the host on any cart with a
 large uniform block; fixed in webgl-node 1.6.2.
 

@@ -6,9 +6,11 @@
   "author": "martianovdev",
   "authorUrl": "https://github.com/martianovdev",
   "license": "CC-BY-4.0",
-  "webgpu": false,
   "controls": "WASD move, mouse look.",
   "credits": [
     "CC BY 4.0: this cart is a redistribution of the project at the pinned commit with the changes in patches/, credited to Mikhail Martianov (martianov.tech)."
+  ],
+  "notes": [
+    "WebGPU: patches/ rewrites the shaders that pass sampler2D to functions (WGSL has no sampler parameters: lighting_shadow.glsl, eevee_lighting.glsl and model.fp read their uniforms directly, so model.material names its shadow sampler texture_shadowmap like the other passes), samples with an explicit LOD where WGSL requires uniform control flow (SSAO, tile masks, shadow atlas; the targets have no mips, so the result is unchanged), and widens the scalar/vec3 fragment outputs to vec4 with alpha 1 (every pass draws with blending on, and WebGPU will not blend from an output without alpha; GL renders byte-identically)."
   ]
 }

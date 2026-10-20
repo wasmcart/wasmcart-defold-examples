@@ -1,3 +1,382 @@
+diff --git a/src/Assets/Materials/Deferred/GBuffer/GBuffer.fp b/src/Assets/Materials/Deferred/GBuffer/GBuffer.fp
+index 47ed5f0..e001138 100644
+--- a/src/Assets/Materials/Deferred/GBuffer/GBuffer.fp
++++ b/src/Assets/Materials/Deferred/GBuffer/GBuffer.fp
+@@ -26,7 +26,7 @@ float normalBlurMaxMip = 4.0;   // maximum intended MIP bias in levels
+ 
+ out vec4 fragColor0;
+ out vec4 fragColor1;
+-out float fragColor2;
++out vec4 fragColor2;
+ 
+ // ======================== include modules ========================
+ // Encoders/decoders for packing normals (oct, etc.)
+@@ -235,7 +235,7 @@ void main()
+     }
+     fragColor0 = albedo.rgba;
+     fragColor1 = vec4(world_normal * 0.5 + 0.5, rough);
+-    fragColor2 = gl_FragCoord.z;
++    fragColor2 = vec4(gl_FragCoord.z, 0.0, 0.0, 1.0);
+     // --- Outputs ---
+ //     fragColor0 = vec4(
+ //         packRGB_to_R16F(albedo.rgb), 
+diff --git a/src/Assets/Materials/Deferred/LightingPass/LightingPass.fp b/src/Assets/Materials/Deferred/LightingPass/LightingPass.fp
+index ad86b07..fa097a0 100644
+--- a/src/Assets/Materials/Deferred/LightingPass/LightingPass.fp
++++ b/src/Assets/Materials/Deferred/LightingPass/LightingPass.fp
+@@ -83,11 +83,10 @@ void main(){
+         P, N, V,
+         baseColor, roughness, metallic, specular,
+         worldColor, scene_env,
+-        size,
+-        texture_tiled_lighting, texture_shadowmap
++        size
+     );
+ 
+-    vec3 volumtric = volumetric(P, camPos, texture_depth_full);
++    vec3 volumtric = volumetric(P, camPos);
+ 
+     // Tonemapping and output parameters
+     // tonemapMode: 0 none, 1 ACES, 2 AGX_APPROX, 3 AGX_LUT
+diff --git a/src/Assets/Materials/Deferred/Modules/eevee_lighting.glsl b/src/Assets/Materials/Deferred/Modules/eevee_lighting.glsl
+index b7d4c13..f74d75e 100644
+--- a/src/Assets/Materials/Deferred/Modules/eevee_lighting.glsl
++++ b/src/Assets/Materials/Deferred/Modules/eevee_lighting.glsl
+@@ -156,17 +156,16 @@ vec3   EEVEE_BRDF_eval(
+ }
+ 
+ // ============ TILED ============
+-uint EEVEE_Tiled_readMask(ivec2 tc, vec2 tiledTexSizeF, sampler2D tiledTex){
++uint EEVEE_Tiled_readMask(ivec2 tc, vec2 tiledTexSizeF){
+     tc = clamp(tc, ivec2(0), ivec2(tiledTexSizeF) - ivec2(1));
+     vec2 uvTile = (vec2(tc) + 0.5) / tiledTexSizeF;
+-    float packedMask = texture(tiledTex, uvTile).r;
++    float packedMask = textureLod(texture_tiled_lighting, uvTile, 0.0).r;
+     return uint(floor(packedMask + 0.5)) & 0xFFFFFFu;
+ }
+ 
+ vec3 EEVEE_Lighting_accumulate(
+     vec3 P, vec3 N, vec3 V, float NdotV,
+     float a, vec3 F0, vec3 baseColorDiff,
+-    sampler2D tiledLightingTex, sampler2D shadowMap,
+     vec4 sceneEnv, vec2 viewportSize)
+ {
+     // Define tile grid ourselves, user doesn't need to think about it
+@@ -180,7 +179,7 @@ vec3 EEVEE_Lighting_accumulate(
+     uint combinedMask = 0u;
+     for (int oy = -1; oy <= 1; ++oy){
+         for (int ox = -1; ox <= 1; ++ox){
+-            combinedMask |= EEVEE_Tiled_readMask(tileCoord + ivec2(ox, oy), tiledTexSizeF, tiledLightingTex);
++            combinedMask |= EEVEE_Tiled_readMask(tileCoord + ivec2(ox, oy), tiledTexSizeF);
+         }
+     }
+     uint m = combinedMask & 0xFFFFFFu;
+@@ -200,7 +199,7 @@ vec3 EEVEE_Lighting_accumulate(
+ 
+         float shadow = 1.0;
+         if (Lp.shadows){
+-            shadow = shadow_computeSoft(P, N, Lp.pos, shadowMap, int(i));
++            shadow = shadow_computeSoft(P, N, Lp.pos, int(i));
+             if (shadow <= 0.0) continue;
+             shadow = EEVEE_sat1(shadow);
+         }
+@@ -230,9 +229,7 @@ vec3 EEVEE_Shade_eval(
+     float specular,          // ~[0..8]
+     vec3 worldColorArg,      // ambient base
+     vec4 sceneEnvArg,        // scene_env copy
+-    vec4 viewportSizeArg,    // size uniform, pass as is (xy = viewport)
+-    sampler2D tiledLightingTex,
+-    sampler2D shadowMapTex
++    vec4 viewportSizeArg     // size uniform, pass as is (xy = viewport)
+ ){
+     float NdotV = max(dot(N, V), 0.0);
+ 
+@@ -243,7 +240,6 @@ vec3 EEVEE_Shade_eval(
+ 
+     vec3 Lo = EEVEE_Lighting_accumulate(
+         P, N, V, NdotV, a, F0, baseColorDiff,
+-        tiledLightingTex, shadowMapTex,
+         sceneEnvArg, viewportSizeArg.xy
+     );
+ 
+diff --git a/src/Assets/Materials/Deferred/Modules/lighting_shadow.glsl b/src/Assets/Materials/Deferred/Modules/lighting_shadow.glsl
+index ac31ba3..6182e4e 100644
+--- a/src/Assets/Materials/Deferred/Modules/lighting_shadow.glsl
++++ b/src/Assets/Materials/Deferred/Modules/lighting_shadow.glsl
+@@ -9,6 +9,9 @@
+ // -----------------------------------------------------------------------------
+ // Global atlas configuration
+ // -----------------------------------------------------------------------------
++// The atlas is the including shader's texture_shadowmap uniform, read directly:
++// WGSL has no sampler function parameters.
++
+ const ivec2 ATLAS_SIZE = ivec2(2000, 2000); // full atlas size (px)
+ const int   FACE_SIZE  = 200;               // single cube face size (px)
+ const ivec2 ATLAS_GRID = ATLAS_SIZE / FACE_SIZE; // number of cells along (x,y)
+@@ -114,7 +117,6 @@ bool uv_outside01(vec2 uv) {
+ // Sample from atlas with face "stitching" (if outside [0..1], jump to adjacent face)
+ // -----------------------------------------------------------------------------
+ vec4 shadow_sampleAtlasStitched(
+-	sampler2D shadowAtlas,
+ 	vec2 uvLocalMaybeOutside,
+ 	int faceIndex,
+ 	int cubemapIndex
+@@ -129,7 +131,7 @@ vec4 shadow_sampleAtlasStitched(
+ 	}
+ 
+ 	vec2 atlasUV = shadow_localToAtlasUV(uv, f, cubemapIndex);
+-	return texture(shadowAtlas, atlasUV);
++	return textureLod(texture_shadowmap, atlasUV, 0.0);
+ }
+ 
+ // -----------------------------------------------------------------------------
+@@ -173,7 +175,6 @@ float shadow_computeBias(vec3 N, vec3 L_toFrag, float distanceToFrag) {
+ // Stochastic PCF in local face coordinates (seam stitching enabled)
+ // -----------------------------------------------------------------------------
+ float shadow_PCF_stochastic(
+-	sampler2D shadowAtlas,
+ 	vec2 uvLocal,
+ 	int faceIndex,
+ 	int cubemapIndex,
+@@ -200,7 +201,6 @@ float shadow_PCF_stochastic(
+ 		vec2 ofsLocal = oRot * (radiusTex * localTexel);
+ 
+ 		float d = shadow_sampleAtlasStitched(
+-			shadowAtlas,
+ 			uvLocal + ofsLocal,    // without clamp - "stitching" will handle transition
+ 			faceIndex,
+ 			cubemapIndex
+@@ -212,9 +212,9 @@ float shadow_PCF_stochastic(
+ }
+ 
+ // ---------- helpers ----------
+-float shadow_fetchDepth(sampler2D atlas, vec2 atlasUV) {
++float shadow_fetchDepth(vec2 atlasUV) {
+ 	// Better this way (LOD=0) to avoid catching mip blending at edges
+-	return textureLod(atlas, atlasUV, 0.0).r;
++	return textureLod(texture_shadowmap, atlasUV, 0.0).r;
+ }
+ 
+ vec2 shadow_atlasUVFromDir(vec3 dir, int cubemapIndex, out int faceIndex) {
+@@ -239,7 +239,6 @@ void basis_from_dir(in vec3 n, out vec3 t, out vec3 b) {
+ 
+ // ---------- PCF on sphere (isotropic and seamless) ----------
+ float shadow_PCF_spherical(
+-	sampler2D shadowAtlas,
+ 	vec3 dir,                 // NORMALIZED direction from light to fragment
+ 	int cubemapIndex,
+ 	float currentDepth,       // distance light→frag
+@@ -268,7 +267,7 @@ float shadow_PCF_spherical(
+ 			vec3 dirOff = normalize(dir + (T * o.x + B * o.y) * tan(rAng));
+ 
+ 			int f; vec2 atlasUV = shadow_atlasUVFromDir(dirOff, cubemapIndex, f);
+-			float sd = shadow_fetchDepth(shadowAtlas, atlasUV);
++			float sd = shadow_fetchDepth(atlasUV);
+ 
+ 			acc += shadow_compareSoft(currentDepth, sd, bias, eps);
+ 		}
+@@ -283,7 +282,6 @@ float shadow_computeSoft(
+ 	vec3 fragWorldPos,
+ 	vec3 fragWorldNormal,
+ 	vec3 lightWorldPos,
+-	sampler2D shadowAtlas,
+ 	int cubemapIndex)
+ 	{
+ 		vec3 LtoF = fragWorldPos - lightWorldPos;
+@@ -293,7 +291,7 @@ float shadow_computeSoft(
+ 		float bias = shadow_computeBias(fragWorldNormal, LtoF, currentDepth);
+ 
+ 		return shadow_PCF_spherical(
+-			shadowAtlas, dir, cubemapIndex, currentDepth, bias
++			dir, cubemapIndex, currentDepth, bias
+ 		);
+ 	}
+ 	
+\ No newline at end of file
+diff --git a/src/Assets/Materials/Deferred/Modules/volumetric.glsl b/src/Assets/Materials/Deferred/Modules/volumetric.glsl
+index 4f2bfd3..e1479ff 100644
+--- a/src/Assets/Materials/Deferred/Modules/volumetric.glsl
++++ b/src/Assets/Materials/Deferred/Modules/volumetric.glsl
+@@ -43,9 +43,8 @@ float volumetric_distancePointToSegment(vec3 a, vec3 b, vec3 p) {
+     return length(p - closest);
+ }
+ 
+-// depthTex is currently unused but passed inside by requirement.
+ // if desired, can add depth sampling for additional attenuation or shadows.
+-vec3 volumetric(vec3 P, vec3 camPos, sampler2D depthTex){
++vec3 volumetric(vec3 P, vec3 camPos){
+     vec3 color = vec3(0.0);
+ 
+     int count = int(light_count.x + 0.5);
+diff --git a/src/Assets/Materials/Deferred/TiledLighting/TiledLighting.fp b/src/Assets/Materials/Deferred/TiledLighting/TiledLighting.fp
+index 2a84bcf..7d3dda1 100644
+--- a/src/Assets/Materials/Deferred/TiledLighting/TiledLighting.fp
++++ b/src/Assets/Materials/Deferred/TiledLighting/TiledLighting.fp
+@@ -38,7 +38,7 @@ uniform light_data {
+ };
+ 
+ // Primary render target
+-out float out_color;
++out vec4 out_color;
+ 
+ // --- MASK output (R32F)
+ // GLSL 140: multiple outputs are bound via glBindFragDataLocation in the application.
+@@ -102,7 +102,7 @@ void main() {
+         // Compute shadow contribution (defined in lighting_shadow.glsl)
+         float shadow = 1.0;
+         if(Lp.shadows){
+-            shadow = shadow_computeSoft(P, N, Lp.pos, texture_shadowmap, i);
++            shadow = shadow_computeSoft(P, N, Lp.pos, i);
+         }
+ 
+ 
+@@ -117,5 +117,5 @@ void main() {
+     // Output:
+     // - RGB not used (set to 0)
+     // - A stores the exact integer mask (converted to float)
+-    out_color = float(mask24);
++    out_color = vec4(float(mask24), 0.0, 0.0, 1.0);
+ }
+diff --git a/src/Assets/Materials/Deferred/VolumetricLighting/VolumetricLighting.fp b/src/Assets/Materials/Deferred/VolumetricLighting/VolumetricLighting.fp
+index 4222e83..9c9959c 100644
+--- a/src/Assets/Materials/Deferred/VolumetricLighting/VolumetricLighting.fp
++++ b/src/Assets/Materials/Deferred/VolumetricLighting/VolumetricLighting.fp
+@@ -68,7 +68,7 @@ void main() {
+     vec3 camPos = getCameraWorldPos();
+ 
+     // pass sampler to module
+-    vec3 color = volumetric(P, camPos, texture_depth_full);
++    vec3 color = volumetric(P, camPos);
+ 
+     out_color = vec4(color, 1.0);
+ }
+diff --git a/src/Assets/Materials/Postprocess/SSAO/SSAO.fp b/src/Assets/Materials/Postprocess/SSAO/SSAO.fp
+index 576ad09..7df45de 100644
+--- a/src/Assets/Materials/Postprocess/SSAO/SSAO.fp
++++ b/src/Assets/Materials/Postprocess/SSAO/SSAO.fp
+@@ -197,7 +197,7 @@ float computeSSAO_Dual(vec2 uv, float radiusWorldBig, float radiusWorldSmall) {
+         // Big radius
+         vec2 uvOffB = uv + (dir * radPxBig) / size.xy;
+         if (!outside01(uvOffB)) {
+-            float SdB = texture(texture_depth, uvOffB).x;
++            float SdB = textureLod(texture_depth, uvOffB, 0.0).x;
+             vec3  SB  = reconstructViewPos(uvOffB, SdB);
+             occ_big  += aoContribution(P, N, SB, rVS_big, bias_big);
+         }
+@@ -205,7 +205,7 @@ float computeSSAO_Dual(vec2 uv, float radiusWorldBig, float radiusWorldSmall) {
+         // Small radius
+         vec2 uvOffS = uv + (dir * radPxSml) / size.xy;
+         if (!outside01(uvOffS)) {
+-            float SdS = texture(texture_depth, uvOffS).x;
++            float SdS = textureLod(texture_depth, uvOffS, 0.0).x;
+             vec3  SS  = reconstructViewPos(uvOffS, SdS);
+             occ_sml  += aoContribution(P, N, SS, rVS_sml, bias_sml);
+         }
+diff --git a/src/Assets/Materials/Scenes/glass.fp b/src/Assets/Materials/Scenes/glass.fp
+index 0807cb0..096c1a3 100644
+--- a/src/Assets/Materials/Scenes/glass.fp
++++ b/src/Assets/Materials/Scenes/glass.fp
+@@ -68,7 +68,7 @@ float fresnel_schlick(float cosTheta, float F0, float powerMul) {
+ #include "/src/Assets/Materials/Deferred/Modules/tonemap.glsl"
+ 
+ out vec4 out_color;
+-out vec3 out_color1;
++out vec4 out_color1;
+ 
+ void main() {
+     vec2 screen_uv = gl_FragCoord.xy / size.xy;
+@@ -145,6 +145,6 @@ void main() {
+     float alphaOut = saturate(u_Transmission);
+ 
+     out_color = vec4(ldr, alphaOut);
+-    out_color1 = vec3(1.0);
++    out_color1 = vec4(1.0);
+     #endif
+ }
+\ No newline at end of file
+diff --git a/src/Assets/Materials/Scenes/model.fp b/src/Assets/Materials/Scenes/model.fp
+index f320676..21b72f6 100644
+--- a/src/Assets/Materials/Scenes/model.fp
++++ b/src/Assets/Materials/Scenes/model.fp
+@@ -11,7 +11,7 @@
+ in vec2 var_texcoord0;
+ 
+ uniform sampler2D tileLightMap;
+-uniform sampler2D shadowMap;
++uniform sampler2D texture_shadowmap;
+ uniform sampler2D albedoMap;
+ uniform sampler2D normalMap;
+ uniform sampler2D roughnessMap;
+@@ -106,18 +106,18 @@ vec3 buildWorldNormal(vec3 normalSample, vec3 T, vec3 B, vec3 Nw) {
+ // ========================================
+ // Tile masks
+ // ========================================
+-uint readTileMaskAt(sampler2D tileLM, ivec2 tc, vec2 tiledTexSizeF) {
++uint readTileMaskAt(ivec2 tc, vec2 tiledTexSizeF) {
+     ivec2 clamped = clamp(tc, ivec2(0), ivec2(tiledTexSizeF) - ivec2(1));
+     vec2 uvTile = (vec2(clamped) + 0.5) / tiledTexSizeF;
+-    float packedMask = texture(tileLM, uvTile).r;
++    float packedMask = textureLod(tileLightMap, uvTile, 0.0).r;
+     return uint(floor(packedMask + 0.5)) & 0xFFFFFFu;
+ }
+ 
+-uint gatherCombinedMask3x3(sampler2D tileLM, ivec2 tileCoord, vec2 tiledTexSizeF) {
++uint gatherCombinedMask3x3(ivec2 tileCoord, vec2 tiledTexSizeF) {
+     uint combined = 0u;
+     for (int oy = -1; oy <= 1; ++oy)
+     for (int ox = -1; ox <= 1; ++ox)
+-    combined |= readTileMaskAt(tileLM, tileCoord + ivec2(ox, oy), tiledTexSizeF);
++    combined |= readTileMaskAt(tileCoord + ivec2(ox, oy), tiledTexSizeF);
+     return combined & 0xFFFFFFu;
+ }
+ 
+@@ -192,7 +192,6 @@ vec3 computeLightingEeveeLike(
+     vec3 N,                          // normal (normalized)
+     vec3 V,                          // view dir (normalized)
+     uint combinedMask24,             // 24-bit active lights mask
+-    sampler2D smap,                  // shadow map
+     mat4 lta[64],                    // light transforms
+     vec4 lca[64],                    // light colors
+     vec4 lpa[64]                     // light props
+@@ -237,7 +236,7 @@ vec3 computeLightingEeveeLike(
+         // Shadows
+         float visible = 1.0;
+         if (Lp.shadows) {
+-            visible = shadow_computeSoft(worldPos, N, Lp.pos, smap, int(i));
++            visible = shadow_computeSoft(worldPos, N, Lp.pos, int(i));
+         }
+ 
+         // Light intensity
+@@ -355,7 +354,7 @@ void main() {
+     ivec2 tiledTexSize  = ivec2(tiledTexSizeF);
+     ivec2 tileCoord     = ivec2(floor(gl_FragCoord.xy * tiledTexSizeF / size.xy));
+     tileCoord           = clamp(tileCoord, ivec2(0), tiledTexSize - ivec2(1));
+-    uint combinedMask   = gatherCombinedMask3x3(tileLightMap, tileCoord, tiledTexSizeF);
++    uint combinedMask   = gatherCombinedMask3x3(tileCoord, tiledTexSizeF);
+ 
+     // Eevee-like lighting
+     vec3 hdrColor = computeLightingEeveeLike(
+@@ -366,7 +365,6 @@ void main() {
+         N,
+         V,
+         combinedMask,
+-        shadowMap,
+         light_transform_array,
+         light_color_array,
+         light_properties_array
+diff --git a/src/Assets/Materials/Scenes/model.material b/src/Assets/Materials/Scenes/model.material
+index 15a1ca6..669922e 100644
+--- a/src/Assets/Materials/Scenes/model.material
++++ b/src/Assets/Materials/Scenes/model.material
+@@ -44,7 +44,7 @@ samplers {
+   max_anisotropy: 0.0
+ }
+ samplers {
+-  name: "shadowMap"
++  name: "texture_shadowmap"
+   wrap_u: WRAP_MODE_REPEAT
+   wrap_v: WRAP_MODE_REPEAT
+   filter_min: FILTER_MODE_MIN_LINEAR
 diff --git a/src/Content/Rooms/Scene.script b/src/Content/Rooms/Scene.script
 index f2c955a..b2170c3 100644
 --- a/src/Content/Rooms/Scene.script
