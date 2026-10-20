@@ -166,7 +166,8 @@ Collada, so its ten `.dae` models are converted to glTF
 (`tools/dae2gltf.mjs`); the Illumination shader's texture reads are hoisted
 out of branches so it compiles to WGSL; the skybox shader's `transpose` helper
 is renamed; the browser pointer-lock extension is replaced by
-`cart-ext/pointer_lock`.
+`cart-ext/pointer_lock`; `game.project` makes GL ES fragment shaders full
+precision (see Illumination).
 
 ### Illumination
 
@@ -182,7 +183,13 @@ MIT. Textures from [Tiny Texture Pack 1 and 2](https://screamingbrainstudios.itc
 by Screaming Brain Studios; normal and specular maps made with
 [Normal Map Online](https://cpetry.github.io/NormalMap-Online/) by @cpetry.
 Dual GL and WebGPU cart. Changes: the model shader's texture reads are hoisted out
-of branches for WGSL. This scene found the second wasmcart-defold WebGPU fix:
+of branches for WGSL, and `game.project` sets
+`glsl_es_default_precision_float = highp`. Defold makes GL ES fragment
+shaders mediump by default, and on GL ES drivers that run mediump at 16 bits
+(Mesa, mobile GPUs) the normal maps' tangent frame came out infinite and no
+light reached the scene; desktop GL and WebGPU always ran it at full
+precision. It also found the WebGPU backbuffer drawn upside down relative to
+GL, which mirrored the `dFdy` its normal mapping uses. This scene found the second wasmcart-defold WebGPU fix:
 its material declares a light-map texcoord most meshes do not supply, which
 GL tolerates and WebGPU refused, so nothing drew.
 
