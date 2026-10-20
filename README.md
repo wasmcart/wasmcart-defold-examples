@@ -253,8 +253,8 @@ cart engine. On WebGPU this scene needed three wasmcart-defold fixes: it
 samples the depth buffer (bound now as unfilterable float, read without
 filtering), `render.set_cull_face` did nothing (the skybox, drawn inside out
 with front faces culled, vanished), and its cube map is JPEG. This cart
-found a heap overrun in webgl-node (the Node host's GL layer) that killed the host on any cart with a
-large uniform block; fixed in webgl-node 1.6.2.
+found a heap overrun in webgl-node (the Node host's GL layer) that killed
+the host on any cart with a large uniform block; fixed in webgl-node 1.6.2.
 
 ## The games
 
