@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// list-carts.mjs [--frames <project>] [--runs <project>]
+// list-carts.mjs [--frames <project>] [--runs <project>] [--webgpu <project>]
 //
 // Prints the projects CI builds and runs, one per line: every example
 // project at the repo root that has a game.project, then every games/<id>
@@ -9,6 +9,8 @@
 // and run on a software rasterizer in CI). With --runs <project>, prints
 // "yes" unless game.json has "ci": {"run": false}: a cart CI builds but does
 // not run, with the reason beside the flag (a host bug the cart trips, say).
+// With --webgpu <project>, prints "yes" unless game.json has "webgpu": false:
+// the cart is a dual cart and CI requires it to run on WebGPU as well as GL.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -33,6 +35,10 @@ if (args[0] === '--runs') {
   const p = args[1];
   const meta = p.startsWith('games/') ? JSON.parse(fs.readFileSync(path.join(ROOT, p, 'game.json'), 'utf8')) : {};
   console.log(meta.ci?.run === false ? 'no' : 'yes');
+} else if (args[0] === '--webgpu') {
+  const p = args[1];
+  const meta = p.startsWith('games/') ? JSON.parse(fs.readFileSync(path.join(ROOT, p, 'game.json'), 'utf8')) : {};
+  console.log(meta.webgpu === false ? 'no' : 'yes');
 } else if (args[0] === '--frames') {
   const p = args[1];
   const meta = p.startsWith('games/') ? JSON.parse(fs.readFileSync(path.join(ROOT, p, 'game.json'), 'utf8')) : {};

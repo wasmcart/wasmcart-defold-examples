@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 // build-cart.mjs <project-dir> [--out DIR] [--name NAME] [--no-webgpu]
 //
-// Builds a Defold project's content with bob and packs it as wasmcart carts:
-// <name>.wasc on the GL engine and, when the WebGPU engine exists,
-// <name>_webgpu.wasc on that one, from the same bob archive.
+// Builds a Defold project's content with bob and packs it as one wasmcart
+// cart, <name>.wasc. When the shaders compile to WGSL it is a dual cart, on the
+// engine with both the GL and the WebGPU adapter: a host with WebGPU runs it
+// on WebGPU and any other host on GL. Otherwise it is on the GL engine.
 //
 // <project-dir> is a Defold project (it has game.project) or a games/<id>
 // folder, whose fetched source is in src/ (tools/fetch-games.mjs).
@@ -78,9 +79,9 @@ const gameMeta = fs.existsSync(gameJson) ? JSON.parse(fs.readFileSync(gameJson, 
 const cartExts = (gameMeta.cartExtensions || []).map(d => path.join(input, d));
 const cartExtNames = cartExts.map(d => (fs.readFileSync(path.join(d, 'ext.manifest'), 'utf8').match(/^name:\s*"?([^"\n]+)"?/m) || [])[1]);
 const skipExts = [...(gameMeta.skipExtensions || []), ...cartExtNames];
-// "webgpu": false in game.json: build the GL cart only. For a game whose WebGPU
-// cart is known not to draw (a WGSL-valid cart that renders black is worse than
-// no WebGPU cart), with the reason in "notes".
+// "webgpu": false in game.json: a GL-only cart. For a game whose WebGPU path is
+// known not to draw (a WGSL-valid cart that renders black on WebGPU is worse
+// than one that runs on GL everywhere), with the reason in "notes".
 if (gameMeta.webgpu === false) webgpu = false;
 outDir = path.resolve(outDir || input);
 
@@ -291,13 +292,13 @@ const BOB_BUILD = [
   '--use-uncompressed-lua-source',
   '--build-server', DEAD_BUILD_SERVER,
 ];
-// WGSL beside GLSL ES, so one archive serves both carts.
+// WGSL beside GLSL ES, so the archive serves both of a dual cart's adapters.
 const wgslErrors = webgpu ? tryBob(contentRoot, ...BOB_BUILD, '--debug-output-wgsl', 'true', 'build') : ['(--no-webgpu)'];
 if (wgslErrors) {
   // A shader that compiles for GL can still fail Defold's SPIR-V -> WGSL step
   // (sampler2D function parameters, sampling in non-uniform control flow).
-  // The GL cart is still worth having; the WebGPU one needs the shader fixed.
-  if (webgpu) console.log(`${name}: WARNING no WebGPU cart: the shaders do not compile to WGSL:\n  ${wgslErrors.filter(l => !/^\s*$/.test(l)).slice(0, 8).join('\n  ')}`);
+  // The cart is still worth having on GL; WebGPU needs the shader fixed.
+  if (webgpu) console.log(`${name}: WARNING GL only: the shaders do not compile to WGSL:\n  ${wgslErrors.filter(l => !/^\s*$/.test(l)).slice(0, 8).join('\n  ')}`);
   webgpu = false;
   bob(contentRoot, ...BOB_BUILD, 'build');
 }
@@ -320,7 +321,7 @@ if (hasNative) {
     }
   }
   emsdk = emsdk || process.env.EMSDK;
-  const variants = webgpu ? 'all' : 'gl';
+  const variants = webgpu ? 'dual' : 'gl';
   run(process.execPath, [path.join(SDK, 'link.mjs'), project, '--out', engineDir, '--variant', variants, ...skipExts.flatMap(e => ['--skip-ext', e]), ...cartExts.flatMap(d => ['--ext', d]), ...(emsdk ? ['--emsdk', emsdk] : [])], { env });
 }
 
@@ -330,15 +331,9 @@ process.on('exit', () => fs.rmSync(stage, { recursive: true, force: true }));
 for (const f of ['game.arci', 'game.arcd', 'game.dmanifest', 'game.projectc']) fs.copyFileSync(path.join(built, f), path.join(stage, f));
 
 fs.mkdirSync(outDir, { recursive: true });
-const carts = [['dmengine_wasmcart.wasm', `${name}.wasc`]];
-if (webgpu) {
-  if (fs.existsSync(path.join(engineDir, 'dmengine_wasmcart_webgpu.wasm'))) carts.push(['dmengine_wasmcart_webgpu.wasm', `${name}_webgpu.wasc`]);
-  else console.log(`${name}: no WebGPU engine in ${engineDir}, GL cart only`);
-}
-for (const [engine, file] of carts) {
-  const wasm = path.join(engineDir, engine);
-  if (!fs.existsSync(wasm)) fail(`no engine at ${wasm}; build wasmcart-defold first (see its README)`);
-  const out = path.join(outDir, file);
-  pack('--wasm', wasm, '--assets', stage, '--name', title, '--width', String(W), '--height', String(H), '--output', out);
-  console.log(`packed ${out} (${(fs.statSync(out).size / 1048576).toFixed(1)} MB)`);
-}
+const engine = webgpu ? 'dmengine_wasmcart_dual.wasm' : 'dmengine_wasmcart.wasm';
+const wasm = path.join(engineDir, engine);
+if (!fs.existsSync(wasm)) fail(`no engine at ${wasm}; build wasmcart-defold first (see its README)${webgpu ? ', with DEFOLD_EMDAWNWEBGPU_PORT set for the dual engine, or pass --no-webgpu' : ''}`);
+const out = path.join(outDir, `${name}.wasc`);
+pack('--wasm', wasm, '--assets', stage, '--name', title, '--width', String(W), '--height', String(H), '--output', out);
+console.log(`packed ${out} (${(fs.statSync(out).size / 1048576).toFixed(1)} MB, ${webgpu ? 'dual GL+WebGPU' : 'GL'})`);

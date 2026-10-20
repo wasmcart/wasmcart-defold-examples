@@ -5,7 +5,7 @@ name: build carts
 # every run, and attached to the release when a tag is pushed.
 #
 # The engine is NOT built here. wasmcart-defold publishes the two cart engines
-# (GL and WebGPU) and the SDK that relinks them with native extensions on each
+# (GL, and dual GL + WebGPU) and the SDK that relinks them with native extensions on each
 # of its releases, and this job takes them from the release that engine.lock
 # names, so a cart here is built against a known engine and the two repos
 # move together on purpose.
@@ -39,12 +39,14 @@ jobs:
 
       # The carts render through native-gles, which links libEGL and libGLESv2
       # and needs Mesa's software rasterizer because the runner has no GPU.
-      - name: Install the software GL stack
+      # Software GL for every cart, and lavapipe (mesa-vulkan-drivers, a
+      # software Vulkan) for the WebGPU host to run the dual carts on.
+      - name: Install the software GL and Vulkan stacks
         run: |
           set -euo pipefail
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends \
-            libegl1 libgles2 libglvnd0 libgl1-mesa-dri libglx-mesa0 libgbm1 rsync zip unzip
+            libegl1 libgles2 libglvnd0 libgl1-mesa-dri libglx-mesa0 libgbm1 mesa-vulkan-drivers rsync zip unzip
 
       - name: Read the engine pin
         id: engine
@@ -65,7 +67,7 @@ jobs:
           set -euo pipefail
           mkdir -p engine
           gh release download "$TAG" --repo wasmcart/wasmcart-defold --dir engine \
-            --pattern 'dmengine_wasmcart.wasm' --pattern 'dmengine_wasmcart_webgpu.wasm' \
+            --pattern 'dmengine_wasmcart.wasm' --pattern 'dmengine_wasmcart_dual.wasm' \
             --pattern 'wasmcart-defold-sdk.tar.gz' --pattern 'SHA256SUMS'
           (cd engine && sha256sum -c --ignore-missing SHA256SUMS)
           tar -xzf engine/wasmcart-defold-sdk.tar.gz -C engine
@@ -121,10 +123,10 @@ jobs:
             exit 1
           fi
 
-      # A .wasc that packs but does not run is not a pass. Step each GL cart
-      # and require the runtime's own "ran N frames" line. The WebGPU carts
-      # are packed but not run: the runner has no WebGPU device.
-      - name: Run every GL cart headless
+      # A .wasc that packs but does not run is not a pass. Step each cart and
+      # require a "ran N frames" line per API: on GL, and a dual cart on
+      # WebGPU (lavapipe) as well.
+      - name: Run every cart headless
         env:
           LIBGL_ALWAYS_SOFTWARE: '1'
           EGL_PLATFORM: surfaceless
@@ -140,10 +142,14 @@ jobs:
             fi
             frames=$(node tools/list-carts.mjs --frames "$p")
             echo "::group::run $name ($frames frames)"
-            out=$(npx --no-install wasmcart "$cart" --frames "$frames" 2>&1 || true)
+            out=$(node tools/run-cart.mjs "$cart" --frames "$frames" --gpu each 2>&1 || true)
             printf '%s\n' "$out" | grep -vE 'maxDynamic' | tail -30
-            if ! printf '%s\n' "$out" | grep -qE "^ran $frames frames"; then
-              bad="$bad $name(no-run)"
+            if ! printf '%s\n' "$out" | grep -qE "^ran $frames frames .* on GL$"; then
+              bad="$bad $name(no-run-gl)"
+            fi
+            if [ "$(node tools/list-carts.mjs --webgpu "$p")" = yes ] \
+               && ! printf '%s\n' "$out" | grep -qE "^ran $frames frames .* on WebGPU$"; then
+              bad="$bad $name(no-run-webgpu)"
             fi
             printf '%s\n' "$out" | grep -qE 'ERROR:SCRIPT|cart trapped' && bad="$bad $name"
             printf '%s\n' "$out" | grep -qE '[0-9]+ PASS +[1-9][0-9]* FAIL' && bad="$bad $name(assertions)"

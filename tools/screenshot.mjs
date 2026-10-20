@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-// screenshot.mjs <cart.wasc> <out.png> [--frames N] [--input F:buttons,...] [--width W]
+// screenshot.mjs <cart.wasc> <out.png> [--frames N] [--input F:buttons,...] [--width W] [--gpu gl|webgpu]
 //
-// Runs a cart on the wasmcart Node host (GL or WebGPU, whichever the cart
-// is) with a fixed pad script and writes one frame as a PNG, scaled down to
+// Runs a cart on the wasmcart Node host (a dual cart on WebGPU when the host
+// has it, else GL; --gpu chooses) with a fixed pad script and writes one frame as a PNG, scaled down to
 // --width if given. For docs/screenshots: every image comes from the cart
 // as it runs on the host, never from the editor.
 //
@@ -10,6 +10,8 @@
 //   --input F:a+b,... hold buttons from frame F for 10 frames (a, b, x, y,
 //                     start, select, up, down, left, right); repeatable list
 //   --width W         scale the PNG to W pixels wide (nearest, integer or 2:1 box)
+//   --gpu gl|webgpu   the API to run a dual cart on (webgpu fails if the host
+//                     cannot provide it)
 import fs from 'node:fs';
 import path from 'node:path';
 import zlib from 'node:zlib';
@@ -19,7 +21,8 @@ import { pathToFileURL } from 'node:url';
 const args = process.argv.slice(2);
 const opt = (n, d) => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : d; };
 const [cart, out] = args.filter(a => !a.startsWith('--') && !args[args.indexOf(a) - 1]?.startsWith('--'));
-if (!cart || !out) { console.error('usage: screenshot.mjs <cart.wasc> <out.png> [--frames N] [--input F:buttons,...] [--width W]'); process.exit(1); }
+const GPU = opt('--gpu', null);
+if (!cart || !out || (GPU && GPU !== 'gl' && GPU !== 'webgpu')) { console.error('usage: screenshot.mjs <cart.wasc> <out.png> [--frames N] [--input F:buttons,...] [--width W] [--gpu gl|webgpu]'); process.exit(1); }
 const FRAMES = Number(opt('--frames', 300));
 const WIDTH = Number(opt('--width', 0));
 const BITS = { a: 1, b: 2, x: 4, y: 8, start: 1 << 4, select: 1 << 5, up: 1 << 8, down: 1 << 9, left: 1 << 10, right: 1 << 11 };
@@ -39,7 +42,8 @@ const quiet = () => {};
 const origErr = console.error;
 console.log = console.error = console.warn = quiet;
 const host = new CartHost();
-await host.load(cart, { adapterOptions: { powerPreference: 'low-power' }, deterministic: { seed: 42, stepMs: 1000 / 60 } });
+await host.load(cart, { ...(GPU === 'gl' ? { wgpu: false } : {}), adapterOptions: { powerPreference: 'low-power' }, deterministic: { seed: 42, stepMs: 1000 / 60 } });
+if (GPU === 'webgpu' && !host.usesWgpu) { origErr(`${cart}: asked for WebGPU, but the host ran it on GL`); process.exit(1); }
 const tick = () => new Promise(r => setImmediate(r));
 for (let f = 0; f < FRAMES; f++) {
   host.runFrame([{ connected: true, buttons: buttonsAt(f) }]);

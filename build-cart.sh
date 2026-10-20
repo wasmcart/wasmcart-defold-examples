@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # build-cart.sh <project-dir> [output-dir]
 #
-# Builds a Defold project's content and packs it as wasmcart carts: a GL cart
-# and, when the WebGPU engine exists, a WebGPU cart from the same archive.
+# Builds a Defold project's content and packs it as one wasmcart cart: a dual
+# GL and WebGPU cart when its shaders compile to WGSL, else a GL cart.
 # This is a thin wrapper around tools/build-cart.mjs, which also handles native
 # extensions (through the wasmcart-defold SDK) and the games/<id> projects;
 # see its header for the environment it reads (DEFOLD_TREE, BOB_JAR, ...).

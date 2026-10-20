@@ -14,10 +14,11 @@ it sits beside this repo. The release this repo is built against is named in
 Two kinds of cart come out of here: the twelve small examples and 2D games
 under the repo root, and the 3D **[showcase games](#showcase-games)** under
 `games/`, open-source Defold projects by other developers fetched at a pinned
-commit and built as carts. Every cart is built twice from one content
-archive: a GL cart (`<name>.wasc`) and, where the game's shaders compile to
-WGSL, a WebGPU cart (`<name>_webgpu.wasc`) for hosts with wasmcart's WebGPU
-tier.
+commit and built as carts. Each is one file, `<name>.wasc`. Where the
+game's shaders compile to WGSL it is a dual cart, with both Defold's GL and
+WebGPU renderers inside: a host with wasmcart's WebGPU tier runs it on
+WebGPU, and any other host runs the same file on GL. The two games whose
+shaders do not compile to WGSL are GL carts.
 
 ## Status
 
@@ -104,7 +105,7 @@ relinking the engine through the wasmcart-defold SDK when a game has native
 extensions.
 
 Every screenshot below was taken from the cart as it runs on the wasmcart Node
-host, on WebGPU where the game has a WebGPU cart (`tools/screenshot.mjs`).
+host, on WebGPU where the cart is a dual cart (`tools/screenshot.mjs`).
 
 ### Treasure Scene
 
@@ -118,7 +119,7 @@ the chest.
 **By [FlexYourBrain](https://github.com/FlexYourBrain)** (Agustin), from
 [FlexYourBrain/Basic3d_TreasureScene](https://github.com/FlexYourBrain/Basic3d_TreasureScene),
 MIT. Art by Agustin R. Also on [itch.io](https://flexyourbrain.itch.io/treasure-scene).
-GL and WebGPU carts; no changes to the project.
+Dual GL and WebGPU cart; no changes to the project.
 
 ### Little Coaster
 
@@ -134,7 +135,7 @@ every asset was made from scratch for it. The play button starts the ride.
 MIT. Uses [vantage](https://github.com/Jhonnyg/vantage) by Jhonny Göransson,
 [dirtylarry](https://github.com/andsve/dirtylarry) by Sven Andersson and
 [defold-pbr](https://github.com/defold/defold-pbr) by the Defold Foundation.
-GL and WebGPU carts; no changes to the project. This game is what found the
+Dual GL and WebGPU cart; no changes to the project. This game is what found the
 WebGPU cube-map binding bug fixed in wasmcart-defold (its environment map
 drew nothing in compatibility mode).
 
@@ -160,7 +161,7 @@ stone, candles, meatcube arm), each linked in the project's README; uses
 [defold-trenchbroom](https://github.com/astrochili/defold-trenchbroom) by Roman
 Silin, [pigeon](https://github.com/paweljarosz/pigeon) by Pawel Jarosz and
 [defold-pointer-lock](https://github.com/indiesoftby/defold-pointer-lock) by
-Indiesoft LLC. GL and WebGPU carts. Changes: Defold 1.14 no longer reads
+Indiesoft LLC. Dual GL and WebGPU cart. Changes: Defold 1.14 no longer reads
 Collada, so its ten `.dae` models are converted to glTF
 (`tools/dae2gltf.mjs`); the Illumination shader's texture reads are hoisted
 out of branches so it compiles to WGSL; the skybox shader's `transpose` helper
@@ -180,7 +181,7 @@ walked in first person. WASD moves, E is the flashlight, F is spectator mode.
 MIT. Textures from [Tiny Texture Pack 1 and 2](https://screamingbrainstudios.itch.io/tiny-texture-pack)
 by Screaming Brain Studios; normal and specular maps made with
 [Normal Map Online](https://cpetry.github.io/NormalMap-Online/) by @cpetry.
-GL and WebGPU carts. Changes: the model shader's texture reads are hoisted out
+Dual GL and WebGPU cart. Changes: the model shader's texture reads are hoisted out
 of branches for WGSL. This scene found the second wasmcart-defold WebGPU fix:
 its material declares a light-map texcoord most meshes do not supply, which
 GL tolerates and WebGPU refused, so nothing drew.
@@ -199,7 +200,7 @@ MIT. Built on [Scene3D](https://github.com/indiesoftby/defold-scene3d) by
 Indiesoft LLC (MIT); models in SideFX Houdini, 2D art in Affinity Designer and
 music in Bandlab, all by the author; uses
 [ludobits](https://github.com/britzl/ludobits) by Björn Ritzl. Also on
-[itch.io](https://glitchman.itch.io/merge-getaway). GL and WebGPU carts.
+[itch.io](https://glitchman.itch.io/merge-getaway). Dual GL and WebGPU cart.
 Changes: Scene3D is moved to its latest commit for Defold 1.14, and three of
 its shaders that pass a `sampler2D` as a function parameter are replaced
 (`overrides/`); the desktop and browser extensions it depends on (defos,
@@ -219,8 +220,8 @@ moves, the mouse looks.
 [martianovdev/Defold-BRDF-Deferred-Rendering-V2](https://github.com/martianovdev/Defold-BRDF-Deferred-Rendering-V2),
 CC BY 4.0: this cart is a redistribution of that project at the pinned commit
 with the changes in its `patches/`, and the credit here is the attribution
-the licence asks for. GL cart only: its shaders pass samplers as function
-parameters and do not compile to WGSL. Changes: the Defold 1.13 API migration
+the licence asks for. GL only: its shaders pass samplers as function
+parameters and do not compile to WGSL (`"webgpu": false` in its `game.json`). Changes: the Defold 1.13 API migration
 (the legacy LiveUpdate loader, the physics listener, `profiler` guarded) and
 the builtin Collada quad replaced by the glTF one.
 
@@ -234,10 +235,10 @@ floating objects under a cloudy sky. The camera is fixed.
 **By [Selim Anaç (selimanac)](https://github.com/selimanac)**, from
 [selimanac/defold-stylized-water-shader](https://github.com/selimanac/defold-stylized-water-shader),
 MIT, a port of [unity-stylized-water](https://github.com/danielshervheim/unity-stylized-water)
-by Daniel Shervheim. GL cart only: the shader samples textures inside
+by Daniel Shervheim. GL only: the shader samples textures inside
 distance-based branches, which WGSL forbids, and with those samples hoisted
-out of the branches the WebGPU cart compiles but draws black, so none ships
-until that is understood (`"webgpu": false` in its `game.json`). Changes:
+out of the branches it compiles but draws black on WebGPU, so the cart stays
+on GL until that is understood (`"webgpu": false` in its `game.json`). Changes:
 none to the project; the extension-imgui dependency, which the sample never
 calls, is left out of the cart engine. This cart found a heap overrun in
 webgl-node (the Node host's GL layer) that killed the host on any cart with a
@@ -381,7 +382,7 @@ source ./dmenv.sh
 
 # 2. Build content and pack a cart (content build + pack in one step)
 cd ../wasmcart-defold-examples
-./build-cart.sh breakout          # -> breakout/breakout.wasc, breakout_webgpu.wasc
+./build-cart.sh breakout          # -> breakout/breakout.wasc (dual GL + WebGPU)
 
 # 3. A showcase game: fetch it at its pinned commit, then build it
 node tools/fetch-games.mjs horror3d
@@ -390,8 +391,9 @@ node tools/build-cart.mjs games/horror3d
 
 `build-cart.sh` wraps `tools/build-cart.mjs`, which reads the resolution and
 title out of `game.project`, builds the content once with WGSL beside the
-GLSL, and packs a GL cart and (when the engine tree has
-`dmengine_wasmcart_webgpu.wasm`) a WebGPU cart. It is the supported path;
+GLSL, and packs one cart: on the dual engine (`dmengine_wasmcart_dual.wasm`)
+when the shaders compile to WGSL, else on the GL engine. It is the supported
+path;
 what follows is what it does, for when something needs changing.
 
 Two things it does beyond that, both for the showcase games:
@@ -534,12 +536,14 @@ polled, and a pad that appears mid-session is picked up on the next frame.
 ## Continuous integration
 
 `.github/workflows/build-carts.yml` packs every example and every enabled
-showcase game into a GL `.wasc` cart and, unless its `game.json` sets
-`"webgpu": false`, a WebGPU one, on each push, and runs each GL
-cart headless (480 frames for an example, 120 for a game; the WebGPU carts
-are packed but not run, as a runner has no WebGPU device). A cart passes only
-if the runtime reports completing all its frames; it fails on a short run, a
-script error, a cart trap or a failed in-cart assertion. Checking only for
+showcase game into one `.wasc` on each push: a dual GL and WebGPU cart
+unless its `game.json` sets `"webgpu": false`. `tools/run-cart.mjs` then
+runs each cart headless on GL (Mesa's software GL), and each dual cart on
+WebGPU as well (lavapipe, Mesa's software Vulkan): 480 frames for an example,
+120 for a game, each frame exactly 1/60 s on the cart's clock so a test's
+timers and physics see the same time on any machine. A cart passes only if
+it completes all its frames on every API it should run on; it fails on a
+short run, a script error, a cart trap or a failed in-cart assertion. Checking only for
 error messages is not enough: a runner with no working GL never loads the
 cart at all, so it produces none of those errors and every cart would look
 fine.
