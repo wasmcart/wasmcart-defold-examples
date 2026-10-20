@@ -252,21 +252,9 @@ extension-imgui dependency, which the sample never calls, is left out of the
 cart engine. On WebGPU this scene needed three wasmcart-defold fixes: it
 samples the depth buffer (bound now as unfilterable float, read without
 filtering), `render.set_cull_face` did nothing (the skybox, drawn inside out
-with front faces culled, vanished), and its cube map is JPEG. This cart found a heap overrun in
-webgl-node (the Node host's GL layer) that killed the host on any cart with a
+with front faces culled, vanished), and its cube map is JPEG. This cart
+found a heap overrun in webgl-node (the Node host's GL layer) that killed the host on any cart with a
 large uniform block; fixed in webgl-node 1.6.2.
-
-### Not built yet
-
-**[SuperWEIRD Game Kit](https://github.com/ludenio/SuperWEIRDGameKit)** by
-[Luden.io](https://luden.io) (CC0) and the
-**[Slasher prototype](https://github.com/Dragosha/slasher-prototype)** by
-[Igor Suntsev (Dragosha)](https://github.com/Dragosha) (code MIT, art CC0)
-are both pinned under `games/` but disabled. Each needs
-[extension-spine](https://github.com/defold/extension-spine), which compiles
-the Spine Runtimes into the engine, and the
-[Spine Runtimes License](https://esotericsoftware.com/spine-runtimes-license)
-needs a decision before that ships in a cart engine.
 
 ## The games
 

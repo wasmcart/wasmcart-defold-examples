@@ -78,8 +78,6 @@ made to build the game on wasmcart-defold, with the reason for each.
 | `games/mergegetaway/` | Merge Getaway | Artsiom Trubchyk (aglitchman) | [aglitchman/defold-ld50-game](https://github.com/aglitchman/defold-ld50-game) @ 1668afb | MIT |
 | `games/brdfdeferred/` | BRDF Deferred Rendering V2 | Mikhail Martianov (martianovdev) | [martianovdev/Defold-BRDF-Deferred-Rendering-V2](https://github.com/martianovdev/Defold-BRDF-Deferred-Rendering-V2) @ 4de9b8b | CC BY 4.0 |
 | `games/stylizedwater/` | Stylized Water | Selim Anaç (selimanac); after Daniel Shervheim's Unity shader | [selimanac/defold-stylized-water-shader](https://github.com/selimanac/defold-stylized-water-shader) @ bdcc1d8 | MIT |
-| `games/superweird/` (disabled) | SuperWEIRD Game Kit | Luden.io | [ludenio/SuperWEIRDGameKit](https://github.com/ludenio/SuperWEIRDGameKit) @ 4e86c38 | CC0 1.0 |
-| `games/slasher/` (disabled) | Slasher prototype | Igor Suntsev (Dragosha) | [Dragosha/slasher-prototype](https://github.com/Dragosha/slasher-prototype) @ 111608f | MIT (code), CC0 (art) |
 
 Third-party content inside those games, as each project's README credits it:
 
