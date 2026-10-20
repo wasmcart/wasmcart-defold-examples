@@ -11,5 +11,8 @@
   "credits": [
     "Textures from Tiny Texture Pack 1 and 2 by Screaming Brain Studios.",
     "Specular and normal maps generated with Normal Map Online by @cpetry."
+  ],
+  "notes": [
+    "GL ES precision: game.project sets [shader] glsl_es_default_precision_float = highp. Defold defaults GL ES fragment shaders to mediump, and drivers that honour it (Mesa here, mobile GPUs) build the Illumination normal-map tangent frame from 16-bit view-direction derivatives: it comes out infinite and every light vanishes. Desktop GL and WebGPU always ran it at full precision."
   ]
 }

@@ -21,6 +21,7 @@
     "Depends on defold-operator and defold-trenchbroom (Roman Silin), pigeon (Pawel Jarosz) and defold-pointer-lock (Indiesoft LLC)."
   ],
   "notes": [
-    "pointer_lock (indiesoftby/defold-pointer-lock) is replaced by cart-ext/pointer_lock: the original locks the cursor through GLFW or the browser, neither of which a cart has. Its Lua half is unchanged."
+    "pointer_lock (indiesoftby/defold-pointer-lock) is replaced by cart-ext/pointer_lock: the original locks the cursor through GLFW or the browser, neither of which a cart has. Its Lua half is unchanged.",
+    "GL ES precision: game.project sets [shader] glsl_es_default_precision_float = highp. Defold defaults GL ES fragment shaders to mediump, and drivers that honour it (Mesa here, mobile GPUs) build the Illumination normal-map tangent frame from 16-bit view-direction derivatives: it comes out infinite and every light vanishes. Desktop GL and WebGPU always ran it at full precision."
   ]
 }

@@ -267,6 +267,17 @@ index cdcfe83..08fc119 100644
    "material: \\\"/assets/skybox/materials/sky.material\\\"\\n"
    "textures: \\\"/assets/skybox/clouds.cubemap\\\"\\n"
    "skeleton: \\\"\\\"\\n"
+diff --git a/game.project b/game.project
+index da6b4d6..d4f9288 100644
+--- a/game.project
++++ b/game.project
+@@ -65,3 +65,6 @@ max_count = 32
+ max_count = 0
+ max_tile_count = 0
+ 
++
++[shader]
++glsl_es_default_precision_float = highp
 diff --git a/illumination/illumination.go b/illumination/illumination.go
 index 22e28c8..26f4298 100644
 --- a/illumination/illumination.go

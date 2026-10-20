@@ -285,6 +285,19 @@ if (fs.existsSync(overridesDir)) {
 }
 if (migrated) console.log(`${name}: migrated ${migrated} file${migrated > 1 ? 's' : ''} to the Defold 1.14 API`);
 if (manual.length) console.log(`${name}: WARNING removed Defold APIs that need a hand-written change:\n  ${manual.join('\n  ')}`);
+// bob builds incrementally, and its cache does not key on game.project: a
+// changed setting (glsl_es_default_precision_float, say) left every shader
+// built under the old one. So the staged build is discarded whenever
+// game.project or the bob jar changes.
+{
+  const stampFile = path.join(contentRoot, 'build/.wasmcart-stamp');
+  const stamp = crypto.createHash('sha1').update(fs.readFileSync(path.join(contentRoot, 'game.project'))).update(BOB).digest('hex');
+  if (!fs.existsSync(stampFile) || fs.readFileSync(stampFile, 'utf8') !== stamp) {
+    fs.rmSync(path.join(contentRoot, 'build'), { recursive: true, force: true });
+    fs.mkdirSync(path.join(contentRoot, 'build'), { recursive: true });
+    fs.writeFileSync(stampFile, stamp);
+  }
+}
 console.log(`${name}: building content (${W}x${H})`);
 const BOB_BUILD = [
   '--platform', 'wasm-web',          // host bytecode fails: "bad header in precompiled chunk"

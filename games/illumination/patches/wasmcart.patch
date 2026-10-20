@@ -1,3 +1,14 @@
+diff --git a/game.project b/game.project
+index 519daf9..5d4c910 100644
+--- a/game.project
++++ b/game.project
+@@ -36,3 +36,6 @@ shared_state = 1
+ [engine]
+ fixed_update_frequency = 60
+ 
++
++[shader]
++glsl_es_default_precision_float = highp
 diff --git a/illumination/materials/model.fp b/illumination/materials/model.fp
 index e91fa1c..c5eb65f 100644
 --- a/illumination/materials/model.fp
