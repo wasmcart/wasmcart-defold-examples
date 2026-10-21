@@ -19,11 +19,61 @@ index 511627a..34c55fc 100755
  max_contacts = 1000
  ray_cast_limit_3d = 1000
  trigger_overlap_capacity = 100
+diff --git a/ld50/cars/car_main.script b/ld50/cars/car_main.script
+index 259af0e..90954ee 100755
+--- a/ld50/cars/car_main.script
++++ b/ld50/cars/car_main.script
+@@ -136,11 +136,11 @@ local function process_input(self, dt)
+ 
+     self.no_input_time = self.no_input_time + dt
+ 
+-    if self.input_key_left or self.input_key_left2 then
++    if self.input_key_left or self.input_key_left2 or self.input_pad_left or self.input_stick_left then
+         sx = sx - 1
+         self.no_input_time = 0
+     end
+-    if self.input_key_right or self.input_key_right2 then
++    if self.input_key_right or self.input_key_right2 or self.input_pad_right or self.input_stick_right then
+         sx = sx + 1
+         self.no_input_time = 0
+     end
+@@ -558,5 +558,14 @@ function on_input(self, action_id, action)
+         self.input_key_left2 = not action.released
+     elseif action_id == self.key_right2 then
+         self.input_key_right2 = not action.released
++    -- Gamepad: the d-pad and the left stick steer like the arrow keys.
++    elseif action_id == hash("gamepad_lpad_left") then
++        self.input_pad_left = not action.released
++    elseif action_id == hash("gamepad_lpad_right") then
++        self.input_pad_right = not action.released
++    elseif action_id == hash("gamepad_lstick_left") then
++        self.input_stick_left = not action.released and action.value > 0.3
++    elseif action_id == hash("gamepad_lstick_right") then
++        self.input_stick_right = not action.released and action.value > 0.3
+     end
+ end
 diff --git a/ld50/main.script b/ld50/main.script
-index 59e2bf1..d3bd4d2 100755
+index 59e2bf1..501bc58 100755
 --- a/ld50/main.script
 +++ b/ld50/main.script
-@@ -106,7 +106,8 @@ function on_input(self, action_id, action)
+@@ -80,13 +80,14 @@ end
+ function on_input(self, action_id, action)
+     flow.on_input(action_id, action)
+ 
+-    if action_id == hash("key_m") and action.pressed then
++    -- Gamepad: SELECT toggles the music like M, Y restarts like R.
++    if (action_id == hash("key_m") or action_id == hash("gamepad_back")) and action.pressed then
+         global_state.music = not global_state.music
+     elseif action_id == hash("key_1") and action.pressed then
+         msg.post("@system:", "toggle_physics_debug")
+     elseif action_id == hash("key_2") and action.pressed then
+         msg.post("@system:", "toggle_profile")
+-    elseif action_id == hash("key_r") and action.pressed then
++    elseif (action_id == hash("key_r") or action_id == hash("gamepad_rpad_up")) and action.pressed then
+         -- Reload current scene
+         main.load_scene(self)
+     -- elseif action_id == hash("key_6") and action.pressed then
+@@ -106,7 +107,8 @@ function on_input(self, action_id, action)
      --     print("Loading next scene", next_id)
      --     main.load_scene(self, next_id)
      elseif action_id == hash("key_f11") and action.pressed then
@@ -33,7 +83,7 @@ index 59e2bf1..d3bd4d2 100755
      elseif action_id == hash("key_ralt") or action_id == hash("key_lalt") then
          if action.released then
              self.alt_is_held = false
-@@ -114,7 +115,8 @@ function on_input(self, action_id, action)
+@@ -114,7 +116,8 @@ function on_input(self, action_id, action)
              self.alt_is_held = true
          end
      elseif self.alt_is_held and action_id == hash("key_enter") and action.pressed then
@@ -43,3 +93,19 @@ index 59e2bf1..d3bd4d2 100755
      elseif self.alt_is_held and action_id == hash("key_f4") and action.pressed then
          msg.post("@system:", "exit", {code = 0})
      elseif action_id == hash("touch_multi") then
+diff --git a/ld50/scenes/getaway/getaway_main.script b/ld50/scenes/getaway/getaway_main.script
+index 88e51d5..914b0f9 100755
+--- a/ld50/scenes/getaway/getaway_main.script
++++ b/ld50/scenes/getaway/getaway_main.script
+@@ -76,6 +76,11 @@ function on_input(self, action_id, action)
+         start(self)
+     elseif action_id == self.key_start3 and action.pressed then
+         start(self)
++    -- Gamepad: A, START, or steering with the d-pad or the left stick starts the run.
++    elseif action.pressed and (action_id == hash("gamepad_rpad_down") or action_id == hash("gamepad_start")
++            or action_id == hash("gamepad_lpad_left") or action_id == hash("gamepad_lpad_right")
++            or action_id == hash("gamepad_lstick_left") or action_id == hash("gamepad_lstick_right")) then
++        start(self)
+     elseif global_state.touch_control and action_id == self.touch_start and action.pressed then
+         start(self)
+     end

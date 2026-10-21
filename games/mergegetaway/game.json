@@ -7,7 +7,7 @@
   "authorUrl": "https://github.com/aglitchman",
   "license": "MIT",
   "webgpu": true,
-  "controls": "A/D or left/right steer; M toggles music; R restarts.",
+  "controls": "A/D, left/right, the d-pad or the left stick steer; W, Space, Enter, A or START starts; M or SELECT toggles music; R or Y restarts.",
   "skipExtensions": [
     "defos",
     "Screenshot",

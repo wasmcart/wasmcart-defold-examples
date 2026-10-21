@@ -199,7 +199,9 @@ GL tolerates and WebGPU refused, so nothing drew.
 
 A 3D car-merging getaway: the police are after you, so merge cars of the same
 colour to accelerate and escape. Artsiom Trubchyk's Ludum Dare 50 compo
-entry. A/D steer, M toggles the music, R restarts.
+entry. A/D or the arrow keys steer, M toggles the music, R restarts; on a
+gamepad the d-pad or left stick steers, A or START starts, SELECT toggles the
+music and Y restarts.
 
 **By [Artsiom Trubchyk (aglitchman)](https://github.com/aglitchman)**, from
 [aglitchman/defold-ld50-game](https://github.com/aglitchman/defold-ld50-game),
@@ -212,7 +214,8 @@ Changes: Scene3D is moved to its latest commit for Defold 1.14, and three of
 its shaders that pass a `sampler2D` as a function parameter are replaced
 (`overrides/`); the desktop and browser extensions it depends on (defos,
 screenshot, clipboard, its own HTML5 glue) are left out and the two fullscreen
-calls guarded; the physics object limit is raised.
+calls guarded; the physics object limit is raised; gamepad steering, start,
+music and restart are added (upstream is keyboard and touch only).
 
 ### BRDF Deferred Rendering
 
