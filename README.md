@@ -562,6 +562,16 @@ The finished carts are uploaded as a `carts` artifact with a `SHA256SUMS`
 file. **A pushed `v*` tag also gets a GitHub release with every cart attached**,
 so a version can be pinned and downloaded without an account.
 
+### Versions
+
+Every cart's manifest carries this repo's version, worked out from its git
+tags by wasmcart-pack's rule: at a release tag (`v0.7.4`, no changes to
+tracked files) every cart is `0.7.4`; anywhere else `<last tag>-dev.g<commit>`,
+so a cart built between releases never claims to be one. `CART_VERSION=0.7.4`
+sets it by hand. On a tag the workflow refuses to release a cart whose
+manifest says anything but the tag. The checkout fetches the whole history
+(`fetch-depth: 0`), since a shallow clone has no tags.
+
 The engine is not rebuilt here. [`engine.lock`](engine.lock) names a
 wasmcart-defold release, and the workflow downloads that release's two
 engines and its SDK (checksummed against the release's `SHA256SUMS`), then

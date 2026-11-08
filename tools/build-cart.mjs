@@ -27,12 +27,15 @@
 //                        emsdk is rarely the exact version the engine was built with.
 //   BOB_JAR              bob.jar (default: Defold's, downloaded and cached)
 //   JAVA                 java (default the engine tree's JDK, else PATH)
+//   CART_VERSION         the cart's manifest version (default: this repo's git
+//                        version, by wasmcart-pack's rule: at a clean v<semver>
+//                        tag the tag, else <last tag>-dev.g<commit>)
 import { execFileSync } from 'node:child_process';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { LUA_FILE, RESOURCE_FILE, migrateLua, migrateResource } from './migrate-defold.mjs';
 
 const HERE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -126,6 +129,22 @@ function tryBob(cwd, ...a) {
 
 let PACK = [path.join(HERE, '../wasmcart/bin/wasmcart-pack.js'), path.join(HERE, 'node_modules/wasmcart/bin/wasmcart-pack.js')].find(p => fs.existsSync(p));
 const pack = PACK ? (...a) => run(process.execPath, [PACK, ...a], { stdio: 'ignore' }) : (...a) => run('npx', ['--yes', 'wasmcart', 'pack', ...a], { stdio: 'ignore' });
+
+// --- version -----------------------------------------------------------------
+// Every cart carries THIS repo's version, games/<id> included: a release here
+// is what ships them. Worked out from this checkout and passed explicitly,
+// because the packer would otherwise read the git checkout of the engine it
+// is handed, which can be another repo (the wasmcart-defold tree).
+async function cartVersion() {
+  if (process.env.CART_VERSION) return process.env.CART_VERSION;
+  const mod = PACK && path.join(path.dirname(PACK), '..', 'src', 'cartVersion.js');
+  if (!mod || !fs.existsSync(mod)) fail(`the packer (${PACK || 'npx wasmcart'}) cannot version a cart from git; use wasmcart 0.39.0 or later, or set CART_VERSION`);
+  const { resolveCartVersion } = await import(pathToFileURL(mod).href);
+  const r = resolveCartVersion({ dirs: [HERE] });
+  if (r.error) fail(r.error);
+  return r.version;
+}
+const VERSION = await cartVersion();
 
 // --- project -----------------------------------------------------------------
 const gameProject = fs.readFileSync(path.join(project, 'game.project'), 'utf8');
@@ -348,5 +367,5 @@ const engine = webgpu ? 'dmengine_wasmcart_dual.wasm' : 'dmengine_wasmcart.wasm'
 const wasm = path.join(engineDir, engine);
 if (!fs.existsSync(wasm)) fail(`no engine at ${wasm}; build wasmcart-defold first (see its README)${webgpu ? ', with DEFOLD_EMDAWNWEBGPU_PORT set for the dual engine, or pass --no-webgpu' : ''}`);
 const out = path.join(outDir, `${name}.wasc`);
-pack('--wasm', wasm, '--assets', stage, '--name', title, '--width', String(W), '--height', String(H), '--output', out);
-console.log(`packed ${out} (${(fs.statSync(out).size / 1048576).toFixed(1)} MB, ${webgpu ? 'dual GL+WebGPU' : 'GL'})`);
+pack('--wasm', wasm, '--assets', stage, '--name', title, '--version', VERSION, '--width', String(W), '--height', String(H), '--output', out);
+console.log(`packed ${out} (${VERSION}, ${(fs.statSync(out).size / 1048576).toFixed(1)} MB, ${webgpu ? 'dual GL+WebGPU' : 'GL'})`);

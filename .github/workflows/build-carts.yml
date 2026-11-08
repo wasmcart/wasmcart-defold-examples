@@ -25,7 +25,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
+      # The whole history and every tag: the carts' version comes from them
+      # (README, "Versions"), and a shallow clone has no tags.
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
 
       # bob.jar is compiled for Java 25 (class-file major version 69).
       - uses: actions/setup-java@v6
@@ -96,8 +100,24 @@ jobs:
           path: ~/.cache/wasmcart-defold
           key: bob-${{ hashFiles('tools/build-cart.mjs') }}
 
+      # wasmcart 0.39.0 is the first packer that versions a cart from git; it
+      # comes from its GitHub tag until it is on npm.
       - name: Install the packer and host
-        run: npm install --no-save --no-audit --no-fund wasmcart
+        run: npm install --no-save --no-audit --no-fund "github:wasmcart/wasmcart#v0.39.0"
+
+      # The carts' version, worked out once from this checkout before anything
+      # is built: at a clean v<semver> tag the tag (v0.7.4 gives 0.7.4), else
+      # <last tag>-dev.g<commit>. build-cart.mjs passes it to the packer.
+      - name: The carts' version
+        run: |
+          set -euo pipefail
+          v="$(node --input-type=module -e "
+            import { resolveCartVersion } from '$PWD/node_modules/wasmcart/src/cartVersion.js';
+            const r = resolveCartVersion({ dirs: [process.cwd()] });
+            if (r.error) { console.error(r.error); process.exit(1); }
+            process.stdout.write(r.version);")"
+          echo "carts are version $v"
+          echo "CART_VERSION=$v" >> "$GITHUB_ENV"
 
       # Fail fast with a reason if the runner cannot make a GL context at all.
       - name: Check GL works on this runner
@@ -173,6 +193,23 @@ jobs:
           name: carts
           path: dist/
           retention-days: 30
+
+      # A release's carts must say the release's version; a cart from a shallow
+      # clone, a dirty tree or an old packer says something else.
+      - name: Every cart carries the tag's version
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          set -uo pipefail
+          want="${GITHUB_REF_NAME#v}"
+          bad=0; n=0
+          for c in dist/*.wasc; do
+            got="$(unzip -p "$c" manifest.json | jq -r .version)"
+            echo "$c: $got"
+            n=$((n + 1))
+            [ "$got" = "$want" ] || { echo "::error::$c says version $got; the tag is $GITHUB_REF_NAME"; bad=1; }
+          done
+          [ "$n" -gt 0 ] || { echo "::error::no carts in dist/"; bad=1; }
+          exit $bad
 
       # A pushed tag gets a release carrying every cart, so a version can be
       # pinned and downloaded without a GitHub account.
