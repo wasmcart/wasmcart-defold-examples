@@ -23,3 +23,7 @@ snowline/
 
 # third-party games: fetched at a pinned commit by tools/fetch-games.mjs
 games/*/src/
+
+# prebuilt engines and the packer, fetched by the quick start in README.md
+/engine/
+node_modules/

@@ -7,9 +7,8 @@ implements the ABI.
 
 The engine these build against is
 [wasmcart-defold](https://github.com/wasmcart/wasmcart-defold), which vendors
-Defold and adds a cart runtime. Build it first; the instructions below assume
-it sits beside this repo. The release this repo is built against is named in
-[`engine.lock`](engine.lock).
+Defold and adds a cart runtime. Its releases attach the prebuilt engines, and
+the release this repo is built against is named in [`engine.lock`](engine.lock).
 
 Two kinds of cart come out of here: the twelve small examples and 2D games
 under the repo root, and the 3D **[showcase games](#showcase-games)** under
@@ -19,6 +18,45 @@ game's shaders compile to WGSL it is a dual cart, with both Defold's GL and
 WebGPU renderers inside: a host with wasmcart's WebGPU tier runs it on
 WebGPU, and any other host runs the same file on GL. Every cart here is a
 dual cart.
+
+## Quick start
+
+**Just want to play something?** Prebuilt carts are attached to the
+[latest release](https://github.com/wasmcart/wasmcart-defold-examples/releases/latest):
+Breakout, Planetoid, Exolon: REDUX, Mystery Mansion and seven 3D showcase
+games. With Node installed, play one straight from its URL:
+
+```bash
+npx wasmcart https://github.com/wasmcart/wasmcart-defold-examples/releases/latest/download/breakout.wasc
+```
+
+To write your own, start from this repo. There is no engine to build:
+each wasmcart-defold release attaches the prebuilt engines. You need Node,
+Java 25 (Defold's `bob.jar` is built for it), git, curl, rsync and zip.
+
+```bash
+git clone https://github.com/wasmcart/wasmcart-defold-examples
+cd wasmcart-defold-examples
+npm install --no-save wasmcart             # the cart packer
+TAG=$(sed -n 's/^wasmcart-defold = //p' engine.lock)   # the engine release it pins
+mkdir -p engine && for f in dmengine_wasmcart.wasm dmengine_wasmcart_dual.wasm; do
+  curl -fLo engine/$f https://github.com/wasmcart/wasmcart-defold/releases/download/$TAG/$f
+done
+cp -r breakout my-game                     # edit my-game/main/main.script
+ENGINE_DIR=$PWD/engine ./build-cart.sh my-game   # -> my-game/my-game.wasc
+npx wasmcart my-game/my-game.wasc
+```
+
+The first build downloads Defold 1.14.0's `bob.jar` (about 220 MB, cached
+under `~/.cache/wasmcart-defold`). After that the loop is: edit, rerun the
+last two lines. `build-cart.sh` reads the title and size from `game.project`,
+builds the content with bob and packs it with the prebuilt engine into one
+dual GL and WebGPU cart. A project made in the Defold editor builds the same
+way, `ENGINE_DIR=$PWD/engine ./build-cart.sh /path/to/project`; use editor
+1.14.0, the Defold release the engine is.
+
+A project with C++ native extensions also needs the wasmcart-defold SDK; see
+[Building an example](#building-an-example).
 
 ## Status
 
@@ -73,12 +111,15 @@ reported it as unsupported was wrong. It used the pre-1.13 constant spelling
 ## Play the examples
 
 Every example is a self-contained `.wasc`. With Node installed, no checkout is
-needed to play one:
+needed to play one, straight from the release:
 
 ```bash
-npx wasmcart planetoid/planetoid.wasc
-npx wasmcart breakout/breakout.wasc
+npx wasmcart https://github.com/wasmcart/wasmcart-defold-examples/releases/latest/download/planetoid.wasc
+npx wasmcart https://github.com/wasmcart/wasmcart-defold-examples/releases/latest/download/breakout.wasc
 ```
+
+A cart you built yourself (see [Quick start](#quick-start)) plays the same way
+from its local file: `npx wasmcart breakout/breakout.wasc`.
 
 The same file runs on
 [wasmcart-native](https://github.com/wasmcart/wasmcart-native) on the desktop,
@@ -383,7 +424,8 @@ runtime-generated texture uploaded to the GPU.
 Nothing about this was previously written down, and two steps are easy to miss.
 
 ```bash
-# 1. Build the engine once (see the wasmcart-defold README)
+# 1. Build the engine once (see the wasmcart-defold README), or skip this and
+#    use the prebuilt engines from the Quick start with ENGINE_DIR=$PWD/engine
 cd ../wasmcart-defold
 source ./dmenv.sh
 ./scripts/build.py --platform=wasm-web --skip-tests build_engine -- \
