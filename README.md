@@ -187,8 +187,16 @@ drew nothing in compatibility mode).
 A first-person horror game in the style of Slender: collect the pages
 scattered through a dark forest before the thing hunting you catches up.
 Pawel Jarosz's entry to Made With Defold Jam 2023. WASD moves, Shift runs,
-Space jumps, C crouches, F is the flashlight, the mouse looks; N disables the
-scare jumps and 1/2 adjust brightness.
+Space jumps, C crouches, F is the flashlight, the mouse looks, E collects a
+page; N disables the scare jumps and 1/2 adjust brightness.
+
+**Playable on a gamepad**, start to finish: the left stick or d-pad moves,
+the right stick looks (no pointer lock), LT runs, A jumps, B crouches, Y is
+the flashlight, X collects a page, START hides the UI, SELECT toggles the
+scare jumps and LB/RB adjust brightness; the on-screen hints name the pad
+buttons beside the keys. Checked in romdev with the pad alone: all six
+pages collected (the counter runs 6 to 1, then starts the next round), the
+look, flashlight, brightness and scare toggle each seen on screen.
 
 **By [Pawel Jarosz](https://github.com/paweljarosz)**, from
 [paweljarosz/horror_3d_game_mwdj_2023](https://github.com/paweljarosz/horror_3d_game_mwdj_2023),
@@ -208,7 +216,10 @@ Collada, so its ten `.dae` models are converted to glTF
 out of branches so it compiles to WGSL; the skybox shader's `transpose` helper
 is renamed; the browser pointer-lock extension is replaced by
 `cart-ext/pointer_lock`; `game.project` makes GL ES fragment shaders full
-precision (see Illumination).
+precision (see Illumination); gamepad play is added (upstream is keyboard and
+mouse); and a page is in reach by distance rather than by the player's
+interact trigger, because no trigger message reaches the player on this
+engine, so before this no page could be collected on any input.
 
 ### Illumination
 
@@ -243,6 +254,9 @@ colour to accelerate and escape. Artsiom Trubchyk's Ludum Dare 50 compo
 entry. A/D or the arrow keys steer, M toggles the music, R restarts; on a
 gamepad the d-pad or left stick steers, A or START starts, SELECT toggles the
 music and Y restarts.
+
+Checked in romdev with the pad alone: the title, a run, BUSTED, Y back to
+the title and a new run with START.
 
 **By [Artsiom Trubchyk (aglitchman)](https://github.com/aglitchman)**, from
 [aglitchman/defold-ld50-game](https://github.com/aglitchman/defold-ld50-game),
@@ -329,12 +343,26 @@ that rises as you go.
 
 ![Mystery Mansion](docs/screenshots/mansion.png)
 
+On a gamepad: the d-pad or left stick moves, A (or X or Y) looks at and uses
+things, B uses things in play and closes a message, the journal, a lock or
+the pause menu, START confirms on the title and pauses in play. Checked in
+romdev with the pad alone: the title, the controls page and back, a new
+game, a message from the drawing-room table, pause, resume, quit to the
+title, and through the door into the next room.
+
 ### Exolon: REDUX
 
 A side-scrolling shooter across numbered zones, with bombs and a score chase.
 [source](https://github.com/benjames-171/defold-games/tree/master/Exolon)
 
 ![Exolon](docs/screenshots/exolon.png)
+
+On a gamepad: the d-pad or left stick moves (up uses a teleporter or a
+pod, down ducks), A jumps, X, B, RB or RT fires (hold it to
+launch a bomb), START pauses, B closes the pause menu and returns from the
+title's pages. Checked in romdev with the pad alone: the title, the controls
+page and back, a game, firing and bombs, pause and resume, and zone 1 into
+zone 2.
 
 ### Planetoid
 
@@ -343,11 +371,26 @@ Fly over scrolling terrain, shooting enemies, with a radar strip along the top.
 
 ![Planetoid](docs/screenshots/planetoid.png)
 
+On a gamepad: the d-pad or left stick flies (LB/LT and RB/RT also push left
+and right), A fires and selects, X is hyperspace, B the smart bomb in play
+and back on the title's pages, START starts and pauses. The title's EXIT
+item is hidden in a cart, as it was in a browser: a cart has nothing to exit
+to. Checked in romdev with the pad alone: the title, the controls page and
+back, a game, pause, GAME OVER, A back to the title (the high score kept)
+and a new game.
+
 ### Pathfinder
 
 A puzzle platformer across nine circuit-board levels. [source](https://github.com/benjames-171/defold-games/tree/master/Pathfinder)
 
 ![Pathfinder](docs/screenshots/pathfinder.png)
+
+On a gamepad: the d-pad or left stick moves, A or Y jumps, X uses (B too, in
+play), START or SELECT opens the pause menu (continue, restart, quit), A
+selects and B goes back on the title's pages, the world select and the level
+select. Checked in romdev with the pad alone: the title, the controls page,
+world and level select (and B back), level 1 played to LEVEL CLEAR, level 2,
+the pause menu, and a restart from it.
 
 ### Unit 4
 
@@ -356,10 +399,23 @@ Miniaturised and injected into a patient, fighting antibodies on the way out.
 
 ![Unit 4](docs/screenshots/unit4.png)
 
+On a gamepad: the d-pad or left stick takes one step a turn (into an enemy
+attacks it), L and R choose an inventory slot (highlighted) and A or X uses
+the item in it, A or START moves past the intro and selects, B returns from
+the controls and credits, SELECT gives up the run. Upstream binds no pad at
+all. Checked in romdev with the pad alone: the intro, the menu, the controls
+page and back, a new game, an item picked up and used, area 1 into areas 2
+and 3, and giving up back to the title. On the keyboard Enter now also
+leaves the intro: Space never reached a cart on wasmcart-defold v0.6.2,
+the engine this release is built on (its key table read the END key for
+Space and keypad keys for 0 to 9), which is why the intro could not be left.
+
 ### breakout
 
 Written for this repo rather than ported: paddle, ball, 50 bricks, lives and
-scoring, driven by keyboard or gamepad.
+scoring, driven by keyboard or gamepad: the d-pad or left stick moves, A or
+START serves, X or RB fires the laser. Checked in romdev with the pad alone:
+serve, play, the last life lost and a new game served.
 
 ![breakout](docs/screenshots/breakout.png)
 
@@ -447,6 +503,16 @@ GLSL, and packs one cart: on the dual engine (`dmengine_wasmcart_dual.wasm`)
 when the shaders compile to WGSL, else on the GL engine. It is the supported
 path;
 what follows is what it does, for when something needs changing.
+
+It also gives every cart what a launcher shows before running it: the
+project's `game.json` `"manifest"` (`title`, `description`, `author` and
+`controls`, the pad parts the game reads) goes into the cart's manifest,
+and the project's `art/` folder is packed as its pictures (`art.json`
+names a cover, a logo and a title screen where there are ones, and the
+screenshots; `screenshot.png` there is the README's own
+`docs/screenshots/<name>.png`, copied in at pack time). The covers and
+logos are made by `tools/make-art.mjs` from the cart's screenshots and the
+game's own title logo, and committed, so a build needs nothing more.
 
 Two things it does beyond that, both for the showcase games:
 
@@ -565,6 +631,16 @@ imports (should be 0) and its script-error count, so a disagreement between the
 two is visible on one line.
 
 ## Gamepad
+
+Every game here plays start to finish on a gamepad alone, menus included:
+A or START confirms and B goes back wherever the game has a page to leave.
+Each game's buttons are in its entry above, and each cart's manifest names
+the pad parts it reads in `controls` (`[]` for a scene played with the
+mouse or a touch, or not at all), which a host drawing on-screen controls
+on a phone draws. The showcase scenes other than Horror 3D and Merge
+Getaway (Treasure Scene, Little Coaster, Illumination, BRDF Deferred
+Rendering, Stylized Water) are rendering demos driven by mouse, touch or
+keyboard, and have no pad controls.
 
 The pad maps onto Defold's standard action names through the automatic gamepad
 config, so `/builtins/input/all.input_binding` works with no device row in
