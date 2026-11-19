@@ -100,10 +100,12 @@ jobs:
           path: ~/.cache/wasmcart-defold
           key: bob-${{ hashFiles('tools/build-cart.mjs') }}
 
-      # wasmcart 0.39.0 is the first packer that versions a cart from git; it
-      # comes from its GitHub tag until it is on npm.
+      # The packer: 0.39.0 is the first that versions a cart from git, 0.41.0
+      # the first that writes a manifest title (the carts' title, art and
+      # controls come from each project's game.json and art/). It comes from
+      # its GitHub tag, which is ahead of npm.
       - name: Install the packer and host
-        run: npm install --no-save --no-audit --no-fund "github:wasmcart/wasmcart#v0.39.0"
+        run: npm install --no-save --no-audit --no-fund "github:wasmcart/wasmcart#v0.41.3"
 
       # The carts' version, worked out once from this checkout before anything
       # is built: at a clean v<semver> tag the tag (v0.7.4 gives 0.7.4), else
@@ -187,6 +189,21 @@ jobs:
           for p in $(node tools/list-carts.mjs); do cp "$p"/*.wasc dist/; done
           (cd dist && sha256sum ./*.wasc > SHA256SUMS)
           ls -la dist
+
+      # What a launcher shows comes from the manifest: every cart names its
+      # title, the pad parts it reads (controls, [] for a scene played without
+      # a pad) and a cover among its pictures.
+      - name: Every cart carries its title, controls and art
+        run: |
+          set -uo pipefail
+          bad=0
+          for c in dist/*.wasc; do
+            m="$(unzip -p "$c" manifest.json)"
+            echo "$c: $(printf '%s' "$m" | jq -c '{title, controls, cover: .art.cover, shots: (.art.screenshots // [] | length)}')"
+            printf '%s' "$m" | jq -e '(.title | type == "string") and (.controls | type == "array") and (.art.cover | type == "string")' >/dev/null \
+              || { echo "::error::$c lacks a title, controls or a cover"; bad=1; }
+          done
+          exit $bad
 
       - uses: actions/upload-artifact@v7
         with:

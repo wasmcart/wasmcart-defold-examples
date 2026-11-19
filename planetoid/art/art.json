@@ -1,0 +1,15 @@
+{
+  "cover": "cover.png",
+  "logo": "logo.png",
+  "title": "title.png",
+  "screenshots": [
+    {
+      "path": "screenshot.png",
+      "label": "The ship over the scrolling terrain, with the radar strip along the top"
+    },
+    {
+      "path": "play.png",
+      "label": "The start of a wave, the radar above"
+    }
+  ]
+}

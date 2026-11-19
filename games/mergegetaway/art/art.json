@@ -1,0 +1,14 @@
+{
+  "cover": "cover.png",
+  "title": "title.png",
+  "screenshots": [
+    {
+      "path": "screenshot.png",
+      "label": "Merging cars on the getaway road"
+    },
+    {
+      "path": "play.png",
+      "label": "A run starting, the police behind"
+    }
+  ]
+}

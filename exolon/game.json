@@ -1,0 +1,17 @@
+{
+  "manifest": {
+    "title": "Exolon: REDUX",
+    "description": "A side-scrolling shooter across numbered zones, with bombs and a score chase. By Ben James.",
+    "author": "Ben James",
+    "controls": [
+      "dpad",
+      "left_stick",
+      "a",
+      "b",
+      "x",
+      "r",
+      "right_trigger",
+      "start"
+    ]
+  }
+}

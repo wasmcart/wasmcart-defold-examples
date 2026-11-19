@@ -14,5 +14,11 @@
   ],
   "notes": [
     "GL ES precision: game.project sets [shader] glsl_es_default_precision_float = highp. Defold defaults GL ES fragment shaders to mediump, and drivers that honour it (Mesa here, mobile GPUs) build the Illumination normal-map tangent frame from 16-bit view-direction derivatives: it comes out infinite and every light vanishes. Desktop GL and WebGPU always ran it at full precision."
-  ]
+  ],
+  "manifest": {
+    "title": "Illumination",
+    "description": "The demo scene of Illumination, a forward-shading lighting library for Defold: point and spot lights, a flashlight, fog, normal and specular maps, walked in first person.",
+    "author": "Roman Silin (astrochili)",
+    "controls": []
+  }
 }

@@ -1,0 +1,16 @@
+{
+  "manifest": {
+    "title": "Mystery Mansion",
+    "description": "Explore a haunted house room by room, managing an inventory and a fear meter that rises as you go. By Ben James.",
+    "author": "Ben James",
+    "controls": [
+      "dpad",
+      "left_stick",
+      "a",
+      "b",
+      "x",
+      "y",
+      "start"
+    ]
+  }
+}

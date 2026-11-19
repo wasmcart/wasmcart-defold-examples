@@ -1,0 +1,13 @@
+{
+  "cover": "cover.png",
+  "screenshots": [
+    {
+      "path": "screenshot.png",
+      "label": "The paddle, the ball and fifty bricks"
+    },
+    {
+      "path": "play.png",
+      "label": "The first serve"
+    }
+  ]
+}

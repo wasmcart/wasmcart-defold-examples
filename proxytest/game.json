@@ -1,0 +1,7 @@
+{
+  "manifest": {
+    "title": "Proxy Test",
+    "description": "Loads a collection proxy and confirms it initialised.",
+    "controls": []
+  }
+}

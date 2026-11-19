@@ -1,0 +1,19 @@
+{
+  "manifest": {
+    "title": "Planetoid",
+    "description": "Fly over scrolling terrain, shooting enemies, with a radar strip along the top. By Ben James.",
+    "author": "Ben James",
+    "controls": [
+      "dpad",
+      "left_stick",
+      "a",
+      "b",
+      "x",
+      "l",
+      "r",
+      "left_trigger",
+      "right_trigger",
+      "start"
+    ]
+  }
+}

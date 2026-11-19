@@ -1,0 +1,9 @@
+{
+  "cover": "cover.png",
+  "screenshots": [
+    {
+      "path": "play.png",
+      "label": "The cleared screen of the first fixture"
+    }
+  ]
+}

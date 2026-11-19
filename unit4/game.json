@@ -1,0 +1,18 @@
+{
+  "manifest": {
+    "title": "Unit 4",
+    "description": "Miniaturised and injected into a patient, fight antibodies on the way out, one move at a time. By Ben James.",
+    "author": "Ben James",
+    "controls": [
+      "dpad",
+      "left_stick",
+      "a",
+      "b",
+      "x",
+      "l",
+      "r",
+      "start",
+      "select"
+    ]
+  }
+}

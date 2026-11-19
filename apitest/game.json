@@ -1,0 +1,7 @@
+{
+  "manifest": {
+    "title": "API Test",
+    "description": "Reports PASS or FAIL on Defold APIs the games rarely touch: physics, GUI, timers, animation, json, zlib, save data.",
+    "controls": []
+  }
+}

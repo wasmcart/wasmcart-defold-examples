@@ -1,0 +1,17 @@
+{
+  "manifest": {
+    "title": "Pathfinder",
+    "description": "A puzzle platformer across nine circuit-board levels. By Ben James.",
+    "author": "Ben James",
+    "controls": [
+      "dpad",
+      "left_stick",
+      "a",
+      "b",
+      "x",
+      "y",
+      "start",
+      "select"
+    ]
+  }
+}

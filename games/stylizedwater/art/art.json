@@ -1,0 +1,9 @@
+{
+  "cover": "cover.png",
+  "screenshots": [
+    {
+      "path": "screenshot.png",
+      "label": "Stylized water around floating objects under a cloudy sky"
+    }
+  ]
+}

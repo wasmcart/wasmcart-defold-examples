@@ -1,0 +1,9 @@
+{
+  "cover": "cover.png",
+  "screenshots": [
+    {
+      "path": "screenshot.png",
+      "label": "A lit room of the Illumination demo scene"
+    }
+  ]
+}

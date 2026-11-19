@@ -1,0 +1,9 @@
+{
+  "cover": "cover.png",
+  "screenshots": [
+    {
+      "path": "play.png",
+      "label": "buffer/resource: 7 PASS 0 FAIL"
+    }
+  ]
+}

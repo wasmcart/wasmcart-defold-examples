@@ -48,6 +48,18 @@ const DEAD_BUILD_SERVER = 'http://127.0.0.1:9';
 
 function fail(msg) { console.error(`build-cart: ${msg}`); process.exit(1); }
 const run = (cmd, args, opts = {}) => execFileSync(cmd, args, { stdio: ['ignore', 'inherit', 'inherit'], ...opts });
+/** Set one field of a packed cart's manifest.json (in place, with zip). */
+function setManifestField(cart, key, value) {
+  const manifest = JSON.parse(execFileSync('unzip', ['-p', cart, 'manifest.json'], { encoding: 'utf8' }));
+  manifest[key] = value;
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'wasmcart-defold-manifest-'));
+  try {
+    fs.writeFileSync(path.join(tmp, 'manifest.json'), JSON.stringify(manifest, null, 2));
+    execFileSync('zip', ['-q', path.resolve(cart), 'manifest.json'], { cwd: tmp });
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+}
 
 // --- arguments ---------------------------------------------------------------
 const argv = process.argv.slice(2);
@@ -86,6 +98,16 @@ const skipExts = [...(gameMeta.skipExtensions || []), ...cartExtNames];
 // known not to draw (a WGSL-valid cart that renders black on WebGPU is worse
 // than one that runs on GL everywhere), with the reason in "notes".
 if (gameMeta.webgpu === false) webgpu = false;
+
+// What a launcher shows before it runs the cart, all advisory (SPEC manifest
+// title, description, author, controls, art). game.json "manifest" holds the
+// first four: "controls" names exactly the pad parts the game reads, which a
+// host drawing on-screen touch controls draws ([] for a game played by
+// touching the screen). The art is <project>/art/: its art.json names the
+// pictures, and "screenshot.png" in it is docs/screenshots/<name>.png, the
+// README's own screenshot of the cart, copied in at pack time.
+const cartMeta = gameMeta.manifest || {};
+if (cartMeta.controls !== undefined && !Array.isArray(cartMeta.controls)) fail(`${gameJson}: manifest.controls must be an array of pad tokens`);
 outDir = path.resolve(outDir || input);
 
 // --- tools -------------------------------------------------------------------
@@ -138,7 +160,7 @@ const pack = PACK ? (...a) => run(process.execPath, [PACK, ...a], { stdio: 'igno
 async function cartVersion() {
   if (process.env.CART_VERSION) return process.env.CART_VERSION;
   const mod = PACK && path.join(path.dirname(PACK), '..', 'src', 'cartVersion.js');
-  if (!mod || !fs.existsSync(mod)) fail(`the packer (${PACK || 'npx wasmcart'}) cannot version a cart from git; use wasmcart 0.39.0 or later, or set CART_VERSION`);
+  if (!mod || !fs.existsSync(mod)) fail(`the packer (${PACK || 'npx wasmcart'}) cannot version a cart from git; use wasmcart 0.41.0 or later, or set CART_VERSION`);
   const { resolveCartVersion } = await import(pathToFileURL(mod).href);
   const r = resolveCartVersion({ dirs: [HERE] });
   if (r.error) fail(r.error);
@@ -157,6 +179,7 @@ function setting(section, key) {
 const W = Number(setting('display', 'width')) || 960;
 const H = Number(setting('display', 'height')) || 640;
 const title = setting('project', 'title') || name;
+const displayTitle = cartMeta.title || gameMeta.title || null;
 
 // bob.jar carries its own /builtins; a builtins link in the project collides.
 fs.rmSync(path.join(project, 'builtins'), { force: true, recursive: false });
@@ -367,5 +390,21 @@ const engine = webgpu ? 'dmengine_wasmcart_dual.wasm' : 'dmengine_wasmcart.wasm'
 const wasm = path.join(engineDir, engine);
 if (!fs.existsSync(wasm)) fail(`no engine at ${wasm}; build wasmcart-defold first (see its README)${webgpu ? ', with DEFOLD_EMDAWNWEBGPU_PORT set for the dual engine, or pass --no-webgpu' : ''}`);
 const out = path.join(outDir, `${name}.wasc`);
-pack('--wasm', wasm, '--assets', stage, '--name', title, '--version', VERSION, '--width', String(W), '--height', String(H), '--output', out);
+const meta = [];
+if (displayTitle) meta.push('--title', displayTitle);
+if (cartMeta.description) meta.push('--description', cartMeta.description);
+if (cartMeta.author) meta.push('--author', cartMeta.author);
+if (cartMeta.controls) meta.push('--controls', cartMeta.controls.join(','));
+const artSrc = path.join(input, 'art');
+if (fs.existsSync(artSrc)) {
+  const artStage = path.join(stage, '.art');
+  fs.cpSync(artSrc, artStage, { recursive: true });
+  const shot = path.join(HERE, 'docs/screenshots', `${name}.png`);
+  if (fs.existsSync(shot)) fs.copyFileSync(shot, path.join(artStage, 'screenshot.png'));
+  meta.push('--art', artStage);
+}
+// --controls [] (a touch-only game) is the empty list, which the packer
+// cannot be given as a flag; it is written into the manifest after packing.
+pack('--wasm', wasm, '--assets', stage, '--name', title, '--version', VERSION, '--width', String(W), '--height', String(H), ...meta, '--output', out);
+if (Array.isArray(cartMeta.controls) && cartMeta.controls.length === 0) setManifestField(out, 'controls', []);
 console.log(`packed ${out} (${VERSION}, ${(fs.statSync(out).size / 1048576).toFixed(1)} MB, ${webgpu ? 'dual GL+WebGPU' : 'GL'})`);

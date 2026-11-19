@@ -1,0 +1,9 @@
+{
+  "cover": "cover.png",
+  "screenshots": [
+    {
+      "path": "play.png",
+      "label": "collectionproxy PASS"
+    }
+  ]
+}

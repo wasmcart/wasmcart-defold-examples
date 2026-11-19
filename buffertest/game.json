@@ -1,0 +1,7 @@
+{
+  "manifest": {
+    "title": "Buffer Test",
+    "description": "Reports PASS or FAIL on buffer streams, float32 access and a runtime-generated texture uploaded to the GPU.",
+    "controls": []
+  }
+}

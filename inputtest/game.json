@@ -1,0 +1,23 @@
+{
+  "manifest": {
+    "title": "Input Test",
+    "description": "Every input a Defold cart can receive, reported live: each gamepad button checked by identity, keys, mouse and touch.",
+    "controls": [
+      "dpad",
+      "a",
+      "b",
+      "x",
+      "y",
+      "l",
+      "r",
+      "start",
+      "select",
+      "left_stick",
+      "right_stick",
+      "left_trigger",
+      "right_trigger",
+      "l3",
+      "r3"
+    ]
+  }
+}

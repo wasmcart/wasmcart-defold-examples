@@ -1,0 +1,9 @@
+{
+  "cover": "cover.png",
+  "screenshots": [
+    {
+      "path": "play.png",
+      "label": "apitest: 14 PASS 0 FAIL"
+    }
+  ]
+}

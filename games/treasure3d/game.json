@@ -10,5 +10,11 @@
   "controls": "A/D or left/right turn the table; left mouse opens the chest.",
   "credits": [
     "Art by Agustin R. (FlexYourBrain), per the project README."
-  ]
+  ],
+  "manifest": {
+    "title": "Treasure Scene",
+    "description": "A stylized 3D scene showing Defold's rendering features: a treasure chest on a turntable among crates and trees, with lighting, shadows and a PBR-style material setup.",
+    "author": "FlexYourBrain",
+    "controls": []
+  }
 }

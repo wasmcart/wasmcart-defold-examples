@@ -1,0 +1,7 @@
+{
+  "manifest": {
+    "title": "Hello Defold",
+    "description": "The first fixture: clears to a known colour, prints three frames and plays a 440 Hz tone.",
+    "controls": []
+  }
+}

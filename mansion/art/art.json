@@ -1,0 +1,15 @@
+{
+  "cover": "cover.png",
+  "logo": "logo.png",
+  "title": "title.png",
+  "screenshots": [
+    {
+      "path": "screenshot.png",
+      "label": "A room of the haunted house, with the inventory and the fear meter"
+    },
+    {
+      "path": "play.png",
+      "label": "The drawing room, where the game begins"
+    }
+  ]
+}

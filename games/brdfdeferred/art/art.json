@@ -1,0 +1,9 @@
+{
+  "cover": "cover.png",
+  "screenshots": [
+    {
+      "path": "screenshot.png",
+      "label": "The deferred-rendered interior"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "cover": "cover.png",
+  "logo": "logo.png",
+  "title": "title.png",
+  "screenshots": [
+    {
+      "path": "screenshot.png",
+      "label": "A zone of the shooter, with bombs, score and zone along the bottom"
+    },
+    {
+      "path": "play.png",
+      "label": "Zone 2: rockets on the ground ahead"
+    }
+  ]
+}

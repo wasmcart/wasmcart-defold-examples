@@ -1,0 +1,14 @@
+{
+  "manifest": {
+    "title": "Breakout",
+    "description": "Paddle, ball, 50 bricks, lives and scoring: the starter game of wasmcart-defold-examples.",
+    "controls": [
+      "dpad",
+      "left_stick",
+      "a",
+      "x",
+      "r",
+      "start"
+    ]
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "cover": "cover.png",
+  "screenshots": [
+    {
+      "path": "screenshot.png",
+      "label": "A cross-shaped gravestone in the dark forest"
+    }
+  ]
+}

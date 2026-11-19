@@ -12,5 +12,11 @@
     "All assets made from scratch for the challenge by FlexYourBrain, per the project README.",
     "Depends on vantage (Jhonny Göransson) and dirtylarry (Sven Andersson), both Lua.",
     "Bundles defold-pbr (the Defold Foundation)."
-  ]
+  ],
+  "manifest": {
+    "title": "Little Coaster",
+    "description": "A miniature roller coaster on a playroom floor: a looping track, a ferris wheel, toy blocks and crayons, rendered with Defold PBR. FlexYourBrain's entry to the Defold \"Tiny Worlds\" community challenge.",
+    "author": "FlexYourBrain",
+    "controls": []
+  }
 }

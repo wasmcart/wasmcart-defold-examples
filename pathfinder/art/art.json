@@ -1,0 +1,15 @@
+{
+  "cover": "cover.png",
+  "logo": "logo.png",
+  "title": "title.png",
+  "screenshots": [
+    {
+      "path": "screenshot.png",
+      "label": "A circuit-board level of the puzzle platformer"
+    },
+    {
+      "path": "play.png",
+      "label": "Level 1: the orb on its pedestal and the target below"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "cover": "cover.png",
+  "logo": "logo.png",
+  "title": "title.png",
+  "screenshots": [
+    {
+      "path": "screenshot.png",
+      "label": "Inside the patient: antibodies in the maze, the inventory on the right"
+    },
+    {
+      "path": "play.png",
+      "label": "Area 1, health 9 of 9"
+    }
+  ]
+}

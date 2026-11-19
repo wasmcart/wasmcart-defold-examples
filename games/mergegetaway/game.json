@@ -23,5 +23,21 @@
   ],
   "notes": [
     "defos (fullscreen toggle), Screenshot, clipboard and the game's own LD50 HTML5 glue are desktop or browser extensions a cart cannot use; the Lua guards its two defos calls. pointer_lock is replaced by cart-ext/pointer_lock. scene3d is pinned to its latest commit (3b7048a) for Defold 1.14; its three shaders with sampler2D parameters are replaced under overrides/."
-  ]
+  ],
+  "manifest": {
+    "title": "Merge Getaway",
+    "description": "A 3D car-merging getaway: the police are after you, so merge cars of the same colour to accelerate and escape. Artsiom Trubchyk's Ludum Dare 50 compo entry.",
+    "author": "Artsiom Trubchyk (aglitchman)",
+    "controls": [
+      "dpad",
+      "left_stick",
+      "a",
+      "y",
+      "start",
+      "select"
+    ]
+  },
+  "art": {
+    "cover": "title"
+  }
 }

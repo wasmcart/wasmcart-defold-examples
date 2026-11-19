@@ -1,0 +1,9 @@
+{
+  "cover": "cover.png",
+  "screenshots": [
+    {
+      "path": "screenshot.png",
+      "label": "The treasure chest on its turntable among crates and trees"
+    }
+  ]
+}
