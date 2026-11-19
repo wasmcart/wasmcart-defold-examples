@@ -408,7 +408,7 @@ page and back, a new game, an item picked up and used, area 1 into areas 2
 and 3, and giving up back to the title. On the keyboard Space or Enter
 leaves the intro. Space never reached a cart on wasmcart-defold v0.6.2 and
 earlier (its key table read the END key for Space and keypad keys for 0 to
-9); v0.6.3, which these carts are built on, fixes that.
+9); v0.6.3 fixed that.
 
 ### breakout
 
