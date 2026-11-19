@@ -104,7 +104,7 @@ gamepad_trigger {
 }
 gamepad_trigger {
   input: GAMEPAD_RPAD_RIGHT
-  action: "fire"
+  action: "back"
 }
 gamepad_trigger {
   input: GAMEPAD_START

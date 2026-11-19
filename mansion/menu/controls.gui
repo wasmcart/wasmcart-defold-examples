@@ -138,7 +138,7 @@ nodes {
     z: 0.6392157
   }
   type: TYPE_TEXT
-  text: "GAMEPAD COMPATIBLE"
+  text: "GAMEPAD: A action, B back, START pause"
   font: "main"
   id: "controls1"
   outline {

@@ -220,7 +220,18 @@ local function input_playing(self, action_id, action)
 		elseif action_id == hash("right") then
 			sprite.set_hflip("#sprite", false)
 			trymove(self, vmath.vector3(step, 0, 0))
-		elseif action_id == hash("exit") then
+		elseif action_id == hash("action") or action_id == hash("use") then
+			-- gamepad: use the item in the selected slot
+			useitem(self, data.sel)
+		elseif action_id == hash("prev") or action_id == hash("next") then
+			local count = 0
+			for n = 1, 10 do if data.item[n] > 0 then count = n end end
+			if count > 0 then
+				data.sel = data.sel + (action_id == hash("next") and 1 or -1)
+				if data.sel < 1 then data.sel = count elseif data.sel > count then data.sel = 1 end
+				msg.post("view#game", "sel")
+			end
+		elseif action_id == hash("exit") or action_id == hash("giveup") then
 			gameover(self)
 		elseif action_id == hash("debug") then
 			--nextlevel(self)

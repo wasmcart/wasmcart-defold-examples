@@ -25,6 +25,9 @@ M.difficulty = 2
 M.playerpos = vmath.vector3()
 M.intro = true
 
+-- The inventory slot a gamepad uses (L/R choose it, A or X uses it).
+M.sel = 1
+
 M.item = {}
 M.itemname = {}
 M.itemtype =  {"JUMP", "FREEZE", "BOMB", "STRONG", "HEAL"}

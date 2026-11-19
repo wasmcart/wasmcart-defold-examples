@@ -65,9 +65,10 @@ nodes {
     z: 0.6627451
   }
   type: TYPE_TEXT
-  text: "WASD, ARROW KEYS - move\n"
-  "1,2,3,4,5,6,7,8,9,0 - use item\n"
-  "ESC - quit game"
+  text: "WASD, ARROWS, D-PAD - move\n"
+  "1-9, 0 - use item\n"
+  "L/R - pick item, A - use it\n"
+  "ESC, SELECT - quit game"
   font: "large"
   id: "text"
   outline {
@@ -98,7 +99,7 @@ nodes {
     z: 0.4
   }
   type: TYPE_TEXT
-  text: "PRESS SPACE"
+  text: "PRESS SPACE, ENTER OR A"
   font: "main"
   id: "pressspace"
   outline {

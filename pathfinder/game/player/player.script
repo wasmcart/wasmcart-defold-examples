@@ -273,6 +273,13 @@ end
 function on_input(self, action_id, action)
 	if self.lock > 0 then return
 	end	
+	-- gamepad: B is "use" in play, as it always was, and closes the pause
+	-- menu; SELECT pauses and closes it, as ESC does
+	if action_id == hash("back") then
+		action_id = data.state == data.STATE_PLAYING and hash("use") or hash("exit")
+	elseif action_id == hash("select") then
+		action_id = hash("exit")
+	end
 	if data.state == data.STATE_PLAYING then
 		input_playing(self, action_id, action)
 	elseif data.state == data.STATE_PAUSE then

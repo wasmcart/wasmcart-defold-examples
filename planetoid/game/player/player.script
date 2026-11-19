@@ -243,6 +243,11 @@ end
 function on_input(self, action_id, action)
 	if action.value < 0.2 then return
 	end	
+	-- gamepad B: the smart bomb in play, as it always was, and back elsewhere
+	-- (closes the pause menu; leaves the game over screen)
+	if action_id == hash("back") then
+		action_id = data.state == data.STATE_PLAYING and hash("smart") or hash("exit")
+	end
 	
 	if data.state == data.STATE_PLAYING then
 		input_playing(self, action_id, action)

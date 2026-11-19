@@ -68,7 +68,7 @@ nodes {
     z: 0.4
   }
   type: TYPE_TEXT
-  text: "PRESS SPACE"
+  text: "PRESS SPACE, ENTER OR A"
   font: "main"
   id: "pressspace"
   outline {

@@ -73,6 +73,11 @@ end
 function on_input(self, action_id, action)
 	if action.value < 0.2 then return
 	end
+	-- gamepad B: returns from the controls and credits pages
+	if action_id == hash("back") then
+		if data.state == data.STATE_MENU then return end
+		action_id = hash("exit")
+	end
 
 	if data.state == data.STATE_MENU then
 		input(self, action_id, action)

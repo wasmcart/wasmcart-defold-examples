@@ -116,7 +116,7 @@ gamepad_trigger {
 }
 gamepad_trigger {
   input: GAMEPAD_RPAD_RIGHT
-  action: "use"
+  action: "back"
 }
 gamepad_trigger {
   input: GAMEPAD_START
@@ -132,7 +132,7 @@ gamepad_trigger {
 }
 gamepad_trigger {
   input: GAMEPAD_BACK
-  action: "exit"
+  action: "select"
 }
 touch_trigger {
   input: TOUCH_MULTI

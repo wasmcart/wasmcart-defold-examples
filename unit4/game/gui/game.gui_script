@@ -35,10 +35,16 @@ local function invsort(self)
 end
 
 local function invpanel(self)
+	-- keep the gamepad selection on a filled slot (the inventory is packed from slot 1)
+	local count = 0
+	for n = 1, 10 do if data.item[n] > 0 then count = n end end
+	if data.sel > count then data.sel = math.max(count, 1) end
+	if data.sel < 1 then data.sel = 1 end
 	for n = 1, 10 do
 		if data.item[n] > 0 then
 			local node = gui.get_node(tostring(n))
-			gui.set_color(node, data.hex2rgba("#d8e1a9"))
+			local col = n == data.sel and "#c9ad23" or "#d8e1a9"
+			gui.set_color(node, data.hex2rgba(col))
 						
 			node = gui.get_node("name"..tostring(n))
 			gui.set_enabled(node, true)
@@ -98,7 +104,7 @@ local function disc(self, item)
 end
 
 function on_message(self, message_id, message, sender)
-	if message_id == hash("inv") then
+	if message_id == hash("inv") or message_id == hash("sel") then
 		invsort(self)
 		invpanel(self)
 	elseif message_id == hash("fade") then

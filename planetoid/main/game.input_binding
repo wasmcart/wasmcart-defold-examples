@@ -88,7 +88,7 @@ gamepad_trigger {
 }
 gamepad_trigger {
   input: GAMEPAD_RPAD_RIGHT
-  action: "smart"
+  action: "back"
 }
 gamepad_trigger {
   input: GAMEPAD_START

@@ -127,7 +127,7 @@ nodes {
     z: 0.0
   }
   type: TYPE_TEXT
-  text: "GAMEPAD COMPATIBLE"
+  text: "PAD: A JUMP, X FIRE"
   font: "main"
   id: "gamepad"
   outline {

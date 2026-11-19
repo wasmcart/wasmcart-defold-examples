@@ -103,7 +103,7 @@ nodes {
     z: 0.6627451
   }
   type: TYPE_TEXT
-  text: "USE ARROW KEYS + SPACE"
+  text: "ARROWS/D-PAD + SPACE/A"
   font: "main"
   id: "text"
   outline {

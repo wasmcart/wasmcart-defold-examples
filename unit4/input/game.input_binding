@@ -82,3 +82,67 @@ key_trigger {
   input: KEY_END
   action: "debug"
 }
+gamepad_trigger {
+  input: GAMEPAD_LSTICK_LEFT
+  action: "left"
+}
+gamepad_trigger {
+  input: GAMEPAD_LSTICK_RIGHT
+  action: "right"
+}
+gamepad_trigger {
+  input: GAMEPAD_LSTICK_UP
+  action: "up"
+}
+gamepad_trigger {
+  input: GAMEPAD_LSTICK_DOWN
+  action: "down"
+}
+gamepad_trigger {
+  input: GAMEPAD_LPAD_LEFT
+  action: "left"
+}
+gamepad_trigger {
+  input: GAMEPAD_LPAD_RIGHT
+  action: "right"
+}
+gamepad_trigger {
+  input: GAMEPAD_LPAD_UP
+  action: "up"
+}
+gamepad_trigger {
+  input: GAMEPAD_LPAD_DOWN
+  action: "down"
+}
+gamepad_trigger {
+  input: GAMEPAD_RPAD_DOWN
+  action: "action"
+}
+gamepad_trigger {
+  input: GAMEPAD_START
+  action: "action"
+}
+gamepad_trigger {
+  input: GAMEPAD_RPAD_RIGHT
+  action: "back"
+}
+gamepad_trigger {
+  input: GAMEPAD_RPAD_LEFT
+  action: "use"
+}
+gamepad_trigger {
+  input: GAMEPAD_LSHOULDER
+  action: "prev"
+}
+gamepad_trigger {
+  input: GAMEPAD_RSHOULDER
+  action: "next"
+}
+gamepad_trigger {
+  input: GAMEPAD_BACK
+  action: "giveup"
+}
+key_trigger {
+  input: KEY_ENTER
+  action: "action"
+}

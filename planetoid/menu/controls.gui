@@ -139,7 +139,7 @@ nodes {
     z: 0.41568628
   }
   type: TYPE_TEXT
-  text: "GAMEPAD COMPATIBLE"
+  text: "GAMEPAD: A fire, X hyperspace, B smart bomb"
   font: "main"
   id: "gamepad"
   outline {

@@ -40,6 +40,7 @@ local function newgame(self)
 	data.energy = 9
 	data.state = data.STATE_PLAYING
 	data.itemname = {"?", "?", "?", "?", "?"}
+	data.sel = 1
 	for n = 1, 10 do data.item[n] = 0 end
 	msg.post("main:/handler", "show_game")
 end	

@@ -10,10 +10,10 @@ function init(self)
 		gui.get_position(gui.get_node("3")),
 		gui.get_position(gui.get_node("4")),
 	}
-	if html5 then
-		self.menumax = 3
-		gui.set_enabled(gui.get_node("4"), false)
-	end
+	-- A cart, like a browser, has nothing to exit to (the host ends it), so
+	-- the EXIT item is hidden there too.
+	self.menumax = 3
+	gui.set_enabled(gui.get_node("4"), false)
 	msg.post(".", "acquire_input_focus")
 	self.node = gui.get_node("container")
 	gui.set_position(self.node, vmath.vector3(data.SCR_W/2, (data.SCR_H/2), 0))
@@ -83,6 +83,11 @@ end
 
 function on_input(self, action_id, action)
 	if action.value < 0.2 then return
+	end
+	-- gamepad B: returns from the controls and scoring pages
+	if action_id == hash("back") then
+		if data.state == data.STATE_MENU then return end
+		action_id = hash("exit")
 	end
 
 	if data.state == data.STATE_MENU then

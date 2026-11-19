@@ -104,9 +104,9 @@ gamepad_trigger {
 }
 gamepad_trigger {
   input: GAMEPAD_RPAD_RIGHT
-  action: "action"
+  action: "back"
 }
 gamepad_trigger {
   input: GAMEPAD_START
-  action: "exit"
+  action: "start"
 }

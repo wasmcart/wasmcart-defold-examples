@@ -115,6 +115,12 @@ local function input(self, action_id, action)
 end
 
 function on_input(self, action_id, action)
+	-- gamepad B and SELECT: back out of a page, as ESC does (on the title
+	-- they do nothing: ESC quits there, which a pad should not)
+	if action_id == hash("back") or action_id == hash("select") then
+		if data.state == data.STATE_MENU then return end
+		action_id = hash("exit")
+	end
 	if data.state == data.STATE_MENU then
 		input(self, action_id, action)
 	elseif data.state == data.STATE_CONTROLS then
