@@ -7,7 +7,7 @@
   "authorUrl": "https://github.com/paweljarosz",
   "license": "MIT",
   "webgpu": true,
-  "controls": "WASD move, Shift run, Space jump, C crouch, F flashlight, mouse look, N disables scare jumps, 1/2 adjust brightness.",
+  "controls": "WASD or the left stick (or d-pad) move, the mouse or the right stick look, Shift or LT run, Space or A jump, C or B crouch, F or Y flashlight, E or X collects a page, H or START hides the UI, N or SELECT toggles the scare jumps, 1/2 or LB/RB adjust brightness.",
   "skipExtensions": [
     "pointer_lock"
   ],
@@ -22,6 +22,28 @@
   ],
   "notes": [
     "pointer_lock (indiesoftby/defold-pointer-lock) is replaced by cart-ext/pointer_lock: the original locks the cursor through GLFW or the browser, neither of which a cart has. Its Lua half is unchanged.",
-    "GL ES precision: game.project sets [shader] glsl_es_default_precision_float = highp. Defold defaults GL ES fragment shaders to mediump, and drivers that honour it (Mesa here, mobile GPUs) build the Illumination normal-map tangent frame from 16-bit view-direction derivatives: it comes out infinite and every light vanishes. Desktop GL and WebGPU always ran it at full precision."
-  ]
+    "GL ES precision: game.project sets [shader] glsl_es_default_precision_float = highp. Defold defaults GL ES fragment shaders to mediump, and drivers that honour it (Mesa here, mobile GPUs) build the Illumination normal-map tangent frame from 16-bit view-direction derivatives: it comes out infinite and every light vanishes. Desktop GL and WebGPU always ran it at full precision.",
+    "Gamepad (added for the cart; upstream is keyboard and mouse): walker.script reads the left stick, d-pad, A, B, LT and L3 as the keys they stand for; player.script turns the right stick into the operator's manual_control look (no pointer lock; a 0.12 dead zone, 160 and 110 degrees a second at full deflection, a 1.6 response curve) and puts the flashlight on Y; hint.gui_script puts collect on X, hide UI on START, the scare toggle on SELECT and brightness on LB/RB. The on-screen hints name both.",
+    "Pages are in reach by distance (scene.script, 1.4 m), not by the player's interact trigger: on this engine no trigger_response reaches the player (walking into the first page on the cross stone sends none, with the interact object as a trigger or as a kinematic body), so without this no page could be collected on any input. The player gets the same paper messages the trigger sent."
+  ],
+  "manifest": {
+    "title": "Horror 3D",
+    "description": "A first-person horror game in the style of Slender: collect the pages scattered through a dark forest before the thing hunting you catches up. Pawel Jarosz's entry to Made With Defold Jam 2023.",
+    "author": "Pawel Jarosz",
+    "controls": [
+      "left_stick",
+      "right_stick",
+      "dpad",
+      "a",
+      "b",
+      "x",
+      "y",
+      "l",
+      "r",
+      "left_trigger",
+      "l3",
+      "start",
+      "select"
+    ]
+  }
 }
